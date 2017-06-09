@@ -53,6 +53,22 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/gorilla/securecookie",
+			"repository": "https://github.com/gorilla/securecookie",
+			"vcs": "git",
+			"revision": "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/gorilla/sessions",
+			"repository": "https://github.com/gorilla/sessions",
+			"vcs": "git",
+			"revision": "8b6b4cd75f07f7ee036eb37b8127bd40ab1efc49",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/onsi/ginkgo",
 			"repository": "https://github.com/onsi/ginkgo",
 			"vcs": "git",
