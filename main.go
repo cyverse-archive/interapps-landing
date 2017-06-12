@@ -58,9 +58,25 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Make sure the path in the CAS params is the same as the one that was
+	// requested.
+	svcURL, err := url.Parse(c.frontendURL)
+	if err != nil {
+		err = errors.Wrapf(err, "failed to parse the frontend URL %s", c.frontendURL)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Make sure the serivce path and the query params are set to the incoming
+	// requests values for those fields.
+	svcURL.Path = r.URL.Path
+	sq := r.URL.Query()
+	sq.Del("ticket")
+	svcURL.RawQuery = sq.Encode()
+
 	casURL.Path = path.Join(casURL.Path, c.casValidate)
 	q := casURL.Query()
-	q.Add("service", c.frontendURL)
+	q.Add("service", svcURL.String())
 	q.Add("ticket", r.URL.Query().Get("ticket"))
 	casURL.RawQuery = q.Encode()
 
@@ -91,10 +107,10 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redirectURL := r.URL
-	rq := redirectURL.Query()
-	rq.Del("ticket")
-	redirectURL.RawQuery = rq.Encode()
+	// redirectURL := r.URL
+	// rq := redirectURL.Query()
+	// rq.Del("ticket")
+	// redirectURL.RawQuery = rq.Encode()
 
 	//Store a session, hopefully to short circuit the CAS redirect dance in later
 	//requests.
@@ -107,7 +123,7 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 	session.Values[sessionKey] = 1
 	c.cookies.Save(r, w, session)
 
-	http.Redirect(w, r, redirectURL.String(), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, svcURL.String(), http.StatusTemporaryRedirect)
 }
 
 // Session implements the mux.Matcher interface so that requests can be routed
@@ -143,9 +159,23 @@ func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Make sure the path in the CAS params is the same as the one that was
+	// requested.
+	svcURL, err := url.Parse(c.frontendURL)
+	if err != nil {
+		err = errors.Wrapf(err, "failed to parse the frontend URL %s", c.frontendURL)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Make sure the serivce path and the query params are set to the incoming
+	// requests values for those fields.
+	svcURL.Path = r.URL.Path
+	svcURL.RawQuery = r.URL.RawQuery
+
 	//set the service query param in the casURL.
 	q := casURL.Query()
-	q.Add("service", c.frontendURL)
+	q.Add("service", svcURL.String())
 	casURL.RawQuery = q.Encode()
 	casURL.Path = path.Join(casURL.Path, "login")
 
@@ -184,11 +214,12 @@ func main() {
 
 	// If the query containes a ticket in the query params, then it needs to be
 	// validated.
-	r.HandleFunc("/", p.ValidateTicket).Queries("ticket", "")
-	r.HandleFunc("/", p.RedirectToCAS).MatcherFunc(p.Session)
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
+	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
+	r.PathPrefix("/").Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "test successful")
-	})
+	}))
+	// r.HandleFunc("/", )
 
 	server := &http.Server{
 		Handler: r,
