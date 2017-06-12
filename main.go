@@ -36,15 +36,17 @@ type CASProxy struct {
 	frontendURL string // The URL placed into service query param for CAS.
 	backendURL  string // The backend URL to forward to.
 	cookies     *sessions.CookieStore
+	maxAge      int
 }
 
 // NewCASProxy returns a newly instantiated *CASProxy.
-func NewCASProxy(casBase, casValidate, frontendURL, backendURL string) *CASProxy {
+func NewCASProxy(casBase, casValidate, frontendURL, backendURL string, maxAge int) *CASProxy {
 	return &CASProxy{
 		casBase:     casBase,
 		casValidate: casValidate,
 		frontendURL: frontendURL,
 		backendURL:  backendURL,
+		maxAge:      maxAge,
 		cookies:     sessions.NewCookieStore([]byte("omgsekretz")), // TODO: replace
 	}
 }
@@ -116,6 +118,7 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session.Values[sessionKey] = 1
+	session.Options.MaxAge = c.maxAge
 	c.cookies.Save(r, w, session)
 
 	http.Redirect(w, r, svcURL.String(), http.StatusTemporaryRedirect)
@@ -184,6 +187,7 @@ func main() {
 		listenAddr  = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
 		casBase     = flag.String("cas-base-url", "", "The base URL to the CAS host.")
 		casValidate = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
+		maxAge      = flag.Int("max-age", 30, "The number of seconds that the session cookie is valid for.")
 	)
 
 	flag.Parse()
@@ -202,7 +206,7 @@ func main() {
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
 
-	p := NewCASProxy(*casBase, *casValidate, *frontendURL, *backendURL)
+	p := NewCASProxy(*casBase, *casValidate, *frontendURL, *backendURL, *maxAge)
 
 	r := mux.NewRouter()
 
