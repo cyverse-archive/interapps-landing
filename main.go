@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"path"
 
@@ -180,6 +181,16 @@ func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, casURL.String(), http.StatusTemporaryRedirect)
 }
 
+// ReverseProxy returns a proxy that forwards requests to the configured
+// backend URL. It can act as a http.Handler.
+func (c *CASProxy) ReverseProxy() (*httputil.ReverseProxy, error) {
+	backend, err := url.Parse(c.backendURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse %s", c.backendURL)
+	}
+	return httputil.NewSingleHostReverseProxy(backend), nil
+}
+
 func main() {
 	var (
 		backendURL  = flag.String("backend-url", "http://localhost:60000", "The hostname and port to proxy requests to.")
@@ -210,16 +221,16 @@ func main() {
 
 	r := mux.NewRouter()
 
+	rp, err := p.ReverseProxy()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// If the query containes a ticket in the query params, then it needs to be
 	// validated.
 	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
 	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
-	r.PathPrefix("/").Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		for k, v := range r.Header {
-			fmt.Fprintf(w, "key: %s, value: %s    \n", k, v)
-		}
-		fmt.Fprintln(w, "test successful")
-	}))
+	r.PathPrefix("/").Handler(rp)
 
 	server := &http.Server{
 		Handler: r,
