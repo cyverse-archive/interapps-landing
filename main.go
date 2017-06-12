@@ -107,11 +107,6 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// redirectURL := r.URL
-	// rq := redirectURL.Query()
-	// rq.Del("ticket")
-	// redirectURL.RawQuery = rq.Encode()
-
 	//Store a session, hopefully to short circuit the CAS redirect dance in later
 	//requests.
 	session, err := c.cookies.Get(r, sessionName)
@@ -128,7 +123,6 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 
 // Session implements the mux.Matcher interface so that requests can be routed
 // based on cookie existence.
-// TODO: route based on value
 func (c *CASProxy) Session(r *http.Request, m *mux.RouteMatch) bool {
 	var (
 		val interface{}
@@ -217,9 +211,11 @@ func main() {
 	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
 	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
 	r.PathPrefix("/").Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		for k, v := range r.Header {
+			fmt.Fprintf(w, "key: %s, value: %s    \n", k, v)
+		}
 		fmt.Fprintln(w, "test successful")
 	}))
-	// r.HandleFunc("/", )
 
 	server := &http.Server{
 		Handler: r,
