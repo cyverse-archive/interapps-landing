@@ -306,9 +306,6 @@ func main() {
 	// validated.
 	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
 	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
-
-	// Only accept http and https for the this reverse proxy handler. Websocket
-	// requests should have a scheme of 'ws'.
 	r.PathPrefix("/").Handler(proxy)
 
 	server := &http.Server{
