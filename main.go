@@ -38,7 +38,7 @@ type CASProxy struct {
 	casValidate  string // The path to the validation endpoint on the CAS server.
 	frontendURL  string // The URL placed into service query param for CAS.
 	backendURL   string // The backend URL to forward to.
-	wsbackendURL string
+	wsbackendURL string // The websocket URL to forward requests to.
 	cookies      *sessions.CookieStore
 	maxAge       int
 }
@@ -74,15 +74,15 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Make sure the serivce path and the query params are set to the incoming
-	// requests values for those fields.
+	// Ensure that the service path and the query params are set to the incoming
+	// request's values for those fields.
 	svcURL.Path = r.URL.Path
 	sq := r.URL.Query()
 	sq.Del("ticket") // Remove the ticket from the service URL. Redirection loops occur otherwise.
 	svcURL.RawQuery = sq.Encode()
 
-	// The request URL for cas validation needs to have the service and ticket in
-	// it.
+	// The request URL for CAS ticket validation needs to have the service and
+	// ticket in it.
 	casURL.Path = path.Join(casURL.Path, c.casValidate)
 	q := casURL.Query()
 	q.Add("service", svcURL.String())
@@ -116,7 +116,7 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 
 	// This is where the actual ticket validation happens. If the CAS server
 	// returns 'no\n\n' in the body, then the validation was not successful. The
-	// HTTP status code will be in the 200 range regardless if the validation
+	// HTTP status code will be in the 200 range regardless of the validation
 	// status.
 	if bytes.Equal(b, []byte("no\n\n")) {
 		err = fmt.Errorf("ticket validation response body was %s", b)
@@ -124,10 +124,11 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Store a session, hopefully to short circuit the CAS redirect dance in later
+	// Store a session, hopefully to short-circuit the CAS redirect dance in later
 	// requests. The max age of the cookie should be less than the lifetime of
 	// the CAS ticket, which is around 10+ hours. This means that we'll be hitting
-	// the CAS server fairly often, but it shouldn't be an issue.
+	// the CAS server fairly often. Adjust the max age to rate limit requests to
+	// CAS.
 	session, err := c.cookies.Get(r, sessionName)
 	if err != nil {
 		err = errors.Wrapf(err, "failed get session %s", sessionName)
@@ -302,7 +303,7 @@ func main() {
 
 	r := mux.NewRouter()
 
-	// If the query containes a ticket in the query params, then it needs to be
+	// If the query contains a ticket in the query params, then it needs to be
 	// validated.
 	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
 	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
