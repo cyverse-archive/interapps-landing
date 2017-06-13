@@ -1,1 +1,3 @@
 cas-proxy
+*.crt
+*.key
