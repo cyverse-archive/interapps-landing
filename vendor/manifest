@@ -69,6 +69,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/gorilla/websocket",
+			"repository": "https://github.com/gorilla/websocket",
+			"vcs": "git",
+			"revision": "a91eba7f97777409bc2c443f5534d41dd20c5720",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/onsi/ginkgo",
 			"repository": "https://github.com/onsi/ginkgo",
 			"vcs": "git",
@@ -120,6 +128,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/yhat/wsutil",
+			"repository": "https://github.com/yhat/wsutil",
+			"vcs": "git",
+			"revision": "666b94ea38f279dc3ac060200f708ec2d39abdce",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "golang.org/x/net/context",
 			"repository": "https://go.googlesource.com/net",
 			"vcs": "git",
@@ -135,6 +151,15 @@
 			"revision": "59a0b19b5533c7977ddeb86b017bf507ed407b12",
 			"branch": "master",
 			"path": "html",
+			"notests": true
+		},
+		{
+			"importpath": "golang.org/x/net/websocket",
+			"repository": "https://go.googlesource.com/net",
+			"vcs": "git",
+			"revision": "dfe83d419c9403b40b19d08cdba2afec27b002f7",
+			"branch": "master",
+			"path": "/websocket",
 			"notests": true
 		},
 		{

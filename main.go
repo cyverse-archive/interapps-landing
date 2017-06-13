@@ -9,11 +9,13 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/pkg/errors"
+	"github.com/yhat/wsutil"
 )
 
 var log = logrus.WithFields(logrus.Fields{
@@ -32,23 +34,25 @@ const sessionKey = "proxy-session-key"
 // CASProxy contains the application logic that handles authentication, session
 // validations, ticket validation, and request proxying.
 type CASProxy struct {
-	casBase     string // base URL for the CAS server
-	casValidate string // The path to the validation endpoint on the CAS server.
-	frontendURL string // The URL placed into service query param for CAS.
-	backendURL  string // The backend URL to forward to.
-	cookies     *sessions.CookieStore
-	maxAge      int
+	casBase      string // base URL for the CAS server
+	casValidate  string // The path to the validation endpoint on the CAS server.
+	frontendURL  string // The URL placed into service query param for CAS.
+	backendURL   string // The backend URL to forward to.
+	wsbackendURL string
+	cookies      *sessions.CookieStore
+	maxAge       int
 }
 
 // NewCASProxy returns a newly instantiated *CASProxy.
-func NewCASProxy(casBase, casValidate, frontendURL, backendURL string, maxAge int) *CASProxy {
+func NewCASProxy(casBase, casValidate, frontendURL, backendURL, wsbackendURL string, maxAge int) *CASProxy {
 	return &CASProxy{
-		casBase:     casBase,
-		casValidate: casValidate,
-		frontendURL: frontendURL,
-		backendURL:  backendURL,
-		maxAge:      maxAge,
-		cookies:     sessions.NewCookieStore([]byte("omgsekretz")), // TODO: replace
+		casBase:      casBase,
+		casValidate:  casValidate,
+		frontendURL:  frontendURL,
+		backendURL:   backendURL,
+		wsbackendURL: wsbackendURL,
+		maxAge:       maxAge,
+		cookies:      sessions.NewCookieStore([]byte("omgsekretz")), // TODO: replace
 	}
 }
 
@@ -191,14 +195,64 @@ func (c *CASProxy) ReverseProxy() (*httputil.ReverseProxy, error) {
 	return httputil.NewSingleHostReverseProxy(backend), nil
 }
 
+// WSReverseProxy returns a proxy that forwards websocket request to the
+// configured backend URL. It can act as a http.Handler.
+func (c *CASProxy) WSReverseProxy() (*wsutil.ReverseProxy, error) {
+	w, err := url.Parse(c.wsbackendURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse the websocket backend URL %s", c.wsbackendURL)
+	}
+	return wsutil.NewSingleHostReverseProxy(w), nil
+}
+
+// isWebsocket returns true if the connection is a websocket request. Adapted
+// from the code at https://groups.google.com/d/msg/golang-nuts/KBx9pDlvFOc/0tR1gBRfFVMJ.
+func (c *CASProxy) isWebsocket(r *http.Request) bool {
+	connectionHeader := ""
+	allHeaders := r.Header["Connection"]
+	if len(allHeaders) > 0 {
+		connectionHeader = allHeaders[0]
+	}
+
+	upgrade := false
+	if strings.ToLower(connectionHeader) == "upgrade" {
+		if len(r.Header["Upgrade"]) > 0 {
+			upgrade = (strings.ToLower(r.Header["Upgrade"][0]) == "websocket")
+		}
+	}
+	return upgrade
+}
+
+// Proxy returns a handler that can support both websockets and http requests.
+func (c *CASProxy) Proxy() (http.Handler, error) {
+	ws, err := c.WSReverseProxy()
+	if err != nil {
+		return nil, err
+	}
+
+	rp, err := c.ReverseProxy()
+	if err != nil {
+		return nil, err
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if c.isWebsocket(r) {
+			ws.ServeHTTP(w, r)
+			return
+		}
+		rp.ServeHTTP(w, r)
+	}), nil
+}
+
 func main() {
 	var (
-		backendURL  = flag.String("backend-url", "http://localhost:60000", "The hostname and port to proxy requests to.")
-		frontendURL = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
-		listenAddr  = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
-		casBase     = flag.String("cas-base-url", "", "The base URL to the CAS host.")
-		casValidate = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
-		maxAge      = flag.Int("max-age", 30, "The number of seconds that the session cookie is valid for.")
+		backendURL   = flag.String("backend-url", "http://localhost:60000", "The hostname and port to proxy requests to.")
+		wsbackendURL = flag.String("ws-backend-url", "", "The backend URL for the handling websocket requests. Defaults to the value of --backend-url with a scheme of ws://")
+		frontendURL  = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
+		listenAddr   = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
+		casBase      = flag.String("cas-base-url", "", "The base URL to the CAS host.")
+		casValidate  = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
+		maxAge       = flag.Int("max-age", 30, "The number of seconds that the session cookie is valid for.")
 	)
 
 	flag.Parse()
@@ -211,26 +265,39 @@ func main() {
 		log.Fatal("--frontend-url must be set.")
 	}
 
+	if *wsbackendURL == "" {
+		w, err := url.Parse(*backendURL)
+		if err != nil {
+			log.Fatal(err)
+		}
+		w.Scheme = "ws"
+		*wsbackendURL = w.String()
+	}
+
 	log.Infof("backend URL is %s", *backendURL)
+	log.Infof("websocket backend URL is %s", *wsbackendURL)
 	log.Infof("frontend URL is %s", *frontendURL)
 	log.Infof("listen address is %s", *listenAddr)
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
 
-	p := NewCASProxy(*casBase, *casValidate, *frontendURL, *backendURL, *maxAge)
+	p := NewCASProxy(*casBase, *casValidate, *frontendURL, *backendURL, *wsbackendURL, *maxAge)
 
-	r := mux.NewRouter()
-
-	rp, err := p.ReverseProxy()
+	proxy, err := p.Proxy()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	r := mux.NewRouter()
 
 	// If the query containes a ticket in the query params, then it needs to be
 	// validated.
 	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
 	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
-	r.PathPrefix("/").Handler(rp)
+
+	// Only accept http and https for the this reverse proxy handler. Websocket
+	// requests should have a scheme of 'ws'.
+	r.PathPrefix("/").Handler(proxy)
 
 	server := &http.Server{
 		Handler: r,
