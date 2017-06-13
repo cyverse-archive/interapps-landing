@@ -10,10 +10,12 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/alexedwards/scs/engine/memstore"
+	"github.com/alexedwards/scs/session"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/pkg/errors"
 	"github.com/yhat/wsutil"
 )
@@ -30,6 +32,7 @@ func init() {
 
 const sessionName = "proxy-session"
 const sessionKey = "proxy-session-key"
+const sessionAccess = "proxy-session-last-access"
 
 // CASProxy contains the application logic that handles authentication, session
 // validations, ticket validation, and request proxying.
@@ -39,20 +42,16 @@ type CASProxy struct {
 	frontendURL  string // The URL placed into service query param for CAS.
 	backendURL   string // The backend URL to forward to.
 	wsbackendURL string // The websocket URL to forward requests to.
-	cookies      *sessions.CookieStore
-	maxAge       int
 }
 
 // NewCASProxy returns a newly instantiated *CASProxy.
-func NewCASProxy(casBase, casValidate, frontendURL, backendURL, wsbackendURL string, maxAge int) *CASProxy {
+func NewCASProxy(casBase, casValidate, frontendURL, backendURL, wsbackendURL string) *CASProxy {
 	return &CASProxy{
 		casBase:      casBase,
 		casValidate:  casValidate,
 		frontendURL:  frontendURL,
 		backendURL:   backendURL,
 		wsbackendURL: wsbackendURL,
-		maxAge:       maxAge,
-		cookies:      sessions.NewCookieStore([]byte("omgsekretz")), // TODO: replace
 	}
 }
 
@@ -129,44 +128,43 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 	// the CAS ticket, which is around 10+ hours. This means that we'll be hitting
 	// the CAS server fairly often. Adjust the max age to rate limit requests to
 	// CAS.
-	session, err := c.cookies.Get(r, sessionName)
+	err = session.PutInt(r, sessionKey, 1)
 	if err != nil {
-		err = errors.Wrapf(err, "failed get session %s", sessionName)
+		err = errors.Wrap(err, "error setting setting value")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	session.Values[sessionKey] = 1
-	session.Options.MaxAge = c.maxAge
-	c.cookies.Save(r, w, session)
 
-	http.Redirect(w, r, svcURL.String(), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, svcURL.String(), http.StatusFound)
 }
 
 // Session implements the mux.Matcher interface so that requests can be routed
 // based on cookie existence.
 func (c *CASProxy) Session(r *http.Request, m *mux.RouteMatch) bool {
-	var (
-		val interface{}
-		ok  bool
-	)
-	session, err := c.cookies.Get(r, sessionName)
+	msg, err := session.GetInt(r, sessionKey)
 	if err != nil {
 		return true
 	}
-	if val, ok = session.Values[sessionKey]; !ok {
-		log.Infof("key %s was not in the session", sessionKey)
+
+	if msg != 1 {
+		log.Infof("session value was %d instead of 1", msg)
 		return true
 	}
-	if val.(int) != 1 {
-		log.Infof("session value was %d instead of 1", val.(int))
+
+	// This should reset the expiration time.
+	err = session.PutInt(r, sessionKey, 1)
+	if err != nil {
+		log.Error(err)
 		return true
 	}
+
 	return false
 }
 
 // RedirectToCAS redirects the request to CAS, setting the service query
 // parameter to the value in frontendURL.
 func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("redirect to cas")
 	casURL, err := url.Parse(c.casBase)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to parse CAS base URL %s", c.casBase)
@@ -195,7 +193,7 @@ func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
 	casURL.Path = path.Join(casURL.Path, "login")
 
 	// perform the redirect
-	http.Redirect(w, r, casURL.String(), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, casURL.String(), http.StatusPermanentRedirect)
 }
 
 // ReverseProxy returns a proxy that forwards requests to the configured
@@ -265,7 +263,7 @@ func main() {
 		listenAddr   = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
 		casBase      = flag.String("cas-base-url", "", "The base URL to the CAS host.")
 		casValidate  = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
-		maxAge       = flag.Int("max-age", 30, "The number of seconds that the session cookie is valid for.")
+		maxAge       = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
 		sslCert      = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
 		sslKey       = flag.String("ssl-key", "", "Path to the SSL .key file.")
 	)
@@ -308,11 +306,21 @@ func main() {
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
 
-	p := NewCASProxy(*casBase, *casValidate, *frontendURL, *backendURL, *wsbackendURL, *maxAge)
+	p := NewCASProxy(*casBase, *casValidate, *frontendURL, *backendURL, *wsbackendURL)
 
 	proxy, err := p.Proxy()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	sessionEngine := memstore.New(30 * time.Second)
+
+	var sessionManager func(h http.Handler) http.Handler
+	if *maxAge > 0 {
+		d := time.Duration(*maxAge) * time.Second
+		sessionManager = session.Manage(sessionEngine, session.IdleTimeout(d))
+	} else {
+		sessionManager = session.Manage(sessionEngine)
 	}
 
 	r := mux.NewRouter()
@@ -324,7 +332,7 @@ func main() {
 	r.PathPrefix("/").Handler(proxy)
 
 	server := &http.Server{
-		Handler: r,
+		Handler: sessionManager(r),
 		Addr:    *listenAddr,
 	}
 	if useSSL {

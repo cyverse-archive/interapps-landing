@@ -10,6 +10,24 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/alexedwards/scs/engine/memstore",
+			"repository": "https://github.com/alexedwards/scs",
+			"vcs": "git",
+			"revision": "f36d272d74ecae3d61058d91dc7401715b044ca1",
+			"branch": "master",
+			"path": "engine/memstore",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/alexedwards/scs/session",
+			"repository": "https://github.com/alexedwards/scs",
+			"vcs": "git",
+			"revision": "f36d272d74ecae3d61058d91dc7401715b044ca1",
+			"branch": "master",
+			"path": "/session",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/golang/protobuf/proto",
 			"repository": "https://github.com/golang/protobuf",
 			"vcs": "git",
@@ -61,14 +79,6 @@
 			"notests": true
 		},
 		{
-			"importpath": "github.com/gorilla/sessions",
-			"repository": "https://github.com/gorilla/sessions",
-			"vcs": "git",
-			"revision": "8b6b4cd75f07f7ee036eb37b8127bd40ab1efc49",
-			"branch": "master",
-			"notests": true
-		},
-		{
 			"importpath": "github.com/gorilla/websocket",
 			"repository": "https://github.com/gorilla/websocket",
 			"vcs": "git",
@@ -89,6 +99,14 @@
 			"repository": "https://github.com/onsi/gomega",
 			"vcs": "git",
 			"revision": "39a54bd3c3bbfe1c331a9b3207e92134c77ed812",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/patrickmn/go-cache",
+			"repository": "https://github.com/patrickmn/go-cache",
+			"vcs": "git",
+			"revision": "7ac151875ffb48b9f3ccce9ea20f020b0c1596c8",
 			"branch": "master",
 			"notests": true
 		},
