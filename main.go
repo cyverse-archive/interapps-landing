@@ -78,15 +78,18 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 	// requests values for those fields.
 	svcURL.Path = r.URL.Path
 	sq := r.URL.Query()
-	sq.Del("ticket")
+	sq.Del("ticket") // Remove the ticket from the service URL. Redirection loops occur otherwise.
 	svcURL.RawQuery = sq.Encode()
 
+	// The request URL for cas validation needs to have the service and ticket in
+	// it.
 	casURL.Path = path.Join(casURL.Path, c.casValidate)
 	q := casURL.Query()
 	q.Add("service", svcURL.String())
 	q.Add("ticket", r.URL.Query().Get("ticket"))
 	casURL.RawQuery = q.Encode()
 
+	// Actually validate the ticket.
 	resp, err := http.Get(casURL.String())
 	if err != nil {
 		err = errors.Wrap(err, "ticket validation error")
@@ -94,6 +97,9 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// If this happens then something went wrong on the CAS side of things. Doesn't
+	// mean the ticket is invalid, just that the CAS server is in a state where
+	// we can't trust the response.
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		err = errors.Wrapf(err, "ticket validation status code was %d", resp.StatusCode)
 		http.Error(w, err.Error(), http.StatusForbidden)
@@ -108,14 +114,20 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
+	// This is where the actual ticket validation happens. If the CAS server
+	// returns 'no\n\n' in the body, then the validation was not successful. The
+	// HTTP status code will be in the 200 range regardless if the validation
+	// status.
 	if bytes.Equal(b, []byte("no\n\n")) {
 		err = fmt.Errorf("ticket validation response body was %s", b)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
-	//Store a session, hopefully to short circuit the CAS redirect dance in later
-	//requests.
+	// Store a session, hopefully to short circuit the CAS redirect dance in later
+	// requests. The max age of the cookie should be less than the lifetime of
+	// the CAS ticket, which is around 10+ hours. This means that we'll be hitting
+	// the CAS server fairly often, but it shouldn't be an issue.
 	session, err := c.cookies.Get(r, sessionName)
 	if err != nil {
 		err = errors.Wrapf(err, "failed get session %s", sessionName)
