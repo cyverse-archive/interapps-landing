@@ -228,7 +228,7 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 	}
 
 	upgrade := false
-	if strings.ToLower(connectionHeader) == "upgrade" {
+	if strings.Contains(strings.ToLower(connectionHeader), "upgrade") {
 		if len(r.Header["Upgrade"]) > 0 {
 			upgrade = (strings.ToLower(r.Header["Upgrade"][0]) == "websocket")
 		}
@@ -266,6 +266,8 @@ func main() {
 		casBase      = flag.String("cas-base-url", "", "The base URL to the CAS host.")
 		casValidate  = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
 		maxAge       = flag.Int("max-age", 30, "The number of seconds that the session cookie is valid for.")
+		sslCert      = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
+		sslKey       = flag.String("ssl-key", "", "Path to the SSL .key file.")
 	)
 
 	flag.Parse()
@@ -276,6 +278,18 @@ func main() {
 
 	if *frontendURL == "" {
 		log.Fatal("--frontend-url must be set.")
+	}
+
+	useSSL := false
+	if *sslCert != "" || *sslKey != "" {
+		if *sslCert == "" {
+			log.Fatal("--ssl-cert is required with --ssl-key.")
+		}
+
+		if *sslKey == "" {
+			log.Fatal("--ssl-key is required with --ssl-cert.")
+		}
+		useSSL = true
 	}
 
 	if *wsbackendURL == "" {
@@ -313,6 +327,11 @@ func main() {
 		Handler: r,
 		Addr:    *listenAddr,
 	}
-	log.Fatal(server.ListenAndServe())
+	if useSSL {
+		err = server.ListenAndServeTLS(*sslCert, *sslKey)
+	} else {
+		err = server.ListenAndServe()
+	}
+	log.Fatal(err)
 
 }
