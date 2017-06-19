@@ -1,0 +1,58 @@
+version: '2'
+
+# Required environment variables
+#   - ORIGIN_HOST -- the hostname for the outward facing nginx proxy.
+#   - ORIGIN_PORT -- the port for the outward facing nginx proxy.
+#   - BASE_URL_PATH -- the base path in the URL for the resources in the proxied app.
+#   - HOST_SSL_KEY_PATH -- the path to the ssl key.
+#   - HOST_SSL_CERT_PATH -- the path to the ssl cert.
+#   - NGINX_SSL_KEY_PATH -- the path to the ssl key.
+#   - NGINX_SSL_CERT_PATH -- the path to the ssl cert.
+#   - PROXY_SSL_KEY_PATH -- the path to the ssl key.
+#   - PROXY_SSL_CERT_PATH -- the path to the ssk cert.
+
+services:
+    notebook:
+        image: jupyter/minimal-notebook
+        container_name: notebook
+        command:
+            - start-notebook.sh
+            - "--NotebookApp.token=''"
+            - "--NotebookApp.base_url='${BASE_URL_PATH}'"
+            - "--NotebookApp.allow_origin='https://${ORIGIN_HOST}:${ORIGIN_PORT}'"
+        ports:
+            - "8888"
+
+    proxy:
+        image: discoenv/cas-proxy:master
+        container_name: proxy
+        command:
+            - "--backend-url"
+            - http://notebook:8888
+            - "--cas-base-url"
+            - ${CAS_URL}
+            - "--frontend-url"
+            - https://${ORIGIN_HOST}:${ORIGIN_PORT}${BASE_URL_PATH}
+            - "--ssl-key"
+            - ${PROXY_SSL_KEY_PATH}
+            - "--ssl-cert"
+            - ${PROXY_SSL_CERT_PATH}
+        ports:
+            - "8080"
+        volumes:
+            - ${HOST_SSL_KEY_PATH}:${PROXY_SSL_KEY_PATH}
+            - ${HOST_SSL_CERT_PATH}:${PROXY_SSL_CERT_PATH}
+        depends_on:
+            - notebook
+
+    nginx:
+        image: nginx
+        container_name: nginx
+        volumes:
+            - ./conf.d:/etc/nginx/conf.d
+            - ${HOST_SSL_KEY_PATH}:${NGINX_SSL_KEY_PATH}
+            - ${HOST_SSL_CERT_PATH}:${NGINX_SSL_CERT_PATH}
+        ports:
+            - "${ORIGIN_PORT}:443"
+        depends_on:
+            - proxy
