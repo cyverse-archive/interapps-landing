@@ -1,0 +1,44 @@
+version: '2'
+
+# Required environment variables
+#   - ORIGIN_HOST -- the hostname for the outward facing nginx proxy.
+#   - ORIGIN_PORT -- the port for the outward facing nginx proxy.
+#   - CAS_URL -- the URL to the CAS server.
+#   - BASE_URL_PATH -- the base path in the URL for the resources in the proxied app.
+
+services:
+    notebook:
+        image: jupyter/minimal-notebook
+        container_name: notebook
+        command:
+            - start-notebook.sh
+            - "--NotebookApp.token=''"
+            - "--NotebookApp.base_url='${BASE_URL_PATH}'"
+            - "--NotebookApp.allow_origin='http://${ORIGIN_HOST}:${ORIGIN_PORT}'"
+        ports:
+            - "8888"
+
+    proxy:
+        image: discoenv/cas-proxy:master
+        container_name: proxy
+        command:
+            - "--backend-url"
+            - http://notebook:8888
+            - "--cas-base-url"
+            - ${CAS_URL}
+            - "--frontend-url"
+            - http://${ORIGIN_HOST}:${ORIGIN_PORT}${BASE_URL_PATH}
+        ports:
+            - "8080"
+        depends_on:
+            - notebook
+
+    nginx:
+        image: nginx
+        container_name: nginx
+        volumes:
+            - ./conf.d:/etc/nginx/conf.d
+        ports:
+            - "${ORIGIN_PORT}:80"
+        depends_on:
+            - proxy
