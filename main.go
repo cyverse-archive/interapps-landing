@@ -165,7 +165,9 @@ func (c *CASProxy) IsAllowed(user string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	l := &PermissionList{}
+	l := &PermissionList{
+		Permissions: []Permission{},
+	}
 	if err = json.Unmarshal(b, l); err != nil {
 		return false, err
 	}
@@ -235,14 +237,30 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
-	log.Println(resp.Header)
-
 	// This is where the actual ticket validation happens. If the CAS server
 	// returns 'no\n\n' in the body, then the validation was not successful. The
 	// HTTP status code will be in the 200 range regardless of the validation
 	// status.
 	if bytes.Equal(b, []byte("no\n\n")) {
 		err = fmt.Errorf("ticket validation response body was %s", b)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	fields := bytes.Fields(b)
+	if len(fields) < 2 {
+		err = errors.New("not enough fields in ticket validation response body")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	username := string(fields[1])
+	allowed, err := c.IsAllowed(username)
+	if !allowed || err != nil {
+		if err != nil {
+			err = errors.Wrap(err, "access denied")
+		} else {
+			err = errors.New("access denied")
+		}
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
