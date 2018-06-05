@@ -2,14 +2,12 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -43,7 +41,6 @@ type CASProxy struct {
 
 	resourceType string // The resource type for analysis.
 	resourceName string // The UUID of the analysis.
-	permsURL     string // The service URL for the permissions service.
 	subjectType  string // The subject type for a user.
 }
 
@@ -54,124 +51,6 @@ func NewCASProxy(casBase, casValidate, frontendURL string) *CASProxy {
 		casValidate: casValidate,
 		frontendURL: frontendURL,
 	}
-}
-
-// Analysis contains the ID for the Analysis, which gets used as the resource
-// name when checking permissions.
-type Analysis struct {
-	ID string `json:"id"` // Literally all we care about here.
-}
-
-// Analyses is a list of analyses returned by the apps service.
-type Analyses struct {
-	Analyses []Analysis `json:"analyses"`
-}
-
-func getResourceName(appsURL, appsUser, externalID string) (string, error) {
-	reqURL, err := url.Parse(appsURL)
-	if err != nil {
-		return "", err
-	}
-	reqURL.Path = filepath.Join(reqURL.Path, "admin/analyses/by-external-id", externalID)
-
-	v := url.Values{}
-	v.Set("user", appsUser)
-	reqURL.RawQuery = v.Encode()
-
-	resp, err := http.Get(reqURL.String())
-	defer func() {
-		if resp != nil {
-			if resp.Body != nil {
-				resp.Body.Close()
-			}
-		}
-	}()
-	if err != nil {
-		return "", err
-	}
-
-	analyses := &Analyses{}
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	if err = json.Unmarshal(b, analyses); err != nil {
-		return "", err
-	}
-	if len(analyses.Analyses) < 1 {
-		return "", errors.New("no analyses found")
-	}
-	return analyses.Analyses[0].ID, nil
-}
-
-// Resource is an item that can have permissions attached to it in the
-// permissions service.
-type Resource struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"resource_type"`
-}
-
-// Subject is an item that accesses resources contained in the permissions
-// service.
-type Subject struct {
-	ID        string `json:"id"`
-	SubjectID string `json:"subject_id"`
-	SourceID  string `json:"subject_source_id"`
-	Type      string `json:"subject_type"`
-}
-
-// Permission is an entry from the permissions service that tells what access
-// a subject has to a resource.
-type Permission struct {
-	ID       string   `json:"id"`
-	Level    string   `json:"permission_level"`
-	Resource Resource `json:"resource"`
-	Subject  Subject  `json:"subject"`
-}
-
-// PermissionList contains a list of permission returned by the permissions
-// service.
-type PermissionList struct {
-	Permissions []Permission `json:"permissions"`
-}
-
-// IsAllowed will return true if the user is allowed to access the running app
-// and false if they're not. An error might be returned as well. Access should
-// be denied if an error is returned, even if the boolean return value is true.
-func (c *CASProxy) IsAllowed(user string) (bool, error) {
-	requrl, err := url.Parse(c.permsURL)
-	if err != nil {
-		return false, err
-	}
-	requrl.Path = filepath.Join(requrl.Path, "permissions/subjects", c.subjectType, user, c.resourceType, c.resourceName)
-	resp, err := http.Get(requrl.String())
-	defer func() {
-		if resp != nil {
-			if resp.Body != nil {
-				resp.Body.Close()
-			}
-		}
-	}()
-	if err != nil {
-		return false, err
-	}
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return false, err
-	}
-	l := &PermissionList{
-		Permissions: []Permission{},
-	}
-	if err = json.Unmarshal(b, l); err != nil {
-		return false, err
-	}
-	if len(l.Permissions) > 0 {
-		if l.Permissions[0].Level != "" {
-			return true, nil
-		}
-	}
-	return false, nil
 }
 
 // ValidateTicket will validate a CAS ticket against the configured CAS server.
@@ -246,17 +125,6 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 	if len(fields) < 2 {
 		err = errors.New("not enough fields in ticket validation response body")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	username := string(fields[1])
-	allowed, err := c.IsAllowed(username)
-	if !allowed || err != nil {
-		if err != nil {
-			err = errors.Wrap(err, "access denied")
-		} else {
-			err = errors.New("access denied")
-		}
-		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
