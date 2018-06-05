@@ -361,7 +361,8 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 
 func main() {
 	var (
-		backendURL   = flag.String("backend-url", "http://localhost:60000", "The hostname and port to proxy requests to.")
+		err          error
+		backendURL   = flag.String("backend-url", "http://localhost:60000", "The hostname and port to listen on.")
 		wsbackendURL = flag.String("ws-backend-url", "", "The backend URL for the handling websocket requests. Defaults to the value of --backend-url with a scheme of ws://")
 		frontendURL  = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
 		listenAddr   = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
@@ -370,12 +371,6 @@ func main() {
 		maxAge       = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
 		sslCert      = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
 		sslKey       = flag.String("ssl-key", "", "Path to the SSL .key file.")
-		resourceType = flag.String("resource-type", "analysis", "The resource type that gets passed to the permissions service.")
-		permsURL     = flag.String("permissions-url", "", "The URL for the permissions service.")
-		subjectType  = flag.String("subject-type", "user", "The subject type to pass to the permissions service.")
-		appsUser     = flag.String("apps-user", "", "Username to use when calling the apps api.")
-		appsURL      = flag.String("apps-url", "", "The URL for the apps service.")
-		externalID   = flag.String("external-id", "", "The external ID to pass to the apps service when looking up the analysis ID.")
 	)
 
 	flag.Parse()
@@ -409,22 +404,6 @@ func main() {
 		*wsbackendURL = w.String()
 	}
 
-	if *appsUser == "" {
-		log.Fatal("--apps-user must be set.")
-	}
-
-	if *appsURL == "" {
-		log.Fatal("--apps-url must be set.")
-	}
-
-	if *permsURL == "" {
-		log.Fatal("--permissions-url must be set.")
-	}
-
-	if *externalID == "" {
-		log.Fatal("--external-id must be set.")
-	}
-
 	log.Infof("backend URL is %s", *backendURL)
 	log.Infof("websocket backend URL is %s", *wsbackendURL)
 	log.Infof("frontend URL is %s", *frontendURL)
@@ -432,21 +411,12 @@ func main() {
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
 
-	resourceName, err := getResourceName(*appsURL, *appsUser, *externalID)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	p := &CASProxy{
 		casBase:      *casBase,
 		casValidate:  *casValidate,
 		frontendURL:  *frontendURL,
 		backendURL:   *backendURL,
 		wsbackendURL: *wsbackendURL,
-		resourceType: *resourceType,
-		subjectType:  *subjectType,
-		resourceName: resourceName,
-		permsURL:     *permsURL,
 	}
 
 	sessionEngine := memstore.New(30 * time.Second)
