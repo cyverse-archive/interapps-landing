@@ -226,14 +226,15 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 
 func main() {
 	var (
-		err         error
-		frontendURL = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
-		listenAddr  = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
-		casBase     = flag.String("cas-base-url", "", "The base URL to the CAS host.")
-		casValidate = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
-		maxAge      = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
-		sslCert     = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
-		sslKey      = flag.String("ssl-key", "", "Path to the SSL .key file.")
+		err            error
+		frontendURL    = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
+		listenAddr     = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
+		casBase        = flag.String("cas-base-url", "", "The base URL to the CAS host.")
+		casValidate    = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
+		maxAge         = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
+		sslCert        = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
+		sslKey         = flag.String("ssl-key", "", "Path to the SSL .key file.")
+		staticFilePath = flag.String("static-file-path", "./static-assets", "Path to static file assets.")
 	)
 
 	flag.Parse()
@@ -285,6 +286,7 @@ func main() {
 	// validated.
 	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
 	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(*staticFilePath))))
 	r.PathPrefix("/").Handler(http.HandlerFunc(p.SiteHandler))
 
 	server := &http.Server{
