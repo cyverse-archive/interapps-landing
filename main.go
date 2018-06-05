@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"path"
 	"path/filepath"
@@ -19,7 +18,6 @@ import (
 	"github.com/alexedwards/scs/session"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	"github.com/yhat/wsutil"
 )
 
 var log = logrus.WithFields(logrus.Fields{
@@ -338,24 +336,9 @@ func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, casURL.String(), http.StatusPermanentRedirect)
 }
 
-// ReverseProxy returns a proxy that forwards requests to the configured
-// backend URL. It can act as a http.Handler.
-func (c *CASProxy) ReverseProxy() (*httputil.ReverseProxy, error) {
-	backend, err := url.Parse(c.backendURL)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse %s", c.backendURL)
-	}
-	return httputil.NewSingleHostReverseProxy(backend), nil
-}
-
-// WSReverseProxy returns a proxy that forwards websocket request to the
-// configured backend URL. It can act as a http.Handler.
-func (c *CASProxy) WSReverseProxy() (*wsutil.ReverseProxy, error) {
-	w, err := url.Parse(c.wsbackendURL)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse the websocket backend URL %s", c.wsbackendURL)
-	}
-	return wsutil.NewSingleHostReverseProxy(w), nil
+// SiteHandler is a basic handler for testing CAS support
+func (c *CASProxy) SiteHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "This is a site.")
 }
 
 // isWebsocket returns true if the connection is a websocket request. Adapted
@@ -374,28 +357,6 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 		}
 	}
 	return upgrade
-}
-
-// Proxy returns a handler that can support both websockets and http requests.
-func (c *CASProxy) Proxy() (http.Handler, error) {
-	ws, err := c.WSReverseProxy()
-	if err != nil {
-		return nil, err
-	}
-
-	rp, err := c.ReverseProxy()
-	if err != nil {
-		return nil, err
-	}
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%+v\n", r.Header)
-		if c.isWebsocket(r) {
-			ws.ServeHTTP(w, r)
-			return
-		}
-		rp.ServeHTTP(w, r)
-	}), nil
 }
 
 func main() {
@@ -488,11 +449,6 @@ func main() {
 		permsURL:     *permsURL,
 	}
 
-	proxy, err := p.Proxy()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	sessionEngine := memstore.New(30 * time.Second)
 
 	var sessionManager func(h http.Handler) http.Handler
@@ -509,7 +465,7 @@ func main() {
 	// validated.
 	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
 	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
-	r.PathPrefix("/").Handler(proxy)
+	r.PathPrefix("/").Handler(http.HandlerFunc(p.SiteHandler))
 
 	server := &http.Server{
 		Handler: sessionManager(r),
