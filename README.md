@@ -1,4 +1,3 @@
-cas-proxy
-=========
+# cas-server
 
-A simple http(s)/websocket proxy that handles CAS authentication.
+A simple http(s)/webapp server that handles CAS authentication.
