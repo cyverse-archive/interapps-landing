@@ -37,11 +37,10 @@ const sessionAccess = "proxy-session-last-access"
 // CASProxy contains the application logic that handles authentication, session
 // validations, ticket validation, and request proxying.
 type CASProxy struct {
-	casBase      string // base URL for the CAS server
-	casValidate  string // The path to the validation endpoint on the CAS server.
-	frontendURL  string // The URL placed into service query param for CAS.
-	backendURL   string // The backend URL to forward to.
-	wsbackendURL string // The websocket URL to forward requests to.
+	casBase     string // base URL for the CAS server
+	casValidate string // The path to the validation endpoint on the CAS server.
+	frontendURL string // The URL placed into service query param for CAS.
+
 	resourceType string // The resource type for analysis.
 	resourceName string // The UUID of the analysis.
 	permsURL     string // The service URL for the permissions service.
@@ -49,13 +48,11 @@ type CASProxy struct {
 }
 
 // NewCASProxy returns a newly instantiated *CASProxy.
-func NewCASProxy(casBase, casValidate, frontendURL, backendURL, wsbackendURL string) *CASProxy {
+func NewCASProxy(casBase, casValidate, frontendURL string) *CASProxy {
 	return &CASProxy{
-		casBase:      casBase,
-		casValidate:  casValidate,
-		frontendURL:  frontendURL,
-		backendURL:   backendURL,
-		wsbackendURL: wsbackendURL,
+		casBase:     casBase,
+		casValidate: casValidate,
+		frontendURL: frontendURL,
 	}
 }
 
@@ -361,16 +358,14 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 
 func main() {
 	var (
-		err          error
-		backendURL   = flag.String("backend-url", "http://localhost:60000", "The hostname and port to listen on.")
-		wsbackendURL = flag.String("ws-backend-url", "", "The backend URL for the handling websocket requests. Defaults to the value of --backend-url with a scheme of ws://")
-		frontendURL  = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
-		listenAddr   = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
-		casBase      = flag.String("cas-base-url", "", "The base URL to the CAS host.")
-		casValidate  = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
-		maxAge       = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
-		sslCert      = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
-		sslKey       = flag.String("ssl-key", "", "Path to the SSL .key file.")
+		err         error
+		frontendURL = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
+		listenAddr  = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
+		casBase     = flag.String("cas-base-url", "", "The base URL to the CAS host.")
+		casValidate = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
+		maxAge      = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
+		sslCert     = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
+		sslKey      = flag.String("ssl-key", "", "Path to the SSL .key file.")
 	)
 
 	flag.Parse()
@@ -395,28 +390,15 @@ func main() {
 		useSSL = true
 	}
 
-	if *wsbackendURL == "" {
-		w, err := url.Parse(*backendURL)
-		if err != nil {
-			log.Fatal(err)
-		}
-		w.Scheme = "ws"
-		*wsbackendURL = w.String()
-	}
-
-	log.Infof("backend URL is %s", *backendURL)
-	log.Infof("websocket backend URL is %s", *wsbackendURL)
 	log.Infof("frontend URL is %s", *frontendURL)
 	log.Infof("listen address is %s", *listenAddr)
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
 
 	p := &CASProxy{
-		casBase:      *casBase,
-		casValidate:  *casValidate,
-		frontendURL:  *frontendURL,
-		backendURL:   *backendURL,
-		wsbackendURL: *wsbackendURL,
+		casBase:     *casBase,
+		casValidate: *casValidate,
+		frontendURL: *frontendURL,
 	}
 
 	sessionEngine := memstore.New(30 * time.Second)
