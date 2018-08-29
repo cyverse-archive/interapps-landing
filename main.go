@@ -31,7 +31,6 @@ func init() {
 
 const sessionName = "proxy-session"
 const sessionKey = "proxy-session-key"
-const sessionAccess = "proxy-session-last-access"
 
 // CASProxy contains the application logic that handles authentication, session
 // validations, ticket validation, and request proxying.
@@ -46,16 +45,6 @@ type CASProxy struct {
 	accessHeader   string // The Host header for checking resource access perms.
 	analysisHeader string // The Host header for getting the analysis ID.
 	sessionStore   *sessions.CookieStore
-}
-
-// NewCASProxy returns a newly instantiated *CASProxy.
-func NewCASProxy(casBase, casValidate, frontendURL string, cs *sessions.CookieStore) *CASProxy {
-	return &CASProxy{
-		casBase:      casBase,
-		casValidate:  casValidate,
-		frontendURL:  frontendURL,
-		sessionStore: cs,
-	}
 }
 
 // Analysis contains the ID for the Analysis, which gets used as the resource
