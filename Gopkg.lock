@@ -27,6 +27,18 @@
   revision = "18fca31550181693b3a834a15b74b564b3605876"
 
 [[projects]]
+  name = "github.com/gorilla/securecookie"
+  packages = ["."]
+  revision = "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983"
+  version = "v1.1.1"
+
+[[projects]]
+  name = "github.com/gorilla/sessions"
+  packages = ["."]
+  revision = "03b6f63cc43ef9c7240a635a5e22b13180e822b8"
+  version = "v1.1.1"
+
+[[projects]]
   name = "github.com/patrickmn/go-cache"
   packages = ["."]
   revision = "7ac151875ffb48b9f3ccce9ea20f020b0c1596c8"
@@ -44,6 +56,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8571b065d4bea1aa082d09ada055ec48cb31a3fdd6555d521122bd489922d38f"
+  inputs-digest = "ab5f9032a8d24c7b5bbef9fc1f320c8b1c75306cc69f7071d7732f0398057df5"
   solver-name = "gps-cdcl"
   solver-version = 1

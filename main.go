@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -10,12 +12,10 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/alexedwards/scs/engine/memstore"
-	"github.com/alexedwards/scs/session"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/pkg/errors"
 )
 
@@ -36,22 +36,159 @@ const sessionAccess = "proxy-session-last-access"
 // CASProxy contains the application logic that handles authentication, session
 // validations, ticket validation, and request proxying.
 type CASProxy struct {
-	casBase     string // base URL for the CAS server
-	casValidate string // The path to the validation endpoint on the CAS server.
-	frontendURL string // The URL placed into service query param for CAS.
-
-	resourceType string // The resource type for analysis.
-	resourceName string // The UUID of the analysis.
-	subjectType  string // The subject type for a user.
+	casBase        string // base URL for the CAS server
+	casValidate    string // The path to the validation endpoint on the CAS server.
+	frontendURL    string // The URL placed into service query param for CAS.
+	resourceType   string // The resource type for analysis.
+	resourceName   string // The UUID of the analysis.
+	subjectType    string // The subject type for a user.
+	ingressURL     string // The URL to the cluster ingress.
+	accessHeader   string // The Host header for checking resource access perms.
+	analysisHeader string // The Host header for getting the analysis ID.
+	sessionStore   *sessions.CookieStore
 }
 
 // NewCASProxy returns a newly instantiated *CASProxy.
-func NewCASProxy(casBase, casValidate, frontendURL string) *CASProxy {
+func NewCASProxy(casBase, casValidate, frontendURL string, cs *sessions.CookieStore) *CASProxy {
 	return &CASProxy{
-		casBase:     casBase,
-		casValidate: casValidate,
-		frontendURL: frontendURL,
+		casBase:      casBase,
+		casValidate:  casValidate,
+		frontendURL:  frontendURL,
+		sessionStore: cs,
 	}
+}
+
+// Analysis contains the ID for the Analysis, which gets used as the resource
+// name when checking permissions.
+type Analysis struct {
+	ID string `json:"id"` // Literally all we care about here.
+}
+
+// Analyses is a list of analyses returned by the apps service.
+type Analyses struct {
+	Analyses []Analysis `json:"analyses"`
+}
+
+func (c *CASProxy) getResourceName(externalID string) (string, error) {
+	bodymap := map[string]string{}
+	bodymap["external_id"] = externalID
+
+	body, err := json.Marshal(bodymap)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, c.ingressURL, bytes.NewReader(body))
+	if err != nil {
+		return "", err
+	}
+
+	req.Host = c.analysisHeader
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	analysis := &Analysis{}
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if err = json.Unmarshal(b, analysis); err != nil {
+		return "", err
+	}
+
+	if analysis.ID == "" {
+		return "", errors.New("no analyses found")
+	}
+
+	return analysis.ID, nil
+}
+
+// Resource is an item that can have permissions attached to it in the
+// permissions service.
+type Resource struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Type string `json:"resource_type"`
+}
+
+// Subject is an item that accesses resources contained in the permissions
+// service.
+type Subject struct {
+	ID        string `json:"id"`
+	SubjectID string `json:"subject_id"`
+	SourceID  string `json:"subject_source_id"`
+	Type      string `json:"subject_type"`
+}
+
+// Permission is an entry from the permissions service that tells what access
+// a subject has to a resource.
+type Permission struct {
+	ID       string   `json:"id"`
+	Level    string   `json:"permission_level"`
+	Resource Resource `json:"resource"`
+	Subject  Subject  `json:"subject"`
+}
+
+// PermissionList contains a list of permission returned by the permissions
+// service.
+type PermissionList struct {
+	Permissions []Permission `json:"permissions"`
+}
+
+// IsAllowed will return true if the user is allowed to access the running app
+// and false if they're not. An error might be returned as well. Access should
+// be denied if an error is returned, even if the boolean return value is true.
+func (c *CASProxy) IsAllowed(user, resource string) (bool, error) {
+	bodymap := map[string]string{
+		"subject":  user,
+		"resource": resource,
+	}
+
+	body, err := json.Marshal(bodymap)
+	if err != nil {
+		return false, err
+	}
+
+	request, err := http.NewRequest(http.MethodPost, c.ingressURL, bytes.NewReader(body))
+	if err != nil {
+		return false, err
+	}
+
+	request.Host = c.accessHeader
+
+	client := &http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+
+	l := &PermissionList{
+		Permissions: []Permission{},
+	}
+
+	if err = json.Unmarshal(b, l); err != nil {
+		return false, err
+	}
+
+	if len(l.Permissions) > 0 {
+		if l.Permissions[0].Level != "" {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 // ValidateTicket will validate a CAS ticket against the configured CAS server.
@@ -129,38 +266,58 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	username := string(fields[1])
+
 	// Store a session, hopefully to short-circuit the CAS redirect dance in later
 	// requests. The max age of the cookie should be less than the lifetime of
 	// the CAS ticket, which is around 10+ hours. This means that we'll be hitting
 	// the CAS server fairly often. Adjust the max age to rate limit requests to
 	// CAS.
-	err = session.PutInt(r, sessionKey, 1)
+	var s *sessions.Session
+	s, err = c.sessionStore.Get(r, sessionName)
 	if err != nil {
-		err = errors.Wrap(err, "error setting setting value")
+		err = errors.Wrap(err, "error getting session")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	s.Values[sessionKey] = username
+	s.Save(r, w)
 
 	http.Redirect(w, r, svcURL.String(), http.StatusFound)
+}
+
+// ResetSessionExpiration should reset the session expiration time.
+func (c *CASProxy) ResetSessionExpiration(w http.ResponseWriter, r *http.Request) error {
+	session, err := c.sessionStore.Get(r, sessionName)
+	if err != nil {
+		return err
+	}
+
+	msg, ok := session.Values[sessionKey]
+	if !ok {
+		return errors.New("session value not found")
+	}
+
+	session.Values[sessionKey] = msg.(string)
+	session.Save(r, w)
+	return nil
 }
 
 // Session implements the mux.Matcher interface so that requests can be routed
 // based on cookie existence.
 func (c *CASProxy) Session(r *http.Request, m *mux.RouteMatch) bool {
-	msg, err := session.GetInt(r, sessionKey)
+	session, err := c.sessionStore.Get(r, sessionName)
 	if err != nil {
 		return true
 	}
 
-	if msg != 1 {
-		log.Infof("session value was %d instead of 1", msg)
+	msgraw, ok := session.Values[sessionKey]
+	if !ok {
 		return true
 	}
-
-	// This should reset the expiration time.
-	err = session.PutInt(r, sessionKey, 1)
-	if err != nil {
-		log.Error(err)
+	msg := msgraw.(string)
+	if msg == "" {
+		log.Infof("session value was empty instead of a username")
 		return true
 	}
 
@@ -235,6 +392,9 @@ func main() {
 		maxAge         = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
 		sslCert        = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
 		sslKey         = flag.String("ssl-key", "", "Path to the SSL .key file.")
+		ingressURL     = flag.String("ingress-url", "", "The URL to the cluster ingress.")
+		analysisHeader = flag.String("analysis-header", "get-analysis-id", "The Host header for the ingress service that gets the analysis ID.")
+		accessHeader   = flag.String("access-header", "check-resource-access", "The Host header for the ingress service that checks analysis access.")
 		staticFilePath = flag.String("static-file-path", "./static-assets", "Path to static file assets.")
 	)
 
@@ -260,25 +420,36 @@ func main() {
 		useSSL = true
 	}
 
+	if *ingressURL == "" {
+		log.Fatal("--ingress-url must be set.")
+	}
+
 	log.Infof("frontend URL is %s", *frontendURL)
 	log.Infof("listen address is %s", *listenAddr)
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
 
-	p := &CASProxy{
-		casBase:     *casBase,
-		casValidate: *casValidate,
-		frontendURL: *frontendURL,
+	authkey := make([]byte, 64)
+	_, err = rand.Read(authkey)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	sessionEngine := memstore.New(30 * time.Second)
+	sessionStore := sessions.NewCookieStore(authkey)
+	sessionStore.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   *maxAge,
+		HttpOnly: true,
+	}
 
-	var sessionManager func(h http.Handler) http.Handler
-	if *maxAge > 0 {
-		d := time.Duration(*maxAge) * time.Second
-		sessionManager = session.Manage(sessionEngine, session.IdleTimeout(d))
-	} else {
-		sessionManager = session.Manage(sessionEngine)
+	p := &CASProxy{
+		casBase:        *casBase,
+		casValidate:    *casValidate,
+		frontendURL:    *frontendURL,
+		ingressURL:     *ingressURL,
+		accessHeader:   *accessHeader,
+		analysisHeader: *analysisHeader,
+		sessionStore:   sessionStore,
 	}
 
 	r := mux.NewRouter()
@@ -293,7 +464,7 @@ func main() {
 	})
 
 	server := &http.Server{
-		Handler: sessionManager(r),
+		Handler: r,
 		Addr:    *listenAddr,
 	}
 	if useSSL {
