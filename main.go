@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/Sirupsen/logrus"
@@ -44,6 +45,7 @@ type CASProxy struct {
 	ingressURL     string // The URL to the cluster ingress.
 	accessHeader   string // The Host header for checking resource access perms.
 	analysisHeader string // The Host header for getting the analysis ID.
+	viceDomain     string // The domain for VICE apps.
 	sessionStore   *sessions.CookieStore
 }
 
@@ -313,6 +315,17 @@ func (c *CASProxy) Session(r *http.Request, m *mux.RouteMatch) bool {
 	return false
 }
 
+// ViceSubdomain implements the mux.Matcher interface so that requests can be
+// routed based on whether they're a request to a VICE app UI or not.
+func (c *CASProxy) ViceSubdomain(r *http.Request, m *mux.RouteMatch) bool {
+	matched, err := regexp.MatchString(fmt.Sprintf("a.*\\.%s(:[0-9]+)?", c.viceDomain), r.Host)
+	if err != nil {
+		log.Errorf("error checking for vice subdomain: %s", err)
+		return false
+	}
+	return matched
+}
+
 // RedirectToCAS redirects the request to CAS, setting the service query
 // parameter to the value in frontendURL.
 func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
@@ -384,6 +397,7 @@ func main() {
 		ingressURL     = flag.String("ingress-url", "", "The URL to the cluster ingress.")
 		analysisHeader = flag.String("analysis-header", "get-analysis-id", "The Host header for the ingress service that gets the analysis ID.")
 		accessHeader   = flag.String("access-header", "check-resource-access", "The Host header for the ingress service that checks analysis access.")
+		viceDomain     = flag.String("vice-domain", "cyverse.run", "The domain for the VICE apps.")
 		staticFilePath = flag.String("static-file-path", "./static-assets", "Path to static file assets.")
 	)
 
@@ -417,6 +431,7 @@ func main() {
 	log.Infof("listen address is %s", *listenAddr)
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
+	log.Infof("VICE domain is %s", *viceDomain)
 
 	authkey := make([]byte, 64)
 	_, err = rand.Read(authkey)
@@ -439,12 +454,16 @@ func main() {
 		accessHeader:   *accessHeader,
 		analysisHeader: *analysisHeader,
 		sessionStore:   sessionStore,
+		viceDomain:     *viceDomain,
 	}
 
 	r := mux.NewRouter()
 
 	// If the query contains a ticket in the query params, then it needs to be
 	// validated.
+	r.PathPrefix("/").MatcherFunc(p.ViceSubdomain).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Welcome to the stubbed out loading page for VICE apps.\n")
+	})
 	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
 	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(*staticFilePath))))
