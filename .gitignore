@@ -1,4 +1,5 @@
 cas-server
+interapps-landing
 *.crt
 *.key
 interapps-landing
