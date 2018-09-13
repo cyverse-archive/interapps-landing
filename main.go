@@ -318,7 +318,7 @@ func (c *CASProxy) Session(r *http.Request, m *mux.RouteMatch) bool {
 // ViceSubdomain implements the mux.Matcher interface so that requests can be
 // routed based on whether they're a request to a VICE app UI or not.
 func (c *CASProxy) ViceSubdomain(r *http.Request, m *mux.RouteMatch) bool {
-	matched, err := regexp.MatchString(fmt.Sprintf("a.*\\.%s(:[0-9]+)?", c.viceDomain), r.Host)
+	matched, err := regexp.MatchString(fmt.Sprintf("a.*\\.%s(:[0-9]+)?", c.viceDomain), r.Header.Get("X-Frontend-Url"))
 	if err != nil {
 		log.Errorf("error checking for vice subdomain: %s", err)
 		return false
@@ -339,7 +339,8 @@ func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
 
 	// Make sure the path in the CAS params is the same as the one that was
 	// requested.
-	svcURL, err := url.Parse(c.frontendURL)
+	frontendURL := r.Header.Get("X-Frontend-Url")
+	svcURL, err := url.Parse(frontendURL)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to parse the frontend URL %s", c.frontendURL)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
