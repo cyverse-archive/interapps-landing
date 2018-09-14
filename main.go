@@ -126,7 +126,7 @@ type Permission struct {
 	Subject  Subject  `json:"subject"`
 }
 
-// PermissionList contains a list of permission returned by the permissions
+// PermissionList contains a list of permissions returned by the permissions
 // service.
 type PermissionList struct {
 	Permissions []Permission `json:"permissions"`
