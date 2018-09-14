@@ -302,11 +302,11 @@ func (c *CASProxy) NeedsSession(r *http.Request, m *mux.RouteMatch) bool {
 		return true
 	}
 
-	msgraw, ok := session.Values[sessionKey]
+	sessionValue, ok := session.Values[sessionKey]
 	if !ok {
 		return true
 	}
-	msg := msgraw.(string)
+	msg := sessionValue.(string)
 	if msg == "" {
 		log.Infof("session value was empty instead of a username")
 		return true
