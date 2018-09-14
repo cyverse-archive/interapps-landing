@@ -7,15 +7,6 @@
   revision = "85b1699d505667d13f8ac4478c1debbf85d6c5de"
 
 [[projects]]
-  name = "github.com/alexedwards/scs"
-  packages = [
-    "engine/memstore",
-    "session"
-  ]
-  revision = "f36d272d74ecae3d61058d91dc7401715b044ca1"
-  version = "v0.1.0"
-
-[[projects]]
   name = "github.com/gorilla/context"
   packages = ["."]
   revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
@@ -27,9 +18,16 @@
   revision = "18fca31550181693b3a834a15b74b564b3605876"
 
 [[projects]]
-  name = "github.com/patrickmn/go-cache"
+  name = "github.com/gorilla/securecookie"
   packages = ["."]
-  revision = "7ac151875ffb48b9f3ccce9ea20f020b0c1596c8"
+  revision = "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983"
+  version = "v1.1.1"
+
+[[projects]]
+  name = "github.com/gorilla/sessions"
+  packages = ["."]
+  revision = "03b6f63cc43ef9c7240a635a5e22b13180e822b8"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -44,6 +42,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8571b065d4bea1aa082d09ada055ec48cb31a3fdd6555d521122bd489922d38f"
+  inputs-digest = "04dacc8196e7ec00ff2c0b3a141d0295e2e7625956af43c014318c0b56ea643c"
   solver-name = "gps-cdcl"
   solver-version = 1
