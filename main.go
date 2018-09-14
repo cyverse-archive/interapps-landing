@@ -294,9 +294,9 @@ func (c *CASProxy) ResetSessionExpiration(w http.ResponseWriter, r *http.Request
 	return nil
 }
 
-// Session implements the mux.Matcher interface so that requests can be routed
+// NeedsSession implements the mux.Matcher interface so that requests can be routed
 // based on cookie existence.
-func (c *CASProxy) Session(r *http.Request, m *mux.RouteMatch) bool {
+func (c *CASProxy) NeedsSession(r *http.Request, m *mux.RouteMatch) bool {
 	session, err := c.sessionStore.Get(r, sessionName)
 	if err != nil {
 		return true
@@ -466,7 +466,7 @@ func main() {
 		fmt.Fprint(w, "Welcome to the stubbed out loading page for VICE apps.\n")
 	})
 	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
-	r.PathPrefix("/").MatcherFunc(p.Session).Handler(http.HandlerFunc(p.RedirectToCAS))
+	r.PathPrefix("/").MatcherFunc(p.NeedsSession).Handler(http.HandlerFunc(p.RedirectToCAS))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(*staticFilePath))))
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(*staticFilePath, "index.html"))
