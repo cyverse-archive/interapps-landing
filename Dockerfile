@@ -11,6 +11,8 @@ RUN cd /go/src/github.com/cyverse-de/interapps-landing && ./build-ui.sh
 ENTRYPOINT ["interapps-landing"]
 CMD ["--help"]
 
+WORKDIR /go/src/github.com/cyverse-de/interapps-landing
+
 ARG git_commit=unknown
 ARG version="2.9.0"
 ARG descriptive_version=unknown
