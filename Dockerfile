@@ -1,7 +1,12 @@
 FROM golang:1.10.2
 
 COPY . /go/src/github.com/cyverse-de/interapps-landing
+
 RUN go install github.com/cyverse-de/interapps-landing
+RUN apt-get update && apt-get install -y curl
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+RUN apt-get install -y nodejs build-essential
+RUN cd /go/src/github.com/cyverse-de/interapps-landing && ./build-ui.sh
 
 ENTRYPOINT ["interapps-landing"]
 CMD ["--help"]
