@@ -463,10 +463,14 @@ func main() {
 
 	// If the query contains a ticket in the query params, then it needs to be
 	// validated.
+	r.PathPrefix("/healthz").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "I'm healthy.")
+	})
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*staticFilePath, "static")))))
 	r.PathPrefix("/").MatcherFunc(p.ViceSubdomain).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(*staticFilePath, "index.html"))
 	})
+
 	// r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
 	//r.PathPrefix("/").MatcherFunc(p.NeedsSession).Handler(http.HandlerFunc(p.RedirectToCAS))
 	// r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
