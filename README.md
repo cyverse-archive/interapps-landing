@@ -8,7 +8,9 @@ Endpoints:
 
 `GET /` - Returns a 404 page/loading page for a running VICE app.
 
-`GET /api/jobs/status-updates?url=https://asdfgh.cyverse.run` - Returns a JSON encoded listing of job status updates for the job associated with the URL that is passed in as a query parameter. The JSON should look like the following:
+`GET /api/jobs/status-updates?url=https://asdfgh.cyverse.run` - Returns a JSON encoded listing of job status updates for the job associated with the URL that is passed in as a query parameter. If the `url` query parameter is missing then a 404 will be returned.
+
+ The JSON returned in the response should look like the following:
 
 ```json
 {
