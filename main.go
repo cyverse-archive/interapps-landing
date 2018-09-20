@@ -408,7 +408,7 @@ type JobStatusUpdate struct {
 // LookupJobStatusUpdates returns the list of job status updates in reverse
 // chronological order.
 func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
-	u := mux.Vars(r)["url"]
+	u := r.FormValue("url")
 
 	subdomain, err := extractSubdomain(u)
 	if err != nil {
@@ -447,7 +447,7 @@ func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	fmt.Fprintln(w, js)
+	fmt.Fprintln(w, string(js))
 }
 
 // RedirectToCAS redirects the request to CAS, setting the service query
@@ -586,6 +586,9 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+	api := r.PathPrefix("/api/").Subrouter()
+	jobs := api.PathPrefix("/jobs/").Subrouter()
+	jobs.Path("/status-updates").Queries("url", "").HandlerFunc(p.LookupJobStatusUpdates)
 
 	// If the query contains a ticket in the query params, then it needs to be
 	// validated.
@@ -613,5 +616,4 @@ func main() {
 		err = server.ListenAndServe()
 	}
 	log.Fatal(err)
-
 }
