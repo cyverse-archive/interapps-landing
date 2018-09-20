@@ -397,9 +397,17 @@ query StatusUpdates($external_id: String) {
 }
 `
 
+// JobStatusUpdate contains the fields we need/want from a job status update.
+type JobStatusUpdate struct {
+	Status  string `json:"status"`
+	SentOn  int64  `json:"sent_on"`
+	UUID    string `json:"id"`
+	Message string `json:"message"`
+}
+
 // LookupJobStatusUpdates returns the list of job status updates in reverse
 // chronological order.
-func LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
+func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 	u := mux.Vars(r)["url"]
 
 	subdomain, err := extractSubdomain(u)
@@ -411,6 +419,35 @@ func LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("empty subdomain for URL '%s'", u), http.StatusBadRequest)
 		return
 	}
+
+	externalID, err := c.lookupExternalUUID(subdomain)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error getting external UUID for subdomain %s", subdomain), http.StatusInternalServerError)
+		return
+	}
+	if externalID == "" {
+		http.Error(w, fmt.Sprintf("empty external UUID for subdomain %s", subdomain), http.StatusInternalServerError)
+		return
+	}
+
+	client := graphql.NewClient(c.graphqlBase)
+	req := graphql.NewRequest(lookupJobStatusUpdatesQuery)
+	req.Var("external_id", externalID)
+
+	data := map[string][]JobStatusUpdate{}
+
+	if err = client.Run(context.Background(), req, &data); err != nil {
+		http.Error(w, fmt.Sprintf("error from job status updates query for subdomain %s: %s", subdomain, err), http.StatusInternalServerError)
+		return
+	}
+
+	js, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error marshalling response from job status updates query for subdomain %s: %s", subdomain, err), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, js)
 }
 
 // RedirectToCAS redirects the request to CAS, setting the service query
