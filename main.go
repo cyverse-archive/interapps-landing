@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"path"
@@ -387,6 +388,54 @@ func (c *CASProxy) IngressExists(subdomain string) (bool, error) {
 	return true, nil
 }
 
+// Endpoint contains endpoint data for a VICE app.
+type Endpoint struct {
+	IP   string
+	Port int
+}
+
+// EndpointConfig uses the app-exposer service to get the IP address and port
+// for the VICE app.
+func (c *CASProxy) EndpointConfig(subdomain string) (*Endpoint, error) {
+	ingressURL, err := url.Parse(c.ingressURL)
+	if err != nil {
+		return nil, err
+	}
+	ingressURL.Path = filepath.Join(ingressURL.Path, fmt.Sprintf("/endpoint/%s", subdomain))
+
+	request, err := http.NewRequest(http.MethodGet, ingressURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	request.Host = c.appExposerHeader
+
+	client := &http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		err = errors.Wrap(err, "error reading body of CAS response")
+		return nil, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		log.Errorf("Status code %d error from app-exposer /endpoint/%s: %s", resp.StatusCode, subdomain, string(b))
+		return nil, fmt.Errorf("non-2XX status code returned: %d", resp.StatusCode)
+	}
+
+	ept := &Endpoint{}
+	if err = json.Unmarshal(b, ept); err != nil {
+		return nil, errors.Wrapf(err, "error unmarshalling endpoint data for %s", subdomain)
+	}
+
+	return ept, nil
+}
+
 const lookupExternalUUIDQuery = `
 query ExternalID($subdomain: String) {
 	jobs(where: {subdomain: {_eq: $subdomain}}) {
@@ -522,16 +571,22 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := http.Get(u)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	if ready {
+		var ept *Endpoint
+		ept, err = c.EndpointConfig(subdomain)
+		if err != nil {
+			log.Error(err)
+			ready = ready && false
+		}
 
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		ready = ready && false
-	} else {
-		ready = ready && true
+		var conn net.Conn
+		conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", ept.IP, ept.Port))
+		if err != nil {
+			ready = ready && false
+		} else {
+			ready = ready && true
+		}
+		defer conn.Close()
 	}
 
 	responseData := map[string]bool{
