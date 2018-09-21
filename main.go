@@ -539,8 +539,8 @@ func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request
 	fmt.Fprintln(w, string(js))
 }
 
-// URLIsReady returns true if hitting the URL returns a 200 series status code
-// and the Ingress exists inside the k8s cluster.
+// URLIsReady returns true if the Ingress for the provided URL exists and if a
+// connection attempt to the Endpoint for the Ingress succeeds.
 func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 	u := r.FormValue("url")
 
