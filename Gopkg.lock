@@ -30,6 +30,12 @@
   version = "v1.1.1"
 
 [[projects]]
+  name = "github.com/machinebox/graphql"
+  packages = ["."]
+  revision = "05b17f3157491bbfa5d6fc2006443a272d960d15"
+  version = "v0.2.2"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "c605e284fe17294bda444b34710735b29d1a9d90"
@@ -42,6 +48,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "04dacc8196e7ec00ff2c0b3a141d0295e2e7625956af43c014318c0b56ea643c"
+  inputs-digest = "a5af5ed1ddc3b29ec931f78d34d344001d4146976fcf66b293bb6c8e9c2f9210"
   solver-name = "gps-cdcl"
   solver-version = 1

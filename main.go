@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/json"
 	"flag"
@@ -17,6 +18,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 )
 
@@ -47,6 +49,8 @@ type CASProxy struct {
 	analysisHeader string // The Host header for getting the analysis ID.
 	viceDomain     string // The domain for VICE apps.
 	sessionStore   *sessions.CookieStore
+	refreshEnabled bool   // Whether or not to look up information through the graphql server.
+	graphqlBase    string // The base URL to the graphql server.
 }
 
 // Analysis contains the ID for the Analysis, which gets used as the resource
@@ -327,10 +331,128 @@ func (c *CASProxy) ViceSubdomain(r *http.Request, m *mux.RouteMatch) bool {
 	return matched
 }
 
+// extractSubdomain returns the subdomain part of the URL.
+func extractSubdomain(jobURL string) (string, error) {
+	u, err := url.Parse(jobURL)
+	if err != nil {
+		return "", err
+	}
+	fields := strings.Split(u.Hostname(), ".")
+	if len(fields) < 3 {
+		return "", nil
+	}
+	if len(fields) == 3 {
+		return fields[0], nil
+	}
+	return strings.Join(fields[:len(fields)-2], "."), nil
+}
+
+const lookupExternalUUIDQuery = `
+query ExternalID($subdomain: String) {
+	jobs(where: {subdomain: {_eq: $subdomain}}) {
+		steps: jobStepssByjobId {
+			external_id
+		}
+	}
+}
+`
+
+// lookupExternalUUID returns the external job UUID associated with the
+// subdomain.
+func (c *CASProxy) lookupExternalUUID(subdomain string) (string, error) {
+	var (
+		err error
+		ok  bool
+	)
+
+	client := graphql.NewClient(c.graphqlBase)
+	req := graphql.NewRequest(lookupExternalUUIDQuery)
+	req.Var("subdomain", subdomain)
+
+	data := map[string][]map[string][]map[string]string{}
+
+	if err = client.Run(context.Background(), req, &data); err != nil {
+		return "", nil
+	}
+
+	if _, ok = data["jobs"][0]["steps"][0]["external_id"]; !ok {
+		return "", fmt.Errorf("missing external_id for job with subdomain '%s'; data => '%+v'", subdomain, data)
+	}
+	return data["jobs"][0]["steps"][0]["external_id"], nil
+}
+
+const lookupJobStatusUpdatesQuery = `
+query StatusUpdates($external_id: String) {
+  job_status_updates(
+    where: {
+      external_id: {_eq: $external_id}
+    },
+    order_by: sent_on_desc
+  ) {
+    id
+    status
+    message
+    sent_on
+  }
+}
+`
+
+// JobStatusUpdate contains the fields we need/want from a job status update.
+type JobStatusUpdate struct {
+	Status  string `json:"status"`
+	SentOn  int64  `json:"sent_on"`
+	UUID    string `json:"id"`
+	Message string `json:"message"`
+}
+
+// LookupJobStatusUpdates returns the list of job status updates in reverse
+// chronological order.
+func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
+	u := r.FormValue("url")
+
+	subdomain, err := extractSubdomain(u)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error getting subdomain for URL %s", u), http.StatusInternalServerError)
+		return
+	}
+	if subdomain == "" {
+		http.Error(w, fmt.Sprintf("empty subdomain for URL '%s'", u), http.StatusBadRequest)
+		return
+	}
+
+	externalID, err := c.lookupExternalUUID(subdomain)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error getting external UUID for subdomain %s", subdomain), http.StatusInternalServerError)
+		return
+	}
+	if externalID == "" {
+		http.Error(w, fmt.Sprintf("empty external UUID for subdomain %s", subdomain), http.StatusInternalServerError)
+		return
+	}
+
+	client := graphql.NewClient(c.graphqlBase)
+	req := graphql.NewRequest(lookupJobStatusUpdatesQuery)
+	req.Var("external_id", externalID)
+
+	data := map[string][]JobStatusUpdate{}
+
+	if err = client.Run(context.Background(), req, &data); err != nil {
+		http.Error(w, fmt.Sprintf("error from job status updates query for subdomain %s: %s", subdomain, err), http.StatusInternalServerError)
+		return
+	}
+
+	js, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error marshalling response from job status updates query for subdomain %s: %s", subdomain, err), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, string(js))
+}
+
 // RedirectToCAS redirects the request to CAS, setting the service query
 // parameter to the value in frontendURL.
 func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("redirect to cas")
 	casURL, err := url.Parse(c.casBase)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to parse CAS base URL %s", c.casBase)
@@ -388,19 +510,21 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 
 func main() {
 	var (
-		err            error
-		frontendURL    = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
-		listenAddr     = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
-		casBase        = flag.String("cas-base-url", "", "The base URL to the CAS host.")
-		casValidate    = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
-		maxAge         = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
-		sslCert        = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
-		sslKey         = flag.String("ssl-key", "", "Path to the SSL .key file.")
-		ingressURL     = flag.String("ingress-url", "", "The URL to the cluster ingress.")
-		analysisHeader = flag.String("analysis-header", "get-analysis-id", "The Host header for the ingress service that gets the analysis ID.")
-		accessHeader   = flag.String("access-header", "check-resource-access", "The Host header for the ingress service that checks analysis access.")
-		viceDomain     = flag.String("vice-domain", "cyverse.run", "The domain for the VICE apps.")
-		staticFilePath = flag.String("static-file-path", "./build", "Path to static file assets.")
+		err                error
+		frontendURL        = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
+		listenAddr         = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
+		casBase            = flag.String("cas-base-url", "", "The base URL to the CAS host.")
+		casValidate        = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
+		maxAge             = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
+		sslCert            = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
+		sslKey             = flag.String("ssl-key", "", "Path to the SSL .key file.")
+		ingressURL         = flag.String("ingress-url", "", "The URL to the cluster ingress.")
+		analysisHeader     = flag.String("analysis-header", "get-analysis-id", "The Host header for the ingress service that gets the analysis ID.")
+		accessHeader       = flag.String("access-header", "check-resource-access", "The Host header for the ingress service that checks analysis access.")
+		viceDomain         = flag.String("vice-domain", "cyverse.run", "The domain for the VICE apps.")
+		disableAutoRefresh = flag.Bool("disable-auto-refresh", false, "Turns off the auto-refresh feature on the loading page, which avoids hitting the graphql server.")
+		graphqlBase        = flag.String("graphql", "http://graphql-de/v1alpha1/graphql", "The base URL for the graphql provider.")
+		staticFilePath     = flag.String("static-file-path", "./build", "Path to static file assets.")
 	)
 
 	flag.Parse()
@@ -457,9 +581,14 @@ func main() {
 		analysisHeader: *analysisHeader,
 		sessionStore:   sessionStore,
 		viceDomain:     *viceDomain,
+		refreshEnabled: !*disableAutoRefresh,
+		graphqlBase:    *graphqlBase,
 	}
 
 	r := mux.NewRouter()
+	api := r.PathPrefix("/api/").Subrouter()
+	jobs := api.PathPrefix("/jobs/").Subrouter()
+	jobs.Path("/status-updates").Queries("url", "").HandlerFunc(p.LookupJobStatusUpdates)
 
 	// If the query contains a ticket in the query params, then it needs to be
 	// validated.
@@ -487,5 +616,4 @@ func main() {
 		err = server.ListenAndServe()
 	}
 	log.Fatal(err)
-
 }
