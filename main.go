@@ -556,7 +556,7 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 
 	subdomain, err := extractSubdomain(u)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error getting subdomain for URL %s", u), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("error getting subdomain for URL %s", u), http.StatusBadRequest)
 		return
 	}
 	if subdomain == "" {
