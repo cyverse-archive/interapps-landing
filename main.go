@@ -419,7 +419,7 @@ func (c *CASProxy) EndpointConfig(subdomain string) (*Endpoint, error) {
 
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		err = errors.Wrap(err, "error reading body of CAS response")
+		err = errors.Wrap(err, "error reading body of endpoint response")
 		return nil, err
 	}
 
