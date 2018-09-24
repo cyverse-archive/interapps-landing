@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"path"
@@ -38,19 +39,20 @@ const sessionKey = "proxy-session-key"
 // CASProxy contains the application logic that handles authentication, session
 // validations, ticket validation, and request proxying.
 type CASProxy struct {
-	casBase        string // base URL for the CAS server
-	casValidate    string // The path to the validation endpoint on the CAS server.
-	frontendURL    string // The URL placed into service query param for CAS.
-	resourceType   string // The resource type for analysis.
-	resourceName   string // The UUID of the analysis.
-	subjectType    string // The subject type for a user.
-	ingressURL     string // The URL to the cluster ingress.
-	accessHeader   string // The Host header for checking resource access perms.
-	analysisHeader string // The Host header for getting the analysis ID.
-	viceDomain     string // The domain for VICE apps.
-	sessionStore   *sessions.CookieStore
-	refreshEnabled bool   // Whether or not to look up information through the graphql server.
-	graphqlBase    string // The base URL to the graphql server.
+	casBase          string // base URL for the CAS server
+	casValidate      string // The path to the validation endpoint on the CAS server.
+	frontendURL      string // The URL placed into service query param for CAS.
+	resourceType     string // The resource type for analysis.
+	resourceName     string // The UUID of the analysis.
+	subjectType      string // The subject type for a user.
+	ingressURL       string // The URL to the cluster ingress.
+	appExposerHeader string // The Host header for hitting the app-exposer service.
+	accessHeader     string // The Host header for checking resource access perms.
+	analysisHeader   string // The Host header for getting the analysis ID.
+	viceDomain       string // The domain for VICE apps.
+	sessionStore     *sessions.CookieStore
+	refreshEnabled   bool   // Whether or not to look up information through the graphql server.
+	graphqlBase      string // The base URL to the graphql server.
 }
 
 // Analysis contains the ID for the Analysis, which gets used as the resource
@@ -319,11 +321,21 @@ func (c *CASProxy) NeedsSession(r *http.Request, m *mux.RouteMatch) bool {
 	return false
 }
 
+// URLMatches returns true if the given URL is a subdomain of the configured
+// VICE domain.
+func (c *CASProxy) URLMatches(url string) (bool, error) {
+	r := fmt.Sprintf("a.*\\.\\Q%s\\E(:[0-9]+)?", c.viceDomain)
+	matched, err := regexp.MatchString(r, url)
+	if err != nil {
+		return false, err
+	}
+	return matched, nil
+}
+
 // ViceSubdomain implements the mux.Matcher interface so that requests can be
 // routed based on whether they're a request to a VICE app UI or not.
 func (c *CASProxy) ViceSubdomain(r *http.Request, m *mux.RouteMatch) bool {
-	log.Println(r.Header.Get("X-Frontend-Url"))
-	matched, err := regexp.MatchString(fmt.Sprintf("a.*\\.\\Q%s\\E(:[0-9]+)?", c.viceDomain), r.Header.Get("X-Frontend-Url"))
+	matched, err := c.URLMatches(r.Header.Get("X-Frontend-Url"))
 	if err != nil {
 		log.Errorf("error checking for vice subdomain: %s", err)
 		return false
@@ -345,6 +357,83 @@ func extractSubdomain(jobURL string) (string, error) {
 		return fields[0], nil
 	}
 	return strings.Join(fields[:len(fields)-2], "."), nil
+}
+
+// IngressExists uses the app-exposer service to figure out if the provided
+// subdomain exists as an Ingress in the K8s cluster.
+func (c *CASProxy) IngressExists(subdomain string) (bool, error) {
+	ingressURL, err := url.Parse(c.ingressURL)
+	if err != nil {
+		return false, err
+	}
+	ingressURL.Path = filepath.Join(ingressURL.Path, fmt.Sprintf("/ingress/%s", subdomain))
+
+	request, err := http.NewRequest(http.MethodGet, ingressURL.String(), nil)
+	if err != nil {
+		return false, err
+	}
+
+	request.Host = c.appExposerHeader
+
+	client := &http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return false, nil
+	}
+	return true, nil
+}
+
+// Endpoint contains endpoint data for a VICE app.
+type Endpoint struct {
+	IP   string
+	Port int
+}
+
+// EndpointConfig uses the app-exposer service to get the IP address and port
+// for the VICE app.
+func (c *CASProxy) EndpointConfig(subdomain string) (*Endpoint, error) {
+	ingressURL, err := url.Parse(c.ingressURL)
+	if err != nil {
+		return nil, err
+	}
+	ingressURL.Path = filepath.Join(ingressURL.Path, fmt.Sprintf("/endpoint/%s", subdomain))
+
+	request, err := http.NewRequest(http.MethodGet, ingressURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	request.Host = c.appExposerHeader
+
+	client := &http.Client{}
+	resp, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		err = errors.Wrap(err, "error reading body of endpoint response")
+		return nil, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		log.Errorf("Status code %d error from app-exposer /endpoint/%s: %s", resp.StatusCode, subdomain, string(b))
+		return nil, fmt.Errorf("non-2XX status code returned: %d", resp.StatusCode)
+	}
+
+	ept := &Endpoint{}
+	if err = json.Unmarshal(b, ept); err != nil {
+		return nil, errors.Wrapf(err, "error unmarshalling endpoint data for %s", subdomain)
+	}
+
+	return ept, nil
 }
 
 const lookupExternalUUIDQuery = `
@@ -450,6 +539,67 @@ func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request
 	fmt.Fprintln(w, string(js))
 }
 
+// URLIsReady returns true if the Ingress for the provided URL exists and if a
+// connection attempt to the Endpoint for the Ingress succeeds.
+func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
+	u := r.FormValue("url")
+
+	matches, err := c.URLMatches(u)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error checking URL %s: %s", u, err.Error()), http.StatusInternalServerError)
+		return
+	}
+	if !matches {
+		http.Error(w, fmt.Sprintf("URL %s is not a subdomain of %s", u, c.viceDomain), http.StatusBadRequest)
+		return
+	}
+
+	subdomain, err := extractSubdomain(u)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error getting subdomain for URL %s", u), http.StatusBadRequest)
+		return
+	}
+	if subdomain == "" {
+		http.Error(w, fmt.Sprintf("empty subdomain for URL '%s'", u), http.StatusBadRequest)
+		return
+	}
+
+	var ready bool
+	ready, err = c.IngressExists(subdomain)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error checking ingress %s existence: %s", subdomain, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	if ready {
+		var ept *Endpoint
+		ept, err = c.EndpointConfig(subdomain)
+		if err != nil {
+			log.Error(err)
+			ready = ready && false
+		}
+
+		var conn net.Conn
+		conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", ept.IP, ept.Port))
+		if err != nil {
+			ready = ready && false
+		} else {
+			ready = ready && true
+		}
+		defer conn.Close()
+	}
+
+	responseData := map[string]bool{
+		"ready": ready,
+	}
+	js, err := json.Marshal(responseData)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error marshalling json: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintln(w, string(js))
+}
+
 // RedirectToCAS redirects the request to CAS, setting the service query
 // parameter to the value in frontendURL.
 func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
@@ -520,6 +670,7 @@ func main() {
 		sslKey             = flag.String("ssl-key", "", "Path to the SSL .key file.")
 		ingressURL         = flag.String("ingress-url", "", "The URL to the cluster ingress.")
 		analysisHeader     = flag.String("analysis-header", "get-analysis-id", "The Host header for the ingress service that gets the analysis ID.")
+		appExposerHeader   = flag.String("app-exposer-header", "app-exposer", "The Host header value for the app-exposer service.")
 		accessHeader       = flag.String("access-header", "check-resource-access", "The Host header for the ingress service that checks analysis access.")
 		viceDomain         = flag.String("vice-domain", "cyverse.run", "The domain for the VICE apps.")
 		disableAutoRefresh = flag.Bool("disable-auto-refresh", false, "Turns off the auto-refresh feature on the loading page, which avoids hitting the graphql server.")
@@ -573,20 +724,23 @@ func main() {
 	}
 
 	p := &CASProxy{
-		casBase:        *casBase,
-		casValidate:    *casValidate,
-		frontendURL:    *frontendURL,
-		ingressURL:     *ingressURL,
-		accessHeader:   *accessHeader,
-		analysisHeader: *analysisHeader,
-		sessionStore:   sessionStore,
-		viceDomain:     *viceDomain,
-		refreshEnabled: !*disableAutoRefresh,
-		graphqlBase:    *graphqlBase,
+		casBase:          *casBase,
+		casValidate:      *casValidate,
+		frontendURL:      *frontendURL,
+		ingressURL:       *ingressURL,
+		appExposerHeader: *appExposerHeader,
+		accessHeader:     *accessHeader,
+		analysisHeader:   *analysisHeader,
+		sessionStore:     sessionStore,
+		viceDomain:       *viceDomain,
+		refreshEnabled:   !*disableAutoRefresh,
+		graphqlBase:      *graphqlBase,
 	}
 
 	r := mux.NewRouter()
 	api := r.PathPrefix("/api/").Subrouter()
+	api.Path("/url-ready").Queries("url", "").HandlerFunc(p.URLIsReady)
+
 	jobs := api.PathPrefix("/jobs/").Subrouter()
 	jobs.Path("/status-updates").Queries("url", "").HandlerFunc(p.LookupJobStatusUpdates)
 
