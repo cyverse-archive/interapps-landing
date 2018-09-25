@@ -1,4 +1,5 @@
-# interapps-landing
+interapps-landing
+=================
 
 A web application hosting the loading and landing pages for the Visual Interactive Computing Environment (VICE) feature of the Discovery Environment.
 
