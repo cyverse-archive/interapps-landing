@@ -41,7 +41,6 @@ const sessionKey = "proxy-session-key"
 type CASProxy struct {
 	casBase          string // base URL for the CAS server
 	casValidate      string // The path to the validation endpoint on the CAS server.
-	frontendURL      string // The URL placed into service query param for CAS.
 	resourceType     string // The resource type for analysis.
 	resourceName     string // The UUID of the analysis.
 	subjectType      string // The subject type for a user.
@@ -199,9 +198,10 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 
 	// Make sure the path in the CAS params is the same as the one that was
 	// requested.
-	svcURL, err := url.Parse(c.frontendURL)
+	frontendURL := r.Header.Get("X-Frontend-Url")
+	svcURL, err := url.Parse(frontendURL)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to parse the frontend URL %s", c.frontendURL)
+		err = errors.Wrapf(err, "failed to parse the frontend URL %s", frontendURL)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -615,7 +615,7 @@ func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
 	frontendURL := r.Header.Get("X-Frontend-Url")
 	svcURL, err := url.Parse(frontendURL)
 	if err != nil {
-		err = errors.Wrapf(err, "failed to parse the frontend URL %s", c.frontendURL)
+		err = errors.Wrapf(err, "failed to parse the frontend URL %s", frontendURL)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -661,7 +661,6 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 func main() {
 	var (
 		err                error
-		frontendURL        = flag.String("frontend-url", "", "The URL for the frontend server. Might be different from the hostname and listen port.")
 		listenAddr         = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
 		casBase            = flag.String("cas-base-url", "", "The base URL to the CAS host.")
 		casValidate        = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
@@ -684,10 +683,6 @@ func main() {
 		log.Fatal("--cas-base-url must be set.")
 	}
 
-	if *frontendURL == "" {
-		log.Fatal("--frontend-url must be set.")
-	}
-
 	useSSL := false
 	if *sslCert != "" || *sslKey != "" {
 		if *sslCert == "" {
@@ -704,7 +699,6 @@ func main() {
 		log.Fatal("--ingress-url must be set.")
 	}
 
-	log.Infof("frontend URL is %s", *frontendURL)
 	log.Infof("listen address is %s", *listenAddr)
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
@@ -726,7 +720,6 @@ func main() {
 	p := &CASProxy{
 		casBase:          *casBase,
 		casValidate:      *casValidate,
-		frontendURL:      *frontendURL,
 		ingressURL:       *ingressURL,
 		appExposerHeader: *appExposerHeader,
 		accessHeader:     *accessHeader,
