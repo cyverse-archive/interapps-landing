@@ -39,19 +39,21 @@ const sessionKey = "proxy-session-key"
 // CASProxy contains the application logic that handles authentication, session
 // validations, ticket validation, and request proxying.
 type CASProxy struct {
-	casBase          string // base URL for the CAS server
-	casValidate      string // The path to the validation endpoint on the CAS server.
-	resourceType     string // The resource type for analysis.
-	resourceName     string // The UUID of the analysis.
-	subjectType      string // The subject type for a user.
-	ingressURL       string // The URL to the cluster ingress.
-	appExposerHeader string // The Host header for hitting the app-exposer service.
-	accessHeader     string // The Host header for checking resource access perms.
-	analysisHeader   string // The Host header for getting the analysis ID.
-	viceDomain       string // The domain for VICE apps.
-	sessionStore     *sessions.CookieStore
-	refreshEnabled   bool   // Whether or not to look up information through the graphql server.
-	graphqlBase      string // The base URL to the graphql server.
+	casBase                  string // base URL for the CAS server
+	casValidate              string // The path to the validation endpoint on the CAS server.
+	resourceType             string // The resource type for analysis.
+	resourceName             string // The UUID of the analysis.
+	subjectType              string // The subject type for a user.
+	ingressURL               string // The URL to the cluster ingress.
+	appExposerHeader         string // The Host header for hitting the app-exposer service.
+	accessHeader             string // The Host header for checking resource access perms.
+	analysisHeader           string // The Host header for getting the analysis ID.
+	viceDomain               string // The domain for VICE apps.
+	sessionStore             *sessions.CookieStore
+	refreshEnabled           bool   // Whether or not to look up information through the graphql server.
+	graphqlBase              string // The base URL to the graphql server.
+	disableCustomHeaderMatch bool   // Disables matching domains based on the X-Frontend-Url header. Host header is used instead.
+
 }
 
 // Analysis contains the ID for the Analysis, which gets used as the resource
@@ -187,6 +189,17 @@ func (c *CASProxy) IsAllowed(user, resource string) (bool, error) {
 	return false, nil
 }
 
+// FrontendAddress returns the appropriate host[:port] to use for various
+// operations. If the --disable-custom-header-match flag is true, then the Host
+// header in the request is returned. If it's false, the custom X-Frontend-Url
+// header is returned.
+func (c CASProxy) FrontendAddress(r *http.Request) string {
+	if c.disableCustomHeaderMatch {
+		return r.Host
+	}
+	return r.Header.Get("X-Frontend-Url")
+}
+
 // ValidateTicket will validate a CAS ticket against the configured CAS server.
 func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 	casURL, err := url.Parse(c.casBase)
@@ -198,7 +211,7 @@ func (c *CASProxy) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 
 	// Make sure the path in the CAS params is the same as the one that was
 	// requested.
-	frontendURL := r.Header.Get("X-Frontend-Url")
+	frontendURL := c.FrontendAddress(r)
 	svcURL, err := url.Parse(frontendURL)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to parse the frontend URL %s", frontendURL)
@@ -335,7 +348,7 @@ func (c *CASProxy) URLMatches(url string) (bool, error) {
 // ViceSubdomain implements the mux.Matcher interface so that requests can be
 // routed based on whether they're a request to a VICE app UI or not.
 func (c *CASProxy) ViceSubdomain(r *http.Request, m *mux.RouteMatch) bool {
-	matched, err := c.URLMatches(r.Header.Get("X-Frontend-Url"))
+	matched, err := c.URLMatches(c.FrontendAddress(r))
 	if err != nil {
 		log.Errorf("error checking for vice subdomain: %s", err)
 		return false
@@ -612,7 +625,7 @@ func (c *CASProxy) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
 
 	// Make sure the path in the CAS params is the same as the one that was
 	// requested.
-	frontendURL := r.Header.Get("X-Frontend-Url")
+	frontendURL := c.FrontendAddress(r)
 	svcURL, err := url.Parse(frontendURL)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to parse the frontend URL %s", frontendURL)
@@ -660,21 +673,22 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 
 func main() {
 	var (
-		err                error
-		listenAddr         = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
-		casBase            = flag.String("cas-base-url", "", "The base URL to the CAS host.")
-		casValidate        = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
-		maxAge             = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
-		sslCert            = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
-		sslKey             = flag.String("ssl-key", "", "Path to the SSL .key file.")
-		ingressURL         = flag.String("ingress-url", "", "The URL to the cluster ingress.")
-		analysisHeader     = flag.String("analysis-header", "get-analysis-id", "The Host header for the ingress service that gets the analysis ID.")
-		appExposerHeader   = flag.String("app-exposer-header", "app-exposer", "The Host header value for the app-exposer service.")
-		accessHeader       = flag.String("access-header", "check-resource-access", "The Host header for the ingress service that checks analysis access.")
-		viceDomain         = flag.String("vice-domain", "cyverse.run", "The domain for the VICE apps.")
-		disableAutoRefresh = flag.Bool("disable-auto-refresh", false, "Turns off the auto-refresh feature on the loading page, which avoids hitting the graphql server.")
-		graphqlBase        = flag.String("graphql", "http://graphql-de/v1alpha1/graphql", "The base URL for the graphql provider.")
-		staticFilePath     = flag.String("static-file-path", "./build", "Path to static file assets.")
+		err                      error
+		listenAddr               = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
+		casBase                  = flag.String("cas-base-url", "", "The base URL to the CAS host.")
+		casValidate              = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
+		maxAge                   = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
+		sslCert                  = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
+		sslKey                   = flag.String("ssl-key", "", "Path to the SSL .key file.")
+		ingressURL               = flag.String("ingress-url", "", "The URL to the cluster ingress.")
+		analysisHeader           = flag.String("analysis-header", "get-analysis-id", "The Host header for the ingress service that gets the analysis ID.")
+		appExposerHeader         = flag.String("app-exposer-header", "app-exposer", "The Host header value for the app-exposer service.")
+		accessHeader             = flag.String("access-header", "check-resource-access", "The Host header for the ingress service that checks analysis access.")
+		viceDomain               = flag.String("vice-domain", "cyverse.run", "The domain for the VICE apps.")
+		disableAutoRefresh       = flag.Bool("disable-auto-refresh", false, "Turns off the auto-refresh feature on the loading page, which avoids hitting the graphql server.")
+		graphqlBase              = flag.String("graphql", "http://graphql-de/v1alpha1/graphql", "The base URL for the graphql provider.")
+		staticFilePath           = flag.String("static-file-path", "./build", "Path to static file assets.")
+		disableCustomHeaderMatch = flag.Bool("disable-custom-header-match", false, "Disables usage of the X-Frontend-Url header for subdomain matching. Use Host header instead. Useful during development.")
 	)
 
 	flag.Parse()
@@ -718,16 +732,17 @@ func main() {
 	}
 
 	p := &CASProxy{
-		casBase:          *casBase,
-		casValidate:      *casValidate,
-		ingressURL:       *ingressURL,
-		appExposerHeader: *appExposerHeader,
-		accessHeader:     *accessHeader,
-		analysisHeader:   *analysisHeader,
-		sessionStore:     sessionStore,
-		viceDomain:       *viceDomain,
-		refreshEnabled:   !*disableAutoRefresh,
-		graphqlBase:      *graphqlBase,
+		casBase:                  *casBase,
+		casValidate:              *casValidate,
+		ingressURL:               *ingressURL,
+		appExposerHeader:         *appExposerHeader,
+		accessHeader:             *accessHeader,
+		analysisHeader:           *analysisHeader,
+		sessionStore:             sessionStore,
+		viceDomain:               *viceDomain,
+		refreshEnabled:           !*disableAutoRefresh,
+		graphqlBase:              *graphqlBase,
+		disableCustomHeaderMatch: *disableCustomHeaderMatch,
 	}
 
 	r := mux.NewRouter()
