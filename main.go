@@ -494,7 +494,7 @@ query StatusUpdates($external_id: String) {
     id
     status
     message
-    sent_on
+    sentOn: sent_on
   }
 }
 `
@@ -502,7 +502,7 @@ query StatusUpdates($external_id: String) {
 // JobStatusUpdate contains the fields we need/want from a job status update.
 type JobStatusUpdate struct {
 	Status  string `json:"status"`
-	SentOn  int64  `json:"sent_on"`
+	SentOn  int64  `json:"sentOn"`
 	UUID    string `json:"id"`
 	Message string `json:"message"`
 }
