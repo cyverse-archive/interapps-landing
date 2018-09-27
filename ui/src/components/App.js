@@ -20,8 +20,8 @@ class App extends Component {
 
         <img src={spinner} className="spinner" alt="Loading spinner for a job still running" />
 
-        <div class="refresh">
-          <Button variant="contained" color="primary" onClick={this.handleClick} style={{justifyContent: 'center'}} fullWidth="true">
+        <div className="refresh">
+          <Button variant="contained" color="primary" onClick={this.handleClick} style={{justifyContent: 'center'}} fullWidth={true} >
             Refresh
           </Button>
         </div>
