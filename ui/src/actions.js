@@ -31,7 +31,7 @@ export const reducer = handleActions(
       return Object.assign({}, state, {
         entities: Object.assign({}, state.entities, {
           updates: Object.assign({}, state.entities.updates, {
-            [Object.keys(state.entities.updates).length + 1]: action.payload
+            [Object.keys(state.entities.updates).length]: action.payload
           })
         })
       })
