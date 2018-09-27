@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import Button from '@material-ui/core/Button';
 
-import logo from './logo.png';
-import spinner from './loading_spinner.gif';
-import './App.css';
+import logo from '../images/logo.png';
+import spinner from '../images/loading_spinner.gif';
+import '../css/App.css';
 
 class App extends Component {
   constructor(props) {
