@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
 
+import StatusUpdatesContainer from './statusUpdates';
 import logo from '../images/logo.png';
 import spinner from '../images/loading_spinner.gif';
 import '../css/App.css';
@@ -24,6 +25,10 @@ class App extends Component {
           <Button variant="contained" color="primary" onClick={this.handleClick} style={{justifyContent: 'center'}} fullWidth={true} >
             Refresh
           </Button>
+        </div>
+
+        <div className="statusUpdates">
+          <StatusUpdatesContainer />
         </div>
       </div>
     );
