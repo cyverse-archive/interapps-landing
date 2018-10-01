@@ -1,0 +1,18 @@
+{
+  "name": "interapps-landing-server",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "babel-core": "6.26.3"
+  },
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "concurrently \"node port-forward.js\" \"node start-server.js\"",
+    "client": "node start-client.js"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-runtime": "^6.26.0",
+    "concurrently": "^4.0.1"
+  }
+}
