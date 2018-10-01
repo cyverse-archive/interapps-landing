@@ -14,10 +14,9 @@ class StatusUpdates extends Component {
     return (
       <ul>
         {Object.entries(this.props.entities.updates) // Make the object into a [[1,{}], ...]
-          .map(x => x[1])                            // grab the {} from the tuples
-          .sort((a, b) => a.sentOn - b.sentOn)       // sort the tuples based on the sentOn field
-          .map(update =>
-            <StatusUpdate key={update.id} status={update.status} message={update.message} />)}
+               .map(x => x[1])                       // grab the {} from the tuples
+               .sort((a, b) => a.sentOn - b.sentOn)  // sort the tuples based on the sentOn field
+               .map(update => <StatusUpdate key={update.id} status={update.status} message={update.message} />)}
       </ul>
     );
   }
