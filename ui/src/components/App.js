@@ -3,7 +3,7 @@ import Button from '@material-ui/core/Button';
 
 import StatusUpdatesContainer from './statusUpdates';
 import logo from '../images/logo.png';
-import spinner from '../images/loading_spinner.gif';
+import loadingRocket from '../images/loading.png';
 import '../css/App.css';
 
 class App extends Component {
@@ -19,13 +19,18 @@ class App extends Component {
           <img src={logo} className="app-logo" alt="logo" />
         </header>
 
-        <img src={spinner} className="spinner" alt="Loading spinner for a job still running" />
+        <h1 class="welcome">Welcome!</h1>
 
-        <div className="refresh">
-          <Button variant="contained" color="primary" onClick={this.handleClick} style={{justifyContent: 'center'}} fullWidth={true} >
-            Refresh
-          </Button>
+        <img src={loadingRocket} className="loading" alt="Loading rocket for an in-progress job" />
+
+        <div class="analysisMessage">Please wait while we prepare to launch your Analysis.</div>
+
+        <div class="loading-dots">
+          <div class="loading-dots--dot"></div>
+          <div class="loading-dots--dot"></div>
+          <div class="loading-dots--dot"></div>
         </div>
+
 
         <div className="statusUpdates">
           <StatusUpdatesContainer />
