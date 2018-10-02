@@ -1,4 +1,5 @@
 import { createActions, handleActions } from 'redux-actions';
+import fetch from 'cross-fetch';
 
 const defaultState = {
   subdomain: '', // The VICE subdomain we're working with.
@@ -19,11 +20,45 @@ const defaultState = {
   }
 }
 
-export const { addUpdate, setSubdomain, setJob } = createActions({
-  ADD_UPDATE:    (update = {})    => update,
-  SET_SUBDOMAIN: (subdomain = '') => subdomain,
-  SET_JOB:       (job = '')       => job
+// Synchronous actions.
+export const { addUpdate, setSubdomain, getJob, setJob } = createActions({
+  ADD_UPDATE:      (update = {})    => update,
+  //REQUEST_UPDATES: (job = '')       => job,
+  // RECEIVE_UPDATES: (json = {
+  //   job_status_updates: []
+  // }) => ({
+  //   updates: json.job_status_updates
+  // }),
+  SET_SUBDOMAIN:   (subdomain = '') => subdomain,
+  GET_JOB:         (subdomain = '') => subdomain,
+  SET_JOB:         (job = '')       => job
 });
+
+
+// Async actions that dispatch actions defined above, so it needs to be set up
+// separately.
+export let fetchUpdates = () => {
+  return dispatch => {
+    // let proto = window.location.protocol;
+    // let host = window.location.host;
+    return fetch(`/api/jobs/status-updates?url=${encodeURI(window.location.href)}`)
+      .then(
+        response => {
+          if (response.status >= 400) {
+            throw new Error(`error from server: ${response.status}: `, response.text());
+          }
+          return response.json();
+        },
+        error => console.log('error fetching status updates', error)
+      ).then(
+        json => {
+          json.job_status_updates.forEach(i => dispatch(addUpdate(i)));
+        }
+      ).catch(function(error) {
+        console.log('error from server: ', error.message);
+      })
+  };
+}
 
 export const reducer = handleActions(
   {

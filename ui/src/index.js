@@ -1,13 +1,26 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import thunkMiddleware from 'redux-thunk';
+import { createLogger } from 'redux-logger';
 
-import { setSubdomain, setJob, addUpdate, reducer } from './actions';
+import { fetchUpdates, reducer } from './actions';
 import App from './components/App';
 import registerServiceWorker from './registerServiceWorker';
 
-const store = createStore(reducer)
+
+const loggerMiddleware = createLogger();
+
+const store = createStore(
+  reducer,
+  applyMiddleware(
+    thunkMiddleware,
+    loggerMiddleware
+  )
+);
+
+store.dispatch(fetchUpdates());
 
 render(
   <Provider store={store}>
@@ -15,20 +28,5 @@ render(
   </Provider>,
   document.getElementById('root')
 );
-
-console.log(store.getState())
-
-const unsubscribe = store.subscribe(() =>
-  console.log(store.getState())
-)
-
-store.dispatch(setSubdomain('test-subdomain'))
-store.dispatch(setJob('test-job-uuid'))
-store.dispatch(addUpdate({id: "test", status: "Running", message: "test-message", sentOn: 4}))
-store.dispatch(addUpdate({id: "test0", status: "Running", message: "test-message2", sentOn: 3}))
-store.dispatch(addUpdate({id: "test1", status: "Running", message: "test-message3", sentOn: 2}))
-store.dispatch(addUpdate({id: "test2", status: "Running", message: "test-message4", sentOn: 1}))
-
-unsubscribe()
 
 registerServiceWorker();
