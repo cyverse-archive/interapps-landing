@@ -3,7 +3,19 @@ interapps-landing
 
 A web application hosting the loading and landing pages for the Visual Interactive Computing Environment (VICE) feature of the Discovery Environment.
 
-Endpoints:
+## Development
+
+You will need the following installed to work on the UI along with the API:
+
+* npm - Version 6.4.1 or later should be installed.
+* kubectl - Version 1.11 or later Needs to be installed and configured to hit a deployed Discovery Environment namespace.
+* Go - Version 1.10 or above needs to be installed.
+
+There are two npm projects, the top-level overarching project and the UI-specific project in the ui directory. To fire up the API alongside the UI, run `npm start` from the top-level directory.
+
+To fire up just the UI, run `npm start` from the `ui` directory.
+
+## Endpoints:
 
 `GET /healthz` - Always returns a 200 status for now. Meant for use with Kubernetes liveness/readiness probes.
 
