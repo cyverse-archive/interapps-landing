@@ -19,16 +19,16 @@ class App extends Component {
           <img src={logo} className="app-logo" alt="logo" />
         </header>
 
-        <h1 class="welcome">Welcome!</h1>
+        <h1 className="welcome">Welcome!</h1>
 
         <img src={loadingRocket} className="loading" alt="Loading rocket for an in-progress job" />
 
-        <div class="analysisMessage">Please wait while we prepare to launch your Analysis.</div>
+        <div className="analysisMessage">Please wait while we prepare to launch your Analysis.</div>
 
-        <div class="loading-dots">
-          <div class="loading-dots--dot"></div>
-          <div class="loading-dots--dot"></div>
-          <div class="loading-dots--dot"></div>
+        <div className="loading-dots">
+          <div className="loading-dots--dot"></div>
+          <div className="loading-dots--dot"></div>
+          <div className="loading-dots--dot"></div>
         </div>
 
 
