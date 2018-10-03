@@ -24,7 +24,7 @@ class App extends Component {
 
         <img src={loadingRocket} className="loading" alt="Loading rocket for an in-progress job" />
 
-        <div className="analysisMessage">Please wait while we prepare to launch your Analysis.</div>
+        <div className="analysisMessage">Please wait while we launch your application.</div>
 
         <div className="loading-dots">
           <div className="loading-dots--dot"></div>
