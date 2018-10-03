@@ -1,5 +1,5 @@
 import { createActions, handleActions } from 'redux-actions';
-import fetch from 'cross-fetch';
+import axios from 'axios';
 
 const defaultState = {
   subdomain: '', // The VICE subdomain we're working with.
@@ -35,47 +35,31 @@ export const { addUpdate, setSubdomain, getJob, setJob, setReady } = createActio
 // separately.
 export let fetchUpdates = () => {
   return dispatch => {
-    return fetch(`/api/jobs/status-updates?url=${encodeURI(window.location.href)}`)
-      .then(
-        response => {
-          if (response.status >= 400) {
-            throw new Error(`error from server: ${response.status}: `, response.text());
-          }
-          return response.json();
-        },
-        error => console.log('error fetching status updates', error)
-      ).then(
-        json => {
-          json.job_status_updates.forEach(i => dispatch(addUpdate(i)));
-        }
-      ).catch(function(error) {
-        console.log('error from server: ', error.message);
-      })
+    return axios.get(`/api/jobs/status-updates?url=${encodeURI(window.location.href)}`).then(
+      response => {
+        response.data.job_status_updates.forEach(i => dispatch(addUpdate(i)));
+      }
+    ).catch(function(error) {
+      console.log('error from server: ', error.message);
+    });
   };
 }
 
 export const checkURLReady = () => {
   return dispatch => {
-    return fetch(`/api/url-ready?url=${encodeURI(window.location.href)})`)
-      .then(
-        response => {
-          if (response.state >= 400) {
-            throw new Error(`error from server: ${response.status}: `, response.text());
-          }
-          return response.json();
-        },
-        error => console.log('error checking if the url is ready', error)
-      ).then(
-        json => {
-          dispatch(setReady(json.ready));
-          if (json.ready) {
-            window.location.reload(true);
-          }
+    return axios.get(`/api/url-ready?url=${encodeURI(window.location.href)})`).then(
+      response => {
+        dispatch(setReady(response.data.ready));
+
+        if (response.data.ready) {
+          window.location.reload(true);
         }
-      ).catch(function(error) {
-        console.log('error from server: ', error.message);
-      })
-  }
+      }
+    ).catch(function(error) {
+      console.log(error.message);
+      window.location.reload(true);
+    });
+  };
 }
 
 export const reducer = handleActions(
