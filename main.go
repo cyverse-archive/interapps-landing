@@ -362,11 +362,15 @@ func extractSubdomain(jobURL string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	log.Println(u.Hostname())
 	fields := strings.Split(u.Hostname(), ".")
-	if len(fields) < 3 {
+	if len(fields) < 2 {
 		return "", nil
 	}
-	if len(fields) == 3 {
+	if len(fields) == 2 {
+		if fields[0] == "www" {
+			return "", nil
+		}
 		return fields[0], nil
 	}
 	return strings.Join(fields[:len(fields)-2], "."), nil
@@ -494,7 +498,7 @@ query StatusUpdates($external_id: String) {
     id
     status
     message
-    sent_on
+    sentOn: sent_on
   }
 }
 `
@@ -502,7 +506,7 @@ query StatusUpdates($external_id: String) {
 // JobStatusUpdate contains the fields we need/want from a job status update.
 type JobStatusUpdate struct {
 	Status  string `json:"status"`
-	SentOn  int64  `json:"sent_on"`
+	SentOn  int64  `json:"sentOn"`
 	UUID    string `json:"id"`
 	Message string `json:"message"`
 }
@@ -511,6 +515,8 @@ type JobStatusUpdate struct {
 // chronological order.
 func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 	u := r.FormValue("url")
+
+	log.Println(u)
 
 	subdomain, err := extractSubdomain(u)
 	if err != nil {

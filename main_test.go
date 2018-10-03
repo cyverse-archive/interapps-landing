@@ -4,7 +4,7 @@ import "testing"
 
 func TestExtractSubdomain(t *testing.T) {
 	table := map[string]string{
-		"http://example.org":             "",
+		"http://example.org":             "example",
 		"http://foo.example.org":         "foo",
 		"http://foo.bar.example.org":     "foo.bar",
 		"http://foo.bar.baz.example.org": "foo.bar.baz",
