@@ -5,7 +5,7 @@ import { createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 
-import { fetchUpdates, reducer } from './actions';
+import { reducer } from './actions';
 import App from './components/App';
 import registerServiceWorker from './registerServiceWorker';
 
@@ -20,11 +20,9 @@ const store = createStore(
   )
 );
 
-store.dispatch(fetchUpdates());
-
 render(
   <Provider store={store}>
-    <App />
+    <App store={store} />
   </Provider>,
   document.getElementById('root')
 );

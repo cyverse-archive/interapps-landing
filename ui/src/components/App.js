@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 //import Button from '@material-ui/core/Button';
 
 import StatusUpdatesContainer from './statusUpdates';
+import Ticker from './ticker';
 import logo from '../images/logo.png';
 import loadingRocket from '../images/loading.png';
 import '../css/App.css';
@@ -35,6 +36,7 @@ class App extends Component {
         <div className="statusUpdates">
           <StatusUpdatesContainer />
         </div>
+        <Ticker store={this.props.store} />
       </div>
     );
   }

@@ -4,6 +4,7 @@ import fetch from 'cross-fetch';
 const defaultState = {
   subdomain: '', // The VICE subdomain we're working with.
   job: '',       // The job UUID from the database.
+  ready: false,
 
   // entities contains the objects retrieved from the server stored in a map
   // for easy reference in other objects.
@@ -21,17 +22,12 @@ const defaultState = {
 }
 
 // Synchronous actions.
-export const { addUpdate, setSubdomain, getJob, setJob } = createActions({
+export const { addUpdate, setSubdomain, getJob, setJob, setReady } = createActions({
   ADD_UPDATE:      (update = {})    => update,
-  //REQUEST_UPDATES: (job = '')       => job,
-  // RECEIVE_UPDATES: (json = {
-  //   job_status_updates: []
-  // }) => ({
-  //   updates: json.job_status_updates
-  // }),
   SET_SUBDOMAIN:   (subdomain = '') => subdomain,
   GET_JOB:         (subdomain = '') => subdomain,
-  SET_JOB:         (job = '')       => job
+  SET_JOB:         (job = '')       => job,
+  SET_READY:       (ready = false)  => ready
 });
 
 
@@ -39,8 +35,6 @@ export const { addUpdate, setSubdomain, getJob, setJob } = createActions({
 // separately.
 export let fetchUpdates = () => {
   return dispatch => {
-    // let proto = window.location.protocol;
-    // let host = window.location.host;
     return fetch(`/api/jobs/status-updates?url=${encodeURI(window.location.href)}`)
       .then(
         response => {
@@ -60,6 +54,30 @@ export let fetchUpdates = () => {
   };
 }
 
+export const checkURLReady = () => {
+  return dispatch => {
+    return fetch(`/api/url-ready?url=${encodeURI(window.location.href)})`)
+      .then(
+        response => {
+          if (response.state >= 400) {
+            throw new Error(`error from server: ${response.status}: `, response.text());
+          }
+          return response.json();
+        },
+        error => console.log('error checking if the url is ready', error)
+      ).then(
+        json => {
+          dispatch(setReady(json.ready));
+          if (json.ready) {
+            window.location.reload(true);
+          }
+        }
+      ).catch(function(error) {
+        console.log('error from server: ', error.message);
+      })
+  }
+}
+
 export const reducer = handleActions(
   {
     ADD_UPDATE: (state, action) => {
@@ -69,17 +87,22 @@ export const reducer = handleActions(
             [Object.keys(state.entities.updates).length]: action.payload
           })
         })
-      })
+      });
     },
     SET_SUBDOMAIN: (state, action) => {
       return Object.assign({}, state, {
         subdomain: action.payload
-      })
+      });
     },
     SET_JOB: (state, action) => {
       return Object.assign({}, state, {
         job: action.payload
-      })
+      });
+    },
+    SET_READY: (state, action) => {
+      return Object.assign({}, state, {
+        ready: action.payload
+      });
     }
   },
   defaultState
