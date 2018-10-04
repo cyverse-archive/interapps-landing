@@ -193,9 +193,18 @@ func (c *CASProxy) IsAllowed(user, resource string) (bool, error) {
 // operations. If the --disable-custom-header-match flag is true, then the Host
 // header in the request is returned. If it's false, the custom X-Frontend-Url
 // header is returned.
-func (c CASProxy) FrontendAddress(r *http.Request) string {
+func (c *CASProxy) FrontendAddress(r *http.Request) string {
 	if c.disableCustomHeaderMatch {
-		return r.Host
+		u := &url.URL{}
+		if r.TLS != nil {
+			u.Scheme = "https"
+		} else {
+			u.Scheme = "http"
+		}
+		u.Host = r.Host
+		u.Path = r.URL.Path
+		u.RawQuery = r.URL.RawQuery
+		return u.String()
 	}
 	return r.Header.Get("X-Frontend-Url")
 }
@@ -337,7 +346,7 @@ func (c *CASProxy) NeedsSession(r *http.Request, m *mux.RouteMatch) bool {
 // URLMatches returns true if the given URL is a subdomain of the configured
 // VICE domain.
 func (c *CASProxy) URLMatches(url string) (bool, error) {
-	r := fmt.Sprintf("a.*\\.\\Q%s\\E(:[0-9]+)?", c.viceDomain)
+	r := fmt.Sprintf("(a.*\\.)?\\Q%s\\E(:[0-9]+)?", c.viceDomain)
 	matched, err := regexp.MatchString(r, url)
 	if err != nil {
 		return false, err
@@ -362,7 +371,6 @@ func extractSubdomain(jobURL string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Println(u.Hostname())
 	fields := strings.Split(u.Hostname(), ".")
 	if len(fields) < 2 {
 		return "", nil
@@ -515,8 +523,6 @@ type JobStatusUpdate struct {
 // chronological order.
 func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 	u := r.FormValue("url")
-
-	log.Println(u)
 
 	subdomain, err := extractSubdomain(u)
 	if err != nil {
