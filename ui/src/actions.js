@@ -35,18 +35,9 @@ export const { addUpdate, setSubdomain, getJob, setJob, setReady } = createActio
 // separately.
 export let fetchUpdates = () => {
   return dispatch => {
-    return axios.get(
-      `/api/jobs/status-updates?url=${encodeURI(window.location.href)}`,
-      {
-        // 502's tend to pop up when the app is technically running, but isn't ready to serve its UI.
-        validateStatus: (status) => (status >= 200 && status <= 300) || status === 502
-      }
-    ).then(
-      response => {
-        if (response.status !== 502) {
-          response.data.job_status_updates.forEach(i => dispatch(addUpdate(i)));
-        }
-      }
+    let searchParams = new URLSearchParams(window.location.search);
+    return axios.get(`/api/jobs/status-updates?url=${searchParams.get('url')}`).then(
+      response => response.data.job_status_updates.forEach(i => dispatch(addUpdate(i)))
     ).catch(function(error) {
       console.log('error from server: ', error.message);
     });
@@ -55,25 +46,11 @@ export let fetchUpdates = () => {
 
 export const checkURLReady = () => {
   return dispatch => {
-    return axios.get(
-      `/api/url-ready?url=${encodeURI(window.location.href)})`,
-      {
-        // 502's tend to pop up when the app is technically running, but isn't ready to serve its UI.
-        validateStatus: (status) => (status >= 200 && status <= 300) || status === 502
-      }
-    ).then(
-      response => {
-        if (response.status !== 502) {
-          dispatch(setReady(response.data.ready));
-
-          if (response.data.ready) {
-            window.location.reload(true);
-          }
-        }
-      }
+    let searchParams = new URLSearchParams(window.location.search);
+    return axios.get(`/api/url-ready?url=${searchParams.get('url')}`).then(
+      response => dispatch(setReady(response.data.ready))
     ).catch(function(error) {
-      console.log(error.message);
-      window.location.reload(true);
+      console.log('error from server: ', error.message);
     });
   };
 }

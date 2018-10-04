@@ -82,3 +82,9 @@ header {
 .loading-dots--dot:nth-child(3) {
   animation-delay: 1s;
 }
+
+.button {
+  display: block;
+  margin: 0 auto;
+  width: 100px;
+}

@@ -354,15 +354,14 @@ func (c *CASProxy) URLMatches(url string) (bool, error) {
 	return matched, nil
 }
 
-// ViceSubdomain implements the mux.Matcher interface so that requests can be
-// routed based on whether they're a request to a VICE app UI or not.
-func (c *CASProxy) ViceSubdomain(r *http.Request, m *mux.RouteMatch) bool {
-	matched, err := c.URLMatches(c.FrontendAddress(r))
+// ViceSubdomain returns true if the provided URL is a subdomain in the
+// configured VICE domain.
+func (c *CASProxy) ViceSubdomain(url string) (bool, error) {
+	matched, err := c.URLMatches(url)
 	if err != nil {
-		log.Errorf("error checking for vice subdomain: %s", err)
-		return false
+		return false, err
 	}
-	return matched
+	return matched, nil
 }
 
 // extractSubdomain returns the subdomain part of the URL.
@@ -489,6 +488,14 @@ func (c *CASProxy) lookupExternalUUID(subdomain string) (string, error) {
 		return "", nil
 	}
 
+	if _, ok = data["jobs"]; !ok {
+		return "", fmt.Errorf("missing jobs field for subdomain %s", subdomain)
+	}
+
+	if len(data["jobs"]) < 1 {
+		return "", fmt.Errorf("no jobs returned")
+	}
+
 	if _, ok = data["jobs"][0]["steps"][0]["external_id"]; !ok {
 		return "", fmt.Errorf("missing external_id for job with subdomain '%s'; data => '%+v'", subdomain, data)
 	}
@@ -523,6 +530,16 @@ type JobStatusUpdate struct {
 // chronological order.
 func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 	u := r.FormValue("url")
+
+	valid, err := c.ViceSubdomain(u)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error validating URL %s: %s", u, err.Error()), http.StatusInternalServerError)
+		return
+	}
+	if !valid {
+		http.Error(w, fmt.Sprintf("URL %s is not a valid domain", u), http.StatusBadRequest)
+		return
+	}
 
 	subdomain, err := extractSubdomain(u)
 	if err != nil {
@@ -568,14 +585,15 @@ func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request
 // connection attempt to the Endpoint for the Ingress succeeds.
 func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 	u := r.FormValue("url")
+	fmt.Println(u)
 
-	matches, err := c.URLMatches(u)
+	valid, err := c.ViceSubdomain(u)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error checking URL %s: %s", u, err.Error()), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("error validating URL %s: %s", u, err.Error()), http.StatusInternalServerError)
 		return
 	}
-	if !matches {
-		http.Error(w, fmt.Sprintf("URL %s is not a subdomain of %s", u, c.viceDomain), http.StatusBadRequest)
+	if !valid {
+		http.Error(w, fmt.Sprintf("URL %s is not a valid domain", u), http.StatusBadRequest)
 		return
 	}
 
@@ -770,7 +788,7 @@ func main() {
 		fmt.Fprintf(w, "I'm healthy.")
 	})
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*staticFilePath, "static")))))
-	r.PathPrefix("/").MatcherFunc(p.ViceSubdomain).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	r.PathPrefix("/").Queries("url", "").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(*staticFilePath, "index.html"))
 	})
 
