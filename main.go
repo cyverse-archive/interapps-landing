@@ -629,7 +629,23 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 		} else {
 			ready = ready && true
 		}
+		conn.Close()
 		defer conn.Close()
+
+		httpclient := &http.Client{
+			CheckRedirect: func(r *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		}
+		var resp *http.Response
+		resp, err = httpclient.Get(u)
+		if err != nil {
+			ready = ready && false
+		} else {
+			if resp.StatusCode <= 399 && resp.StatusCode >= 200 {
+				ready = ready && true
+			}
+		}
 	}
 
 	responseData := map[string]bool{
