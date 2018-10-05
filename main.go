@@ -17,10 +17,12 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/cyverse-de/configurate"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/machinebox/graphql"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 var log = logrus.WithFields(logrus.Fields{
@@ -717,20 +719,35 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 	return upgrade
 }
 
+const defaultConfig = `
+k8s:
+	app-exposer:
+		base: http://localhost
+		header: app-exposer
+	get-analysis-id:
+		header: get-analysis-id
+	check-resource-access:
+		header: check-resource-access
+
+`
+
 func main() {
 	var (
 		err                      error
-		listenAddr               = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
+		cfg                      *viper.Viper
+		viceDomain               string
+		configPath               = flag.String("config", "/etc/iplant/de/jobservices.yml", "The path to the config file.")
+		listenAddr               = flag.String("listen-addr", "0.0.0.0:60000", "The listen port number.")
 		casBase                  = flag.String("cas-base-url", "", "The base URL to the CAS host.")
 		casValidate              = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
 		maxAge                   = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
 		sslCert                  = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
 		sslKey                   = flag.String("ssl-key", "", "Path to the SSL .key file.")
 		ingressURL               = flag.String("ingress-url", "", "The URL to the cluster ingress.")
-		analysisHeader           = flag.String("analysis-header", "get-analysis-id", "The Host header for the ingress service that gets the analysis ID.")
-		appExposerHeader         = flag.String("app-exposer-header", "app-exposer", "The Host header value for the app-exposer service.")
-		accessHeader             = flag.String("access-header", "check-resource-access", "The Host header for the ingress service that checks analysis access.")
-		viceDomain               = flag.String("vice-domain", "cyverse.run", "The domain for the VICE apps.")
+		analysisHeader           = flag.String("analysis-header", "", "The Host header for the ingress service that gets the analysis ID.")
+		appExposerHeader         = flag.String("app-exposer-header", "", "The Host header value for the app-exposer service.")
+		accessHeader             = flag.String("access-header", "", "The Host header for the ingress service that checks analysis access.")
+		viceBaseURL              = flag.String("vice-base-url", "", "The domain for the VICE apps.")
 		disableAutoRefresh       = flag.Bool("disable-auto-refresh", false, "Turns off the auto-refresh feature on the loading page, which avoids hitting the graphql server.")
 		graphqlBase              = flag.String("graphql", "http://graphql-de/v1alpha1/graphql", "The base URL for the graphql provider.")
 		staticFilePath           = flag.String("static-file-path", "./build", "Path to static file assets.")
@@ -739,9 +756,63 @@ func main() {
 
 	flag.Parse()
 
-	if *casBase == "" {
-		log.Fatal("--cas-base-url must be set.")
+	// make sure the configuration object has sane defaults.
+	if cfg, err = configurate.InitDefaults(*configPath, defaultConfig); err != nil {
+		log.Fatal(err)
 	}
+
+	casBaseCfg := cfg.GetString("cas.base")
+	if *casBase == "" && casBaseCfg == "" {
+		log.Fatal("--cas-base-url or cas.base must be set.")
+	}
+	if *casBase == "" && casBaseCfg != "" {
+		*casBase = casBaseCfg
+	}
+
+	ingressURLCfg := cfg.GetString("k8s.app-exposer.base")
+	if *ingressURL == "" && ingressURLCfg == "" {
+		log.Fatal("--ingress-url or k8s.app-exposer.base must be set.")
+	}
+	if *ingressURL == "" && ingressURLCfg != "" {
+		*ingressURL = ingressURLCfg
+	}
+
+	appExposerHeaderCfg := cfg.GetString("k8s.app-exposer.header")
+	if *appExposerHeader == "" && appExposerHeaderCfg == "" {
+		log.Fatal("--app-exposer-header or k8s.app-exposer.header must be set.")
+	}
+	if *appExposerHeader == "" && appExposerHeaderCfg != "" {
+		*appExposerHeader = appExposerHeaderCfg
+	}
+
+	analysisHeaderCfg := cfg.GetString("k8s.get-analysis-id.header")
+	if *analysisHeader == "" && analysisHeaderCfg == "" {
+		log.Fatal("--analysis-header or k8s.get-analysis-id.header must be set.")
+	}
+	if *analysisHeader == "" && analysisHeaderCfg != "" {
+		*analysisHeader = analysisHeaderCfg
+	}
+
+	accessHeaderCfg := cfg.GetString("k8s.check-resource-access.header")
+	if *accessHeader == "" && accessHeaderCfg == "" {
+		log.Fatal("--access-header or k8s.check-resource-access.header must be set.")
+	}
+	if *accessHeader == "" && accessHeaderCfg != "" {
+		*accessHeader = accessHeaderCfg
+	}
+
+	viceBaseURLCfg := cfg.GetString("k8s.frontend.base")
+	if *viceBaseURL == "" && viceBaseURLCfg == "" {
+		log.Fatal("--vice-base-url or k8s.frontend.base must be set.")
+	}
+	if *viceBaseURL == "" && viceBaseURLCfg != "" {
+		*viceBaseURL = viceBaseURLCfg
+	}
+	vu, err := url.Parse(*viceBaseURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	viceDomain = vu.Host
 
 	useSSL := false
 	if *sslCert != "" || *sslKey != "" {
@@ -755,14 +826,10 @@ func main() {
 		useSSL = true
 	}
 
-	if *ingressURL == "" {
-		log.Fatal("--ingress-url must be set.")
-	}
-
 	log.Infof("listen address is %s", *listenAddr)
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
-	log.Infof("VICE domain is %s", *viceDomain)
+	log.Infof("VICE domain is %s", viceDomain)
 
 	authkey := make([]byte, 64)
 	_, err = rand.Read(authkey)
@@ -785,7 +852,7 @@ func main() {
 		accessHeader:             *accessHeader,
 		analysisHeader:           *analysisHeader,
 		sessionStore:             sessionStore,
-		viceDomain:               *viceDomain,
+		viceDomain:               viceDomain,
 		refreshEnabled:           !*disableAutoRefresh,
 		graphqlBase:              *graphqlBase,
 		disableCustomHeaderMatch: *disableCustomHeaderMatch,
