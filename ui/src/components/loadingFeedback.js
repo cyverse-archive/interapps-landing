@@ -1,17 +1,5 @@
 import React, { Component } from 'react';
-import Button from '@material-ui/core/Button';
 import { connect } from 'react-redux';
-
-class AppButton extends Component {
-  render() {
-    return (
-      <div>
-        <div className="analysisMessage">Your application is ready!</div>
-        <Button variant="contained" href={this.props.appURL} className="button">Go!</Button>
-      </div>
-    );
-  }
-}
 
 class LoadingDots extends Component {
   render() {
@@ -34,7 +22,7 @@ class LoadingFeedback extends Component {
     let feedback;
 
     if (this.props.isReady) {
-      feedback = <AppButton appURL={this.props.appURL}/>;
+      window.location.href = this.props.appURL;
     } else {
       feedback = <LoadingDots />;
     }
