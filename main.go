@@ -616,24 +616,26 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var ept *Endpoint
 	if ready {
-		var ept *Endpoint
 		ept, err = c.EndpointConfig(subdomain)
 		if err != nil {
 			log.Error(err)
-			ready = ready && false
+			ready = false
 		}
+	}
 
+	if ready {
 		var conn net.Conn
 		conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", ept.IP, ept.Port))
 		if err != nil {
-			ready = ready && false
-		} else {
-			ready = ready && true
+			ready = false
 		}
 		conn.Close()
 		defer conn.Close()
+	}
 
+	if ready {
 		httpclient := &http.Client{
 			CheckRedirect: func(r *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
@@ -642,11 +644,10 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 		var resp *http.Response
 		resp, err = httpclient.Get(u)
 		if err != nil {
-			ready = ready && false
-		} else {
-			if resp.StatusCode <= 399 && resp.StatusCode >= 200 {
-				ready = ready && true
-			}
+			ready = false
+		}
+		if resp.StatusCode < 200 && resp.StatusCode > 399 {
+			ready = false
 		}
 	}
 
