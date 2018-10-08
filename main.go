@@ -720,17 +720,14 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 	return upgrade
 }
 
-const defaultConfig = `
-k8s:
-	app-exposer:
-		base: http://localhost
-		header: app-exposer
-	get-analysis-id:
-		header: get-analysis-id
-	check-resource-access:
-		header: check-resource-access
-
-`
+const defaultConfig = `k8s:
+  app-exposer:
+    base: "http://localhost"
+    header: app-exposer
+  get-analysis-id:
+    header: get-analysis-id
+  check-resource-access:
+    header: check-resource-access`
 
 func main() {
 	var (
