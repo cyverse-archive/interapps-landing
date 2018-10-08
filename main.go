@@ -587,7 +587,6 @@ func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request
 // connection attempt to the Endpoint for the Ingress succeeds.
 func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 	u := r.FormValue("url")
-	fmt.Println(u)
 
 	valid, err := c.ViceSubdomain(u)
 	if err != nil {
@@ -644,10 +643,12 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 		var resp *http.Response
 		resp, err = httpclient.Get(u)
 		if err != nil {
+			log.Printf("error checking HTTP status: %s\n", err.Error())
 			ready = false
-		}
-		if resp.StatusCode < 200 && resp.StatusCode > 399 {
-			ready = false
+		} else {
+			if resp.StatusCode < 200 && resp.StatusCode > 399 {
+				ready = false
+			}
 		}
 	}
 
