@@ -17,10 +17,12 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/cyverse-de/configurate"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/machinebox/graphql"
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 var log = logrus.WithFields(logrus.Fields{
@@ -193,9 +195,18 @@ func (c *CASProxy) IsAllowed(user, resource string) (bool, error) {
 // operations. If the --disable-custom-header-match flag is true, then the Host
 // header in the request is returned. If it's false, the custom X-Frontend-Url
 // header is returned.
-func (c CASProxy) FrontendAddress(r *http.Request) string {
+func (c *CASProxy) FrontendAddress(r *http.Request) string {
 	if c.disableCustomHeaderMatch {
-		return r.Host
+		u := &url.URL{}
+		if r.TLS != nil {
+			u.Scheme = "https"
+		} else {
+			u.Scheme = "http"
+		}
+		u.Host = r.Host
+		u.Path = r.URL.Path
+		u.RawQuery = r.URL.RawQuery
+		return u.String()
 	}
 	return r.Header.Get("X-Frontend-Url")
 }
@@ -337,7 +348,7 @@ func (c *CASProxy) NeedsSession(r *http.Request, m *mux.RouteMatch) bool {
 // URLMatches returns true if the given URL is a subdomain of the configured
 // VICE domain.
 func (c *CASProxy) URLMatches(url string) (bool, error) {
-	r := fmt.Sprintf("a.*\\.\\Q%s\\E(:[0-9]+)?", c.viceDomain)
+	r := fmt.Sprintf("(a.*\\.)?\\Q%s\\E(:[0-9]+)?", c.viceDomain)
 	matched, err := regexp.MatchString(r, url)
 	if err != nil {
 		return false, err
@@ -345,15 +356,14 @@ func (c *CASProxy) URLMatches(url string) (bool, error) {
 	return matched, nil
 }
 
-// ViceSubdomain implements the mux.Matcher interface so that requests can be
-// routed based on whether they're a request to a VICE app UI or not.
-func (c *CASProxy) ViceSubdomain(r *http.Request, m *mux.RouteMatch) bool {
-	matched, err := c.URLMatches(c.FrontendAddress(r))
+// ViceSubdomain returns true if the provided URL is a subdomain in the
+// configured VICE domain.
+func (c *CASProxy) ViceSubdomain(url string) (bool, error) {
+	matched, err := c.URLMatches(url)
 	if err != nil {
-		log.Errorf("error checking for vice subdomain: %s", err)
-		return false
+		return false, err
 	}
-	return matched
+	return matched, nil
 }
 
 // extractSubdomain returns the subdomain part of the URL.
@@ -362,7 +372,6 @@ func extractSubdomain(jobURL string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Println(u.Hostname())
 	fields := strings.Split(u.Hostname(), ".")
 	if len(fields) < 2 {
 		return "", nil
@@ -481,6 +490,14 @@ func (c *CASProxy) lookupExternalUUID(subdomain string) (string, error) {
 		return "", nil
 	}
 
+	if _, ok = data["jobs"]; !ok {
+		return "", fmt.Errorf("missing jobs field for subdomain %s", subdomain)
+	}
+
+	if len(data["jobs"]) < 1 {
+		return "", fmt.Errorf("no jobs returned")
+	}
+
 	if _, ok = data["jobs"][0]["steps"][0]["external_id"]; !ok {
 		return "", fmt.Errorf("missing external_id for job with subdomain '%s'; data => '%+v'", subdomain, data)
 	}
@@ -516,7 +533,15 @@ type JobStatusUpdate struct {
 func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 	u := r.FormValue("url")
 
-	log.Println(u)
+	valid, err := c.ViceSubdomain(u)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error validating URL %s: %s", u, err.Error()), http.StatusInternalServerError)
+		return
+	}
+	if !valid {
+		http.Error(w, fmt.Sprintf("URL %s is not a valid domain", u), http.StatusBadRequest)
+		return
+	}
 
 	subdomain, err := extractSubdomain(u)
 	if err != nil {
@@ -562,14 +587,15 @@ func (c *CASProxy) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request
 // connection attempt to the Endpoint for the Ingress succeeds.
 func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 	u := r.FormValue("url")
+	fmt.Println(u)
 
-	matches, err := c.URLMatches(u)
+	valid, err := c.ViceSubdomain(u)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error checking URL %s: %s", u, err.Error()), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("error validating URL %s: %s", u, err.Error()), http.StatusInternalServerError)
 		return
 	}
-	if !matches {
-		http.Error(w, fmt.Sprintf("URL %s is not a subdomain of %s", u, c.viceDomain), http.StatusBadRequest)
+	if !valid {
+		http.Error(w, fmt.Sprintf("URL %s is not a valid domain", u), http.StatusBadRequest)
 		return
 	}
 
@@ -590,22 +616,39 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var ept *Endpoint
 	if ready {
-		var ept *Endpoint
 		ept, err = c.EndpointConfig(subdomain)
 		if err != nil {
 			log.Error(err)
-			ready = ready && false
+			ready = false
 		}
+	}
 
+	if ready {
 		var conn net.Conn
 		conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", ept.IP, ept.Port))
 		if err != nil {
-			ready = ready && false
-		} else {
-			ready = ready && true
+			ready = false
 		}
+		conn.Close()
 		defer conn.Close()
+	}
+
+	if ready {
+		httpclient := &http.Client{
+			CheckRedirect: func(r *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		}
+		var resp *http.Response
+		resp, err = httpclient.Get(u)
+		if err != nil {
+			ready = false
+		}
+		if resp.StatusCode < 200 && resp.StatusCode > 399 {
+			ready = false
+		}
 	}
 
 	responseData := map[string]bool{
@@ -677,20 +720,35 @@ func (c *CASProxy) isWebsocket(r *http.Request) bool {
 	return upgrade
 }
 
+const defaultConfig = `
+k8s:
+	app-exposer:
+		base: http://localhost
+		header: app-exposer
+	get-analysis-id:
+		header: get-analysis-id
+	check-resource-access:
+		header: check-resource-access
+
+`
+
 func main() {
 	var (
 		err                      error
-		listenAddr               = flag.String("listen-addr", "0.0.0.0:8080", "The listen port number.")
+		cfg                      *viper.Viper
+		viceDomain               string
+		configPath               = flag.String("config", "/etc/iplant/de/jobservices.yml", "The path to the config file.")
+		listenAddr               = flag.String("listen-addr", "0.0.0.0:60000", "The listen port number.")
 		casBase                  = flag.String("cas-base-url", "", "The base URL to the CAS host.")
 		casValidate              = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
 		maxAge                   = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
 		sslCert                  = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
 		sslKey                   = flag.String("ssl-key", "", "Path to the SSL .key file.")
 		ingressURL               = flag.String("ingress-url", "", "The URL to the cluster ingress.")
-		analysisHeader           = flag.String("analysis-header", "get-analysis-id", "The Host header for the ingress service that gets the analysis ID.")
-		appExposerHeader         = flag.String("app-exposer-header", "app-exposer", "The Host header value for the app-exposer service.")
-		accessHeader             = flag.String("access-header", "check-resource-access", "The Host header for the ingress service that checks analysis access.")
-		viceDomain               = flag.String("vice-domain", "cyverse.run", "The domain for the VICE apps.")
+		analysisHeader           = flag.String("analysis-header", "", "The Host header for the ingress service that gets the analysis ID.")
+		appExposerHeader         = flag.String("app-exposer-header", "", "The Host header value for the app-exposer service.")
+		accessHeader             = flag.String("access-header", "", "The Host header for the ingress service that checks analysis access.")
+		viceBaseURL              = flag.String("vice-base-url", "", "The domain for the VICE apps.")
 		disableAutoRefresh       = flag.Bool("disable-auto-refresh", false, "Turns off the auto-refresh feature on the loading page, which avoids hitting the graphql server.")
 		graphqlBase              = flag.String("graphql", "http://graphql-de/v1alpha1/graphql", "The base URL for the graphql provider.")
 		staticFilePath           = flag.String("static-file-path", "./build", "Path to static file assets.")
@@ -699,9 +757,63 @@ func main() {
 
 	flag.Parse()
 
-	if *casBase == "" {
-		log.Fatal("--cas-base-url must be set.")
+	// make sure the configuration object has sane defaults.
+	if cfg, err = configurate.InitDefaults(*configPath, defaultConfig); err != nil {
+		log.Fatal(err)
 	}
+
+	casBaseCfg := cfg.GetString("cas.base")
+	if *casBase == "" && casBaseCfg == "" {
+		log.Fatal("--cas-base-url or cas.base must be set.")
+	}
+	if *casBase == "" && casBaseCfg != "" {
+		*casBase = casBaseCfg
+	}
+
+	ingressURLCfg := cfg.GetString("k8s.app-exposer.base")
+	if *ingressURL == "" && ingressURLCfg == "" {
+		log.Fatal("--ingress-url or k8s.app-exposer.base must be set.")
+	}
+	if *ingressURL == "" && ingressURLCfg != "" {
+		*ingressURL = ingressURLCfg
+	}
+
+	appExposerHeaderCfg := cfg.GetString("k8s.app-exposer.header")
+	if *appExposerHeader == "" && appExposerHeaderCfg == "" {
+		log.Fatal("--app-exposer-header or k8s.app-exposer.header must be set.")
+	}
+	if *appExposerHeader == "" && appExposerHeaderCfg != "" {
+		*appExposerHeader = appExposerHeaderCfg
+	}
+
+	analysisHeaderCfg := cfg.GetString("k8s.get-analysis-id.header")
+	if *analysisHeader == "" && analysisHeaderCfg == "" {
+		log.Fatal("--analysis-header or k8s.get-analysis-id.header must be set.")
+	}
+	if *analysisHeader == "" && analysisHeaderCfg != "" {
+		*analysisHeader = analysisHeaderCfg
+	}
+
+	accessHeaderCfg := cfg.GetString("k8s.check-resource-access.header")
+	if *accessHeader == "" && accessHeaderCfg == "" {
+		log.Fatal("--access-header or k8s.check-resource-access.header must be set.")
+	}
+	if *accessHeader == "" && accessHeaderCfg != "" {
+		*accessHeader = accessHeaderCfg
+	}
+
+	viceBaseURLCfg := cfg.GetString("k8s.frontend.base")
+	if *viceBaseURL == "" && viceBaseURLCfg == "" {
+		log.Fatal("--vice-base-url or k8s.frontend.base must be set.")
+	}
+	if *viceBaseURL == "" && viceBaseURLCfg != "" {
+		*viceBaseURL = viceBaseURLCfg
+	}
+	vu, err := url.Parse(*viceBaseURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	viceDomain = vu.Host
 
 	useSSL := false
 	if *sslCert != "" || *sslKey != "" {
@@ -715,14 +827,10 @@ func main() {
 		useSSL = true
 	}
 
-	if *ingressURL == "" {
-		log.Fatal("--ingress-url must be set.")
-	}
-
 	log.Infof("listen address is %s", *listenAddr)
 	log.Infof("CAS base URL is %s", *casBase)
 	log.Infof("CAS ticket validator endpoint is %s", *casValidate)
-	log.Infof("VICE domain is %s", *viceDomain)
+	log.Infof("VICE domain is %s", viceDomain)
 
 	authkey := make([]byte, 64)
 	_, err = rand.Read(authkey)
@@ -745,7 +853,7 @@ func main() {
 		accessHeader:             *accessHeader,
 		analysisHeader:           *analysisHeader,
 		sessionStore:             sessionStore,
-		viceDomain:               *viceDomain,
+		viceDomain:               viceDomain,
 		refreshEnabled:           !*disableAutoRefresh,
 		graphqlBase:              *graphqlBase,
 		disableCustomHeaderMatch: *disableCustomHeaderMatch,
@@ -764,7 +872,7 @@ func main() {
 		fmt.Fprintf(w, "I'm healthy.")
 	})
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*staticFilePath, "static")))))
-	r.PathPrefix("/").MatcherFunc(p.ViceSubdomain).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	r.PathPrefix("/").Queries("url", "").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join(*staticFilePath, "index.html"))
 	})
 

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { checkURLReady, fetchUpdates } from '../actions';
+import { checkURLReady } from '../actions';
+import { connect } from 'react-redux';
 
 // Adapted from https://medium.com/@machadogj/timers-in-react-with-redux-apps-9a5a722162e8
 
-export default class Ticker extends Component {
+class TickerElement extends Component {
   state = {
     timer: null
   };
@@ -19,18 +20,29 @@ export default class Ticker extends Component {
   }
 
   componentWillUnmount() {
-    this.clearInterval(this.state.timer);
+    clearInterval(this.state.timer);
   }
 
   tickCallback() {
     return () => {
       this.props.store.dispatch(checkURLReady());
-      this.props.store.dispatch(fetchUpdates());
     }
   }
 
   render() {
-    return <div className="ticker"></div>
+    if (this.props.isReady) {
+      clearInterval(this.state.timer);
+    }
+    return <div className="ticker"></div>;
   }
-
 }
+
+const mapStateToProps = state => ({
+  isReady: state.ready
+});
+
+const Ticker = connect(
+  mapStateToProps
+)(TickerElement);
+
+export default Ticker;

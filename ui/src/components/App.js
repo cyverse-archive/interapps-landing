@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-//import Button from '@material-ui/core/Button';
 
-import StatusUpdatesContainer from './statusUpdates';
+import LoadingFeedbackArea from './loadingFeedback';
 import Ticker from './ticker';
 import logo from '../images/logo.png';
 import loadingRocket from '../images/loading.png';
 import '../css/App.css';
+
 
 class App extends Component {
   constructor(props) {
@@ -13,6 +13,7 @@ class App extends Component {
 
     this.handleClick = this.handleClick.bind(this);
   }
+
   render() {
     return (
       <div className="app">
@@ -24,18 +25,8 @@ class App extends Component {
 
         <img src={loadingRocket} className="loading" alt="Loading rocket for an in-progress job" />
 
-        <div className="analysisMessage">Please wait while we launch your application.</div>
+        <LoadingFeedbackArea />
 
-        <div className="loading-dots">
-          <div className="loading-dots--dot"></div>
-          <div className="loading-dots--dot"></div>
-          <div className="loading-dots--dot"></div>
-        </div>
-
-
-        <div className="statusUpdates">
-          <StatusUpdatesContainer />
-        </div>
         <Ticker store={this.props.store} />
       </div>
     );

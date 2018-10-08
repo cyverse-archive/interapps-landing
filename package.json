@@ -3,7 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "babel-core": "6.26.3"
+    "axios": "^0.18.0",
+    "babel-core": "6.26.3",
+    "redux-actions": "^2.6.1",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0"
   },
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
