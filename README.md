@@ -11,6 +11,17 @@ You will need the following installed to work on the UI along with the API:
 * kubectl - Version 1.11 or later Needs to be installed and configured to hit a deployed Discovery Environment namespace.
 * Go - Version 1.10 or above needs to be installed.
 
+You will need to set the following environment variables for the top-level NPM project to run correctly:
+
+* `NPM_CONFIG_CAS_URL` - The base URL to the CAS instance we're using for development.
+* `NPM_CONFIG_GRAPHQL_HOSTNAME` - The hostname for the local/port-forwarded graphql server.
+* `NPM_CONFIG_GRAPHQL_PORT` - The port for the local/port-forwarded graphql server.
+* `NPM_CONFIG_INGRESS_URL` - The URL for the VICE ingress.
+* `NPM_CONFIG_API_HOST` - The domain and port that the API will be listening on.
+* `NPM_CONFIG_VICE_URL` - The base URL for the development version of VICE.
+
+A `config.sh` script has been included that you can either use as a reference or modify to your liking.
+
 There are two npm projects, the top-level overarching project and the UI-specific project in the ui directory. To fire up the API alongside the UI, run `npm start` from the top-level directory.
 
 To fire up just the UI, run `npm start` from the `ui` directory.
