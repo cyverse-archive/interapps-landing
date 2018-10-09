@@ -635,13 +635,8 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if ready {
-		httpclient := &http.Client{
-			CheckRedirect: func(r *http.Request, via []*http.Request) error {
-				return http.ErrUseLastResponse
-			},
-		}
 		var resp *http.Response
-		resp, err = httpclient.Get(u)
+		resp, err = http.Get(u)
 		if err != nil {
 			log.Printf("error checking HTTP status: %s\n", err.Error())
 			ready = false
