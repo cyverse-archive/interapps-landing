@@ -635,8 +635,13 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if ready {
+		httpclient := &http.Client{
+			CheckRedirect: func(r *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		}
 		var resp *http.Response
-		resp, err = http.Get(u)
+		resp, err = httpclient.Get(u)
 		if err != nil {
 			log.Printf("error checking HTTP status: %s\n", err.Error())
 			ready = false
@@ -645,6 +650,10 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 				ready = false
 			}
 		}
+	}
+
+	if ready {
+		ready = endpointIsReady(ept.IP, ept.Port)
 	}
 
 	responseData := map[string]bool{
@@ -656,6 +665,43 @@ func (c *CASProxy) URLIsReady(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprintln(w, string(js))
+}
+
+func endpointIsReady(eptIP string, eptPort int) bool {
+	var ready bool
+	httpclient := &http.Client{
+		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	var resp *http.Response
+	resp, err := httpclient.Get(fmt.Sprintf("http://%s:%d/url-ready", eptIP, eptPort))
+	if err != nil {
+		log.Printf("error checking HTTP status: %s\n", err.Error())
+		if resp != nil {
+			resp.Body.Close()
+		}
+		return false
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Errorf("error reading response body: %s", err)
+		return false
+	}
+
+	data := map[string]bool{}
+	if err = json.Unmarshal(body, &data); err != nil {
+		log.Errorf("error unmarshalling body: %s", err)
+		return false
+	}
+
+	if _, ok := data["ready"]; ok {
+		ready = data["ready"]
+	}
+
+	return ready
 }
 
 // RedirectToCAS redirects the request to CAS, setting the service query
