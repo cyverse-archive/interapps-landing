@@ -16,12 +16,13 @@ import (
 const sessionName = "proxy-session"
 const sessionKey = "proxy-session-key"
 
+// CAS handles interactions with CAS.
 type CAS struct {
-	casBase                  string // base URL for the CAS server
-	casValidate              string // The path to the validation endpoint on the CAS server.
-	resourceType             string // The resource type for analysis.
-	resourceName             string // The UUID of the analysis.
-	subjectType              string // The subject type for a user.
+	casBase     string // base URL for the CAS server
+	casValidate string // The path to the validation endpoint on the CAS server.
+	// resourceType             string // The resource type for analysis.
+	// resourceName             string // The UUID of the analysis.
+	// subjectType              string // The subject type for a user.
 	sessionStore             *sessions.CookieStore
 	disableCustomHeaderMatch bool // Disables matching domains based on the X-Frontend-Url header. Host header is used instead.
 }
@@ -121,7 +122,7 @@ func (c *CAS) RedirectToCAS(w http.ResponseWriter, r *http.Request) {
 	casURL.Path = path.Join(casURL.Path, "login")
 
 	// perform the redirect
-	http.Redirect(w, r, casURL.String(), http.StatusPermanentRedirect)
+	http.Redirect(w, r, casURL.String(), http.StatusTemporaryRedirect)
 }
 
 // ValidateTicket will validate a CAS ticket against the configured CAS server.
