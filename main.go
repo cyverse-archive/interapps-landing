@@ -449,7 +449,7 @@ func main() {
 		viceBaseURL        = flag.String("vice-base-url", "", "The domain for the VICE apps.")
 		disableAutoRefresh = flag.Bool("disable-auto-refresh", false, "Turns off the auto-refresh feature on the loading page, which avoids hitting the graphql server.")
 		graphqlBase        = flag.String("graphql", "http://graphql-de/v1alpha1/graphql", "The base URL for the graphql provider.")
-		staticFilePath     = flag.String("static-file-path", "./build", "Path to static file assets.")
+		loadingUIPath      = flag.String("loading-ui-path", "./ui-loading", "Path to the loading UI build.")
 		//disableCustomHeaderMatch = flag.Bool("disable-custom-header-match", false, "Disables usage of the X-Frontend-Url header for subdomain matching. Use Host header instead. Useful during development.")
 	)
 
@@ -563,9 +563,9 @@ func main() {
 	r.PathPrefix("/healthz").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "I'm healthy.")
 	})
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*staticFilePath, "static")))))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*loadingUIPath, "static")))))
 	r.PathPrefix("/").Queries("url", "").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join(*staticFilePath, "index.html"))
+		http.ServeFile(w, r, filepath.Join(*loadingUIPath, "index.html"))
 	})
 
 	// r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
