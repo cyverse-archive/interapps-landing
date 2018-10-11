@@ -282,6 +282,101 @@ func (a *API) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(js))
 }
 
+const runningAnalysesQuery = `
+query RunningAnalyses($username: String) {
+  analyses: jobs (
+    where: {
+      _and: {
+        status: {_eq: "Running"},
+        usersByuserId: {username: {_eq: $username}}}
+    	}
+  ) {
+    id
+    appID: app_id
+    appName: app_name
+		description: job_description
+    user: usersByuserId {
+      username
+    }
+    startDate: start_date
+    endDate: end_date
+    plannedEndDate: planned_end_date
+  }
+}
+`
+
+// RunningAnalyses returns a list of analyses that are in the running state.
+func (a *API) RunningAnalyses(w http.ResponseWriter, r *http.Request) {
+	var err error
+	u := r.FormValue("user")
+
+	client := graphql.NewClient(a.graphqlBase)
+	req := graphql.NewRequest(runningAnalysesQuery)
+	req.Var("username", u)
+
+	var data interface{}
+
+	if err = client.Run(context.Background(), req, &data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	dataJSON, err := json.Marshal(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, string(dataJSON))
+}
+
+const finishedAnalysesQuery = `
+query FinishedAnalyses($username: String) {
+  analyses: jobs (
+    where: {
+      _and: {
+        status: {_in: ["Completed", "Failed", "Cancelled"]},
+        usersByuserId: {username: {_eq: $username}}}
+    	}
+  ) {
+    id
+    appID: app_id
+    appName: app_name
+		description: job_description
+    user: usersByuserId {
+      username
+    }
+    startDate: start_date
+    endDate: end_date
+    plannedEndDate: planned_end_date
+  }
+}
+`
+
+// FinishedAnalyses returns a list of analyses that are in the Completed,
+// Failed, or Cancelled states.
+func (a *API) FinishedAnalyses(w http.ResponseWriter, r *http.Request) {
+	var err error
+	u := r.FormValue("user")
+
+	client := graphql.NewClient(a.graphqlBase)
+	req := graphql.NewRequest(finishedAnalysesQuery)
+	req.Var("username", u)
+
+	var data interface{}
+
+	if err = client.Run(context.Background(), req, &data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	dataJSON, err := json.Marshal(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, string(dataJSON))
+}
+
 // URLIsReady returns true if the Ingress for the provided URL exists and if a
 // connection attempt to the Endpoint for the Ingress succeeds.
 func (a *API) URLIsReady(w http.ResponseWriter, r *http.Request) {
@@ -460,13 +555,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	casBaseCfg := cfg.GetString("cas.base")
-	if *casBase == "" && casBaseCfg == "" {
-		log.Fatal("--cas-base-url or cas.base must be set.")
-	}
-	if *casBase == "" && casBaseCfg != "" {
-		*casBase = casBaseCfg
-	}
+	// casBaseCfg := cfg.GetString("cas.base")
+	// if *casBase == "" && casBaseCfg == "" {
+	// 	log.Fatal("--cas-base-url or cas.base must be set.")
+	// }
+	// if *casBase == "" && casBaseCfg != "" {
+	// 	*casBase = casBaseCfg
+	// }
 
 	ingressURLCfg := cfg.GetString("k8s.app-exposer.base")
 	if *ingressURL == "" && ingressURLCfg == "" {
@@ -554,6 +649,10 @@ func main() {
 	r := mux.NewRouter()
 	api := r.PathPrefix("/api/").Subrouter()
 	api.Path("/url-ready").Queries("url", "").HandlerFunc(p.URLIsReady)
+
+	analyses := api.PathPrefix("/analyses").Subrouter()
+	analyses.Path("/running").Queries("user", "").HandlerFunc(p.RunningAnalyses)
+	analyses.Path("/finished").Queries("user", "").HandlerFunc(p.FinishedAnalyses)
 
 	jobs := api.PathPrefix("/jobs/").Subrouter()
 	jobs.Path("/status-updates").Queries("url", "").HandlerFunc(p.LookupJobStatusUpdates)
