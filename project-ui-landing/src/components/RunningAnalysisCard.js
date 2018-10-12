@@ -10,18 +10,34 @@ import Typography from '@material-ui/core/Typography';
 
 const styles = {
   card: {
-    minWidth: 275,
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
+    maxWidth: '400px',
+    minHeight: '150px',
   },
   title: {
     fontSize: 14,
   },
   pos: {
     marginBottom: 12,
+  },
+  analysisHeader: {
+      display: 'inline-block',
+      width: '100%',
+      color: 'primary',
+  },
+  analysisName: {
+    textAlign: 'left',
+    float: 'left',
+  },
+  appName: {
+    textAlign: 'right',
+    float: 'right',
+  },
+  appLink: {
+    float: 'right',
+  },
+  cardActions: {
+    display: 'inline-block',
+    width: '100%',
   },
 };
 
@@ -31,24 +47,33 @@ class RunningAnalysisCard extends Component {
     const { analysisName, analysisLink, owner, description } = this.props;
     const { appName } = this.props;
 
+    console.log(classes);
+
     return (
       <Card className={classes.card}>
         <CardContent>
-          <Typography>
-            {analysisName}
+          <Typography className={classes.title} variant="h3" gutterBottom>
+            <div className={classes.analysisHeader}>
+              <div className={classes.analysisName}>
+                {analysisName}
+              </div>
+              <div className={classes.appName}>
+                {appName}
+              </div>
+            </div>
           </Typography>
-          <Typography>
-            {appName}
+          <Typography className={classes.title}>
+
           </Typography>
-          <Typography>
-            {owner}
+          <Typography color="textSecondary" gutterBottom>
+            Added by {owner}
           </Typography>
-          <Typography>
+          <Typography component="p">
             {description}
           </Typography>
         </CardContent>
-        <CardActions>
-          <IconButton>
+        <CardActions className={classes.cardActions}>
+          <IconButton className={classes.appLink}>
             <Forward />
           </IconButton>
         </CardActions>

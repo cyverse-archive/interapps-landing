@@ -4,6 +4,7 @@ import { action } from '@storybook/addon-actions';
 import Button from '@material-ui/core/Button';
 import LandingAppBar from '../components/LandingAppBar';
 import RunningAnalysisCard from '../components/RunningAnalysisCard';
+import 'typeface-roboto';
 
 storiesOf('Button', module)
   .add('with text', () => (
