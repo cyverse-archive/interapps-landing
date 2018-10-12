@@ -5,7 +5,10 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import IconButton from '@material-ui/core/IconButton';
-import Forward from '@material-ui/icons/Forward';
+import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
+import Description from '@material-ui/icons/Description';
+import Computer from '@material-ui/icons/Computer';
+import Assessment from '@material-ui/icons/Assessment';
 import Typography from '@material-ui/core/Typography';
 
 const styles = {
@@ -14,23 +17,18 @@ const styles = {
     minHeight: '150px',
   },
   title: {
-    fontSize: 14,
+    fontSize: '20px',
+    fontWeight: '400',
+    marginBottom: '15px',
   },
   pos: {
     marginBottom: 12,
   },
-  analysisHeader: {
-      display: 'inline-block',
-      width: '100%',
-      color: 'primary',
-  },
-  analysisName: {
-    textAlign: 'left',
+  fieldIcon: {
     float: 'left',
-  },
-  appName: {
-    textAlign: 'right',
-    float: 'right',
+    position: 'relative',
+    marginRight: '10px',
+    top: '-3px',
   },
   appLink: {
     float: 'right',
@@ -38,6 +36,14 @@ const styles = {
   cardActions: {
     display: 'inline-block',
     width: '100%',
+  },
+  descriptionBlock: {
+    display: 'inline-block',
+    width: '100%',
+  },
+  owner: {
+    marginLeft: '34px',
+    marginTop: '5px',
   },
 };
 
@@ -53,28 +59,30 @@ class RunningAnalysisCard extends Component {
       <Card className={classes.card}>
         <CardContent>
           <Typography className={classes.title} variant="h3" gutterBottom>
-            <div className={classes.analysisHeader}>
-              <div className={classes.analysisName}>
-                {analysisName}
-              </div>
-              <div className={classes.appName}>
-                {appName}
-              </div>
-            </div>
-          </Typography>
-          <Typography className={classes.title}>
+            <Assessment className={classes.fieldIcon} />
 
+            {analysisName}
           </Typography>
-          <Typography color="textSecondary" gutterBottom>
-            Added by {owner}
+
+          <Typography className={classes.title} variant="h3" gutterBottom>
+            <Computer className={classes.fieldIcon} />
+
+            {appName}
+
+            <Typography color="textSecondary" className={classes.owner} gutterBottom>
+              Added by {owner}
+            </Typography>
           </Typography>
-          <Typography component="p">
+
+          <Typography>
+            <Description className={classes.fieldIcon} />
             {description}
           </Typography>
         </CardContent>
+
         <CardActions className={classes.cardActions}>
           <IconButton className={classes.appLink}>
-            <Forward />
+            <OpenInBrowser />
           </IconButton>
         </CardActions>
       </Card>
