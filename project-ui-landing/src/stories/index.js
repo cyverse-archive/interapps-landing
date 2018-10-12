@@ -2,7 +2,8 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import Button from '@material-ui/core/Button';
-import LandingAppBar from '../components/appbar';
+import LandingAppBar from '../components/LandingAppBar';
+import RunningAnalysisCard from '../components/RunningAnalysisCard';
 
 storiesOf('Button', module)
   .add('with text', () => (
@@ -15,4 +16,15 @@ storiesOf('Button', module)
 storiesOf('LandingAppBar', module)
   .add('default', () => (
     <LandingAppBar />
-  ))
+  ));
+
+storiesOf('RunningAnalysisCard', module)
+  .add('default', () => (
+    <RunningAnalysisCard
+      appName="App Name"
+      analysisName="Analysis Name"
+      description="This is a test description of a running analysis."
+      analysisLink=""
+      owner="Owner Name"
+    />
+  ));
