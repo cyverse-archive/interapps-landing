@@ -14,7 +14,7 @@ import RunningAnalysisDialog from './RunningAnalysisDialog';
 import Button from '@material-ui/core/Button';
 
 const paperWidth = '400px';
-const paperHeight = '210px';
+const paperHeight = '250px';
 
 const styles = {
   card: {
@@ -62,7 +62,6 @@ const styles = {
 };
 
 class RunningAnalysisCard extends Component {
-
   state = {
     dialogOpen: false
   };
@@ -83,6 +82,13 @@ class RunningAnalysisCard extends Component {
     const { classes } = this.props;
     const { analysisName, analysisLink, owner, description } = this.props;
     const { appName } = this.props;
+
+    let displayDescription = "";
+    if ([...description].length > 140) {
+      displayDescription = [...description].slice(0, 139).join('') + '...'
+    } else {
+      displayDescription = description
+    }
 
     return (
       <div>
@@ -118,7 +124,8 @@ class RunningAnalysisCard extends Component {
 
             <Typography>
               <Description className={classes.fieldIcon} />
-              {description}
+
+              {displayDescription}
             </Typography>
           </CardContent>
 

@@ -25,7 +25,16 @@ storiesOf('RunningAnalysisCard', module)
       appName="App Name"
       analysisName="Analysis Name"
       description="This is a test description of a running analysis."
-      analysisLink=""
+      analysisLink="https://cyverse.org"
+      owner="Owner Name"
+    />
+  ))
+  .add('with description longer than 140 chars', () => (
+    <RunningAnalysisCard
+      appName="App Name"
+      analysisName="Analysis Name"
+      description="This is a test description of a running analysis. Adding more characters for testing purposes. Hopefully this will have an ellipsis added to the end of it. Adding even more inconsequential text."
+      analysisLink="https://cyverse.org"
       owner="Owner Name"
     />
   ));
