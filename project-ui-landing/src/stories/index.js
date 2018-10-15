@@ -37,4 +37,31 @@ storiesOf('RunningAnalysisCard', module)
       analysisLink="https://cyverse.org"
       owner="Owner Name"
     />
+  ))
+  .add('and with an analysis name longer than 32 chars', () => (
+    <RunningAnalysisCard
+      appName="App Name"
+      analysisName="Analysis Name12345678901234567890"
+      description="This is a test description of a running analysis. Adding more characters for testing purposes. Hopefully this will have an ellipsis added to the end of it. Adding even more inconsequential text."
+      analysisLink="https://cyverse.org"
+      owner="Owner Name"
+    />
+  ))
+  .add('and with an app name longer than 30 chars', () => (
+    <RunningAnalysisCard
+      appName="App Name123456789012345678901234567890"
+      analysisName="Analysis Name12345678901234567890"
+      description="This is a test description of a running analysis. Adding more characters for testing purposes. Hopefully this will have an ellipsis added to the end of it. Adding even more inconsequential text."
+      analysisLink="https://cyverse.org"
+      owner="Owner Name"
+    />
+  ))
+  .add('and with an owner longer than 34 chars', () => (
+    <RunningAnalysisCard
+      appName="App Name123456789012345678901234567890"
+      analysisName="Analysis Name12345678901234567890"
+      description="This is a test description of a running analysis. Adding more characters for testing purposes. Hopefully this will have an ellipsis added to the end of it. Adding even more inconsequential text."
+      analysisLink="https://cyverse.org"
+      owner="Owner Name123456789012345678901234567801234567890"
+    />
   ));

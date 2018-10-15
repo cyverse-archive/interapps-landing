@@ -61,6 +61,8 @@ const styles = {
   },
 };
 
+const ellipsize = (s, limit) => [...s].slice(0, limit-4).join('') + '...';
+
 class RunningAnalysisCard extends Component {
   state = {
     dialogOpen: false
@@ -85,9 +87,30 @@ class RunningAnalysisCard extends Component {
 
     let displayDescription = "";
     if ([...description].length > 140) {
-      displayDescription = [...description].slice(0, 139).join('') + '...'
+      displayDescription = ellipsize(description, 140);
     } else {
-      displayDescription = description
+      displayDescription = description;
+    }
+
+    let displayAnalysisName = "";
+    if ([...analysisName].length > 32) {
+      displayAnalysisName = ellipsize(analysisName, 32);
+    } else {
+      displayAnalysisName = analysisName;
+    }
+
+    let displayAppName = "";
+    if ([...appName].length > 30) {
+      displayAppName = ellipsize(appName, 30);
+    } else {
+      displayAppName = appName;
+    }
+
+    let displayOwner = "";
+    if ([...owner].length > 34) {
+      displayOwner = ellipsize(owner, 34);
+    } else {
+      displayOwner = owner;
     }
 
     return (
@@ -109,16 +132,16 @@ class RunningAnalysisCard extends Component {
             <Typography className={classes.title} variant="h3" gutterBottom>
               <Assessment className={classes.fieldIcon} />
 
-              {analysisName}
+              {displayAnalysisName}
             </Typography>
 
             <Typography className={classes.title} variant="h3" gutterBottom>
               <Computer className={classes.fieldIcon} />
 
-              {appName}
+              {displayAppName}
 
               <Typography color="textSecondary" className={classes.owner} gutterBottom>
-                Added by {owner}
+                Added by {displayOwner}
               </Typography>
             </Typography>
 
