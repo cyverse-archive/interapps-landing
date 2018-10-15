@@ -1,6 +1,9 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.cas-server
 
-ui/build
+project-ui-loading/build
+project-ui-landing/build
+ui-loading/
+ui-landing/
 cas-server
 interapps-landing
 *.crt

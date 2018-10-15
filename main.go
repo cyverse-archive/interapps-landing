@@ -282,6 +282,101 @@ func (a *API) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(js))
 }
 
+const runningAnalysesQuery = `
+query RunningAnalyses($username: String) {
+  analyses: jobs (
+    where: {
+      _and: {
+        status: {_eq: "Running"},
+        usersByuserId: {username: {_eq: $username}}}
+    	}
+  ) {
+    id
+    appID: app_id
+    appName: app_name
+		description: job_description
+    user: usersByuserId {
+      username
+    }
+    startDate: start_date
+    endDate: end_date
+    plannedEndDate: planned_end_date
+  }
+}
+`
+
+// RunningAnalyses returns a list of analyses that are in the running state.
+func (a *API) RunningAnalyses(w http.ResponseWriter, r *http.Request) {
+	var err error
+	u := r.FormValue("user")
+
+	client := graphql.NewClient(a.graphqlBase)
+	req := graphql.NewRequest(runningAnalysesQuery)
+	req.Var("username", u)
+
+	var data interface{}
+
+	if err = client.Run(context.Background(), req, &data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	dataJSON, err := json.Marshal(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, string(dataJSON))
+}
+
+const finishedAnalysesQuery = `
+query FinishedAnalyses($username: String) {
+  analyses: jobs (
+    where: {
+      _and: {
+        status: {_in: ["Completed", "Failed", "Cancelled"]},
+        usersByuserId: {username: {_eq: $username}}}
+    	}
+  ) {
+    id
+    appID: app_id
+    appName: app_name
+		description: job_description
+    user: usersByuserId {
+      username
+    }
+    startDate: start_date
+    endDate: end_date
+    plannedEndDate: planned_end_date
+  }
+}
+`
+
+// FinishedAnalyses returns a list of analyses that are in the Completed,
+// Failed, or Cancelled states.
+func (a *API) FinishedAnalyses(w http.ResponseWriter, r *http.Request) {
+	var err error
+	u := r.FormValue("user")
+
+	client := graphql.NewClient(a.graphqlBase)
+	req := graphql.NewRequest(finishedAnalysesQuery)
+	req.Var("username", u)
+
+	var data interface{}
+
+	if err = client.Run(context.Background(), req, &data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	dataJSON, err := json.Marshal(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, string(dataJSON))
+}
+
 // URLIsReady returns true if the Ingress for the provided URL exists and if a
 // connection attempt to the Endpoint for the Ingress succeeds.
 func (a *API) URLIsReady(w http.ResponseWriter, r *http.Request) {
@@ -432,25 +527,26 @@ const defaultConfig = `k8s:
 
 func main() {
 	var (
-		err         error
-		cfg         *viper.Viper
-		viceDomain  string
-		configPath  = flag.String("config", "/etc/iplant/de/jobservices.yml", "The path to the config file.")
-		listenAddr  = flag.String("listen-addr", "0.0.0.0:60000", "The listen port number.")
-		casBase     = flag.String("cas-base-url", "", "The base URL to the CAS host.")
-		casValidate = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
-		maxAge      = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
-		sslCert     = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
-		sslKey      = flag.String("ssl-key", "", "Path to the SSL .key file.")
-		ingressURL  = flag.String("ingress-url", "", "The URL to the cluster ingress.")
-		// analysisHeader     = flag.String("analysis-header", "", "The Host header for the ingress service that gets the analysis ID.")
-		appExposerHeader = flag.String("app-exposer-header", "", "The Host header value for the app-exposer service.")
-		// accessHeader       = flag.String("access-header", "", "The Host header for the ingress service that checks analysis access.")
-		viceBaseURL        = flag.String("vice-base-url", "", "The domain for the VICE apps.")
-		disableAutoRefresh = flag.Bool("disable-auto-refresh", false, "Turns off the auto-refresh feature on the loading page, which avoids hitting the graphql server.")
-		graphqlBase        = flag.String("graphql", "http://graphql-de/v1alpha1/graphql", "The base URL for the graphql provider.")
-		staticFilePath     = flag.String("static-file-path", "./build", "Path to static file assets.")
-		//disableCustomHeaderMatch = flag.Bool("disable-custom-header-match", false, "Disables usage of the X-Frontend-Url header for subdomain matching. Use Host header instead. Useful during development.")
+		err                      error
+		cfg                      *viper.Viper
+		viceDomain               string
+		configPath               = flag.String("config", "/etc/iplant/de/jobservices.yml", "The path to the config file.")
+		listenAddr               = flag.String("listen-addr", "0.0.0.0:60000", "The listen port number.")
+		casBase                  = flag.String("cas-base-url", "", "The base URL to the CAS host.")
+		casValidate              = flag.String("cas-validate", "validate", "The CAS URL endpoint for validating tickets.")
+		maxAge                   = flag.Int("max-age", 0, "The idle timeout for session, in seconds.")
+		sslCert                  = flag.String("ssl-cert", "", "Path to the SSL .crt file.")
+		sslKey                   = flag.String("ssl-key", "", "Path to the SSL .key file.")
+		ingressURL               = flag.String("ingress-url", "", "The URL to the cluster ingress.")
+		analysisHeader           = flag.String("analysis-header", "", "The Host header for the ingress service that gets the analysis ID.")
+		appExposerHeader         = flag.String("app-exposer-header", "", "The Host header value for the app-exposer service.")
+		accessHeader             = flag.String("access-header", "", "The Host header for the ingress service that checks analysis access.")
+		viceBaseURL              = flag.String("vice-base-url", "", "The domain for the VICE apps.")
+		disableAutoRefresh       = flag.Bool("disable-auto-refresh", false, "Turns off the auto-refresh feature on the loading page, which avoids hitting the graphql server.")
+		graphqlBase              = flag.String("graphql", "http://graphql-de/v1alpha1/graphql", "The base URL for the graphql provider.")
+		loadingUIPath            = flag.String("loading-ui-path", "./ui-loading", "Path to the loading UI build.")
+		landingUIPath            = flag.String("landing-ui-path", "./ui-landing", "Path to the landing UI build.")
+		disableCustomHeaderMatch = flag.Bool("disable-custom-header-match", false, "Disables usage of the X-Frontend-Url header for subdomain matching. Use Host header instead. Useful during development.")
 	)
 
 	flag.Parse()
@@ -484,21 +580,21 @@ func main() {
 		*appExposerHeader = appExposerHeaderCfg
 	}
 
-	// analysisHeaderCfg := cfg.GetString("k8s.get-analysis-id.header")
-	// if *analysisHeader == "" && analysisHeaderCfg == "" {
-	// 	log.Fatal("--analysis-header or k8s.get-analysis-id.header must be set.")
-	// }
-	// if *analysisHeader == "" && analysisHeaderCfg != "" {
-	// 	*analysisHeader = analysisHeaderCfg
-	// }
-	//
-	// accessHeaderCfg := cfg.GetString("k8s.check-resource-access.header")
-	// if *accessHeader == "" && accessHeaderCfg == "" {
-	// 	log.Fatal("--access-header or k8s.check-resource-access.header must be set.")
-	// }
-	// if *accessHeader == "" && accessHeaderCfg != "" {
-	// 	*accessHeader = accessHeaderCfg
-	// }
+	analysisHeaderCfg := cfg.GetString("k8s.get-analysis-id.header")
+	if *analysisHeader == "" && analysisHeaderCfg == "" {
+		log.Fatal("--analysis-header or k8s.get-analysis-id.header must be set.")
+	}
+	if *analysisHeader == "" && analysisHeaderCfg != "" {
+		*analysisHeader = analysisHeaderCfg
+	}
+
+	accessHeaderCfg := cfg.GetString("k8s.check-resource-access.header")
+	if *accessHeader == "" && accessHeaderCfg == "" {
+		log.Fatal("--access-header or k8s.check-resource-access.header must be set.")
+	}
+	if *accessHeader == "" && accessHeaderCfg != "" {
+		*accessHeader = accessHeaderCfg
+	}
 
 	viceBaseURLCfg := cfg.GetString("k8s.frontend.base")
 	if *viceBaseURL == "" && viceBaseURLCfg == "" {
@@ -551,28 +647,50 @@ func main() {
 		graphqlBase:      *graphqlBase,
 	}
 
+	c := &CAS{
+		casBase:                  *casBase,
+		casValidate:              *casValidate,
+		disableCustomHeaderMatch: *disableCustomHeaderMatch,
+		sessionStore:             sessionStore,
+	}
+
 	r := mux.NewRouter()
+
+	r.PathPrefix("/healthz").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "I'm healthy.")
+	})
+
 	api := r.PathPrefix("/api/").Subrouter()
 	api.Path("/url-ready").Queries("url", "").HandlerFunc(p.URLIsReady)
+
+	analyses := api.PathPrefix("/analyses").Subrouter()
+	analyses.Path("/running").Queries("user", "").HandlerFunc(p.RunningAnalyses)
+	analyses.Path("/finished").Queries("user", "").HandlerFunc(p.FinishedAnalyses)
 
 	jobs := api.PathPrefix("/jobs/").Subrouter()
 	jobs.Path("/status-updates").Queries("url", "").HandlerFunc(p.LookupJobStatusUpdates)
 
-	// If the query contains a ticket in the query params, then it needs to be
-	// validated.
-	r.PathPrefix("/healthz").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "I'm healthy.")
-	})
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*staticFilePath, "static")))))
-	r.PathPrefix("/").Queries("url", "").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join(*staticFilePath, "index.html"))
-	})
+	// Loading page routes
+	loading := r.PathPrefix("/loading").Subrouter()
+	loading.Path("/static").Handler(
+		http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*loadingUIPath, "static")))),
+	)
+	loading.Path("/").
+		Queries("url", "").
+		HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFile(w, r, filepath.Join(*loadingUIPath, "index.html"))
+		})
 
-	// r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(p.ValidateTicket))
-	//r.PathPrefix("/").MatcherFunc(p.NeedsSession).Handler(http.HandlerFunc(p.RedirectToCAS))
-	// r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// 	http.ServeFile(w, r, filepath.Join(*staticFilePath, "index.html"))
-	// })
+	// landing page routes
+	landing := r.PathPrefix("/landing").Subrouter()
+	landing.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(c.ValidateTicket))
+	landing.PathPrefix("/").MatcherFunc(c.NeedsSession).Handler(http.HandlerFunc(c.RedirectToCAS))
+	landing.Path("/static").Handler(
+		http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*landingUIPath, "static")))),
+	)
+	landing.Path("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join(*landingUIPath, "index.html"))
+	})
 
 	server := &http.Server{
 		Handler: r,
