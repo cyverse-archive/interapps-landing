@@ -10,11 +10,20 @@ import Description from '@material-ui/icons/Description';
 import Computer from '@material-ui/icons/Computer';
 import Assessment from '@material-ui/icons/Assessment';
 import Typography from '@material-ui/core/Typography';
+import RunningAnalysisDialog from './RunningAnalysisDialog';
+import Button from '@material-ui/core/Button';
+
+const paperWidth = '400px';
+const paperHeight = '210px';
 
 const styles = {
   card: {
-    maxWidth: '400px',
-    minHeight: '150px',
+    width: paperWidth,
+    height: paperHeight,
+  },
+  dialogPaper: {
+    minWidth: paperWidth,
+    minHeight: paperHeight,
   },
   title: {
     fontSize: '20px',
@@ -33,6 +42,11 @@ const styles = {
   appLink: {
     float: 'right',
   },
+  appInfo: {
+    float: 'left',
+    marginTop: '7px',
+    marginLeft: '0px',
+  },
   cardActions: {
     display: 'inline-block',
     width: '100%',
@@ -48,44 +62,80 @@ const styles = {
 };
 
 class RunningAnalysisCard extends Component {
+
+  state = {
+    dialogOpen: false
+  };
+
+  handleClickMoreInfo = () => {
+    this.setState({dialogOpen: true});
+  };
+
+  handleCloseDialog = () => {
+    this.setState({dialogOpen: false});
+  };
+
+  handleClickAppLink = () => {
+    alert("link clicked");
+  };
+
   render() {
     const { classes } = this.props;
     const { analysisName, analysisLink, owner, description } = this.props;
     const { appName } = this.props;
 
-    console.log(classes);
-
     return (
+      <div>
+        <RunningAnalysisDialog
+          handleClose={this.handleCloseDialog}
+          handleClickLink={this.handleClickAppLink}
+          open={this.state.dialogOpen}
+          analysisName={analysisName}
+          appName={appName}
+          owner={owner}
+          description={description}
+          analysisLink={analysisLink}
+          classes={classes}
+        />
+
       <Card className={classes.card}>
-        <CardContent>
-          <Typography className={classes.title} variant="h3" gutterBottom>
-            <Assessment className={classes.fieldIcon} />
+          <CardContent>
+            <Typography className={classes.title} variant="h3" gutterBottom>
+              <Assessment className={classes.fieldIcon} />
 
-            {analysisName}
-          </Typography>
-
-          <Typography className={classes.title} variant="h3" gutterBottom>
-            <Computer className={classes.fieldIcon} />
-
-            {appName}
-
-            <Typography color="textSecondary" className={classes.owner} gutterBottom>
-              Added by {owner}
+              {analysisName}
             </Typography>
-          </Typography>
 
-          <Typography>
-            <Description className={classes.fieldIcon} />
-            {description}
-          </Typography>
-        </CardContent>
+            <Typography className={classes.title} variant="h3" gutterBottom>
+              <Computer className={classes.fieldIcon} />
 
-        <CardActions className={classes.cardActions}>
-          <IconButton className={classes.appLink}>
-            <OpenInBrowser />
-          </IconButton>
-        </CardActions>
-      </Card>
+              {appName}
+
+              <Typography color="textSecondary" className={classes.owner} gutterBottom>
+                Added by {owner}
+              </Typography>
+            </Typography>
+
+            <Typography>
+              <Description className={classes.fieldIcon} />
+              {description}
+            </Typography>
+          </CardContent>
+
+          <CardActions className={classes.cardActions}>
+            <Button
+              className={classes.appInfo}
+              onClick={this.handleClickMoreInfo}
+              color="secondary"
+            >
+              More Info
+            </Button>
+            <IconButton className={classes.appLink} onClick={this.handleClickAppLink}>
+              <OpenInBrowser />
+            </IconButton>
+          </CardActions>
+        </Card>
+      </div>
     );
   }
 }
