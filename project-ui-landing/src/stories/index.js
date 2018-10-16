@@ -4,6 +4,8 @@ import { action } from '@storybook/addon-actions';
 import Button from '@material-ui/core/Button';
 import LandingAppBar from '../components/LandingAppBar';
 import RunningAnalysisCard from '../components/RunningAnalysisCard';
+import RunningAnalysisCardGrid from '../components/RunningAnalysisCardGrid';
+import { Analysis } from '../actions';
 import 'typeface-roboto';
 
 storiesOf('Button', module)
@@ -65,3 +67,68 @@ storiesOf('RunningAnalysisCard', module)
       owner="Owner Name123456789012345678901234567801234567890"
     />
   ));
+
+storiesOf('RunningAnalysisCardGrid', module)
+  .add('with one card', () => {
+    let analysis = new Analysis(
+      '0',
+      'test-analysis-name',
+      'test-app-name',
+      'this is a test of the running analysis card grid',
+      'test-owner-name'
+    );
+
+    return (
+      <RunningAnalysisCardGrid analyses={[analysis]} />
+    );
+  })
+  .add('with two cards', () => {
+    let analyses = [
+      new Analysis(
+        '0',
+        'test-analysis-name-0',
+        'test-app-name-0',
+        'this is a test of the running analysis card grid 0',
+        'test-owner-name 0'
+      ),
+      new Analysis(
+        '1',
+        'test-analysis-name-1',
+        'test-app-name-1',
+        'this is a test of the running analysis card grid 1',
+        'test-owner-name 1'
+      )
+    ];
+
+    return (
+      <RunningAnalysisCardGrid analyses={analyses} />
+    );
+  })
+  .add('with three cards', () => {
+    let nums = [...Array(3).keys()];
+    let analyses = nums.map(n => new Analysis(
+      `${n}`,
+      `test-analysis-name-${n}`,
+      `test-app-name=${n}`,
+      `this is a test of the running analysis card grid ${n}`,
+      `test-owner-name ${n}`
+    ));
+
+    return (
+      <RunningAnalysisCardGrid analyses={analyses} />
+    );
+  })
+  .add('with lots of cards', () => {
+    let nums = [...Array(30).keys()];
+    let analyses = nums.map(n => new Analysis(
+      `${n}`,
+      `test-analysis-name-${n}`,
+      `test-app-name=${n}`,
+      `this is a test of the running analysis card grid ${n}`,
+      `test-owner-name ${n}`
+    ));
+
+    return (
+      <RunningAnalysisCardGrid analyses={analyses} />
+    );
+  });
