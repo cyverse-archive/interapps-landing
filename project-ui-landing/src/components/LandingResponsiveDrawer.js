@@ -20,36 +20,31 @@ const drawerWidth = 240;
 const styles = theme => ({
   root: {
     flexGrow: 1,
-    height: 440,
     zIndex: 1,
     overflow: 'hidden',
     position: 'relative',
     display: 'flex',
-    width: '100%',
-  },
-  appBar: {
-    position: 'absolute',
-    marginLeft: drawerWidth,
-    [theme.breakpoints.up('md')]: {
-      width: `calc(100% - ${drawerWidth}px)`,
-    },
   },
   navIconHide: {
     [theme.breakpoints.up('md')]: {
       display: 'none',
     },
   },
-  toolbar: theme.mixins.toolbar,
   drawerPaper: {
     width: drawerWidth,
     [theme.breakpoints.up('md')]: {
       position: 'relative',
     },
+    borderRight: '0px',
+  },
+  navListPermanent: {
+    borderRight: '1px solid rgba(0, 0, 0, 0.1)',
   },
   content: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
     padding: theme.spacing.unit * 3,
+    minWidth: 0, // So the Typography noWrap works
   },
 });
 
@@ -63,8 +58,8 @@ class LandingResponsiveDrawer extends Component {
   };
 
   render() {
-    const { classes, theme } = this.props;
-    const {  handleClickApps, handleClickFinished, handleClickRunning } = this.props;
+    const { classes, theme, children} = this.props;
+    const { handleClickApps, handleClickFinished, handleClickRunning } = this.props;
 
     const drawer = (
       <div>
@@ -79,7 +74,7 @@ class LandingResponsiveDrawer extends Component {
 
     return (
       <div className={classes.root}>
-        <Hidden mdUp>
+        <Hidden mdUp className={classes.navListTemp}>
          <Drawer
            variant="temporary"
            anchor={theme.direction === 'rtl' ? 'right' : 'left'}
@@ -96,7 +91,7 @@ class LandingResponsiveDrawer extends Component {
          </Drawer>
        </Hidden>
 
-       <Hidden smDown implementation="css">
+       <Hidden smDown implementation="css" className={classes.navListPermanent}>
           <Drawer
             variant="permanent"
             open
@@ -107,14 +102,21 @@ class LandingResponsiveDrawer extends Component {
             {drawer}
           </Drawer>
         </Hidden>
+        <main className={classes.content}>
+          {children}
+        </main>
       </div>
     );
   }
 }
 
 LandingResponsiveDrawer.propTypes = {
-  classes: PropTypes.object.isRequired,
-  theme:   PropTypes.object.isRequired,
+  classes:             PropTypes.object.isRequired,
+  theme:               PropTypes.object.isRequired,
+  handleClickApps:     PropTypes.func.isRequired,
+  handleClickRunning:  PropTypes.func.isRequired,
+  handleClickFinished: PropTypes.func.isRequired,
+  //appBar:              PropTypes.object.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(LandingResponsiveDrawer);

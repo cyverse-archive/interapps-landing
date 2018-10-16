@@ -1,22 +1,14 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import Button from '@material-ui/core/Button';
 import LandingAppBar from '../components/LandingAppBar';
 import RunningAnalysisCard from '../components/RunningAnalysisCard';
 import RunningAnalysisCardGrid from '../components/RunningAnalysisCardGrid';
 import NavList from '../components/NavList';
 import LandingResponsiveDrawer from '../components/LandingResponsiveDrawer';
+import LandingMain from '../components/LandingMain';
 import { Analysis } from '../actions';
 import 'typeface-roboto';
-
-storiesOf('Button', module)
-  .add('with text', () => (
-    <Button onClick={action('clicked')}>Hello Button</Button>
-  ))
-  .add('with some emoji', () => (
-    <Button onClick={action('clicked')}><span role="img" aria-label="so cool">😀 😎 👍 💯</span></Button>
-  ));
 
 storiesOf('LandingAppBar', module)
   .add('default', () => (
@@ -156,3 +148,19 @@ storiesOf('LandingResponsiveDrawer', module)
       />
     );
   });
+
+storiesOf('LandingMain', module)
+  .add('default', () => {
+    let nums = [...Array(30).keys()];
+    let analyses = nums.map(n => new Analysis(
+      `${n}`,
+      `test-analysis-name-${n}`,
+      `test-app-name=${n}`,
+      `this is a test of the running analysis card grid ${n}`,
+      `test-owner-name ${n}`
+    ));
+
+    return (
+      <LandingMain runningAnalyses={analyses} />
+    );
+  })

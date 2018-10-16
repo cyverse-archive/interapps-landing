@@ -10,18 +10,18 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { withStyles } from '@material-ui/core/styles';
 
-const styles = {
+const styles = theme => ({
   root: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   grow: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   menuButton: {
     marginLeft: -12,
     marginRight: 20,
   },
-};
+});
 
 class LandingAppBar extends Component {
   state = {
@@ -47,10 +47,6 @@ class LandingAppBar extends Component {
       <div className={classes.root}>
         <AppBar position="static">
           <Toolbar>
-            <IconButton className={classes.MenuButton} color="inherit" aria-label="Menu">
-              <MenuIcon />
-            </IconButton>
-
             <Typography variant="h6" color="inherit" className={classes.grow}>
               Visual Interactive Computing Environment
             </Typography>

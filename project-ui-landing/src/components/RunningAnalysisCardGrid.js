@@ -18,7 +18,6 @@ class RunningAnalysisCardGrid extends Component {
   render() {
     const { classes, analyses } = this.props;
 
-    console.log(analyses);
     return (
         <Grid container className={classes.root} spacing={16}>
           <Grid item xs={12}>
