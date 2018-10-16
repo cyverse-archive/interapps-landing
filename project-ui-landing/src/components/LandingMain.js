@@ -36,17 +36,12 @@ class LandingMain extends Component {
     pageToShow: 0,
   };
 
-  handleClickApps = () => {
-    this.setState({pageToShow: ShowApps});
-  };
+  // need to close over 'this', otherwise it gets re-bound farther down the stack.
+  handleClickApps = () => ( () => this.setState({pageToShow: ShowApps}) );
 
-  handleClickRunning = () => {
-    this.setState({pagetoShow: ShowRunning});
-  };
+  handleClickRunning = () => ( () => this.setState({pageToShow: ShowRunning}) );
 
-  handleClickFinished = () => {
-    this.setState({pageToShow: ShowFinished});
-  };
+  handleClickFinished = () => ( () => this.setState({pageToShow: ShowFinished}) );
 
   render() {
     const { classes, runningAnalyses, finishedAnalyses, appsList } = this.props;
@@ -66,13 +61,14 @@ class LandingMain extends Component {
       default:
         console.log('unknown value for pageToShow');
     }
+
     return (
       <div>
         <LandingAppBar />
         <LandingResponsiveDrawer
-          handleClickFinished={this.handleClickFinished}
-          handleClickRunning={this.handleClickRunning}
-          handleClickApps={this.handleClickApps}
+          handleClickFinished={this.handleClickFinished()}
+          handleClickRunning={this.handleClickRunning()}
+          handleClickApps={this.handleClickApps()}
         >
           {mainContent}
         </LandingResponsiveDrawer>
