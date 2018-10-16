@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button';
 import LandingAppBar from '../components/LandingAppBar';
 import RunningAnalysisCard from '../components/RunningAnalysisCard';
 import RunningAnalysisCardGrid from '../components/RunningAnalysisCardGrid';
+import NavList from '../components/NavList';
 import { Analysis } from '../actions';
 import 'typeface-roboto';
 
@@ -130,5 +131,16 @@ storiesOf('RunningAnalysisCardGrid', module)
 
     return (
       <RunningAnalysisCardGrid analyses={analyses} />
+    );
+  });
+
+storiesOf('NavList', module)
+  .add('default', () => {
+    return (
+      <NavList
+        handleClickFinished={() => alert("Finished clicked")}
+        handleClickRunning={() => alert("Running clicked")}
+        handleClickApps={() => alert("Apps clicked")}
+      />
     );
   });
