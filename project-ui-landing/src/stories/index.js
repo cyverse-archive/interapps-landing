@@ -6,6 +6,7 @@ import LandingAppBar from '../components/LandingAppBar';
 import RunningAnalysisCard from '../components/RunningAnalysisCard';
 import RunningAnalysisCardGrid from '../components/RunningAnalysisCardGrid';
 import NavList from '../components/NavList';
+import LandingResponsiveDrawer from '../components/LandingResponsiveDrawer';
 import { Analysis } from '../actions';
 import 'typeface-roboto';
 
@@ -138,6 +139,17 @@ storiesOf('NavList', module)
   .add('default', () => {
     return (
       <NavList
+        handleClickFinished={() => alert("Finished clicked")}
+        handleClickRunning={() => alert("Running clicked")}
+        handleClickApps={() => alert("Apps clicked")}
+      />
+    );
+  });
+
+storiesOf('LandingResponsiveDrawer', module)
+  .add('default', () => {
+    return (
+      <LandingResponsiveDrawer
         handleClickFinished={() => alert("Finished clicked")}
         handleClickRunning={() => alert("Running clicked")}
         handleClickApps={() => alert("Apps clicked")}
