@@ -28,45 +28,34 @@ export class Analysis {
   }
 }
 
+export class App {
+  constructor(
+    uuid,
+    name,
+    toolName,
+    toolVersion,
+    description,
+    creator
+  ) {
+    this.uuid = uuid
+    this.name = name
+    this.toolName = toolName
+    this.toolVersion = toolVersion
+    this.description = description
+    this.creator = creator
+  }
+}
+
 const defaultState = {
+  mobileOpen: false,
   username: "",
   email: "",
   apps : {
-    index: {
-      // "uuid" : {
-      //   appName: "",
-      //   toolName: "",
-      //   appVersion: "",
-      //   toolVersion: "",
-      //   description: "",
-      //   creator: "",
-      //   permissions: [""]
-      // }
-    },
+    index: {},
     appsList: [] // Only store UUIDs.
   },
   analyses : {
-    index: {
-      // Example of what should be stored in the index
-      // "uuid" : {
-      //   appID: "",
-      //   appName: "",
-      //   toolName: "",
-      //   appVersion: "",
-      //   toolVersion: "",
-      //   description: "",
-      //   owner: "",
-      //   permissions: [""],
-      //   inputs : {
-      //     files: [""],
-      //     folders: [""]
-      //   },
-      //   status: "",
-      //   startDate: "",
-      //   endDate: "",
-      //   plannedEndDate: 0,
-      // }
-    },
+    index: {},
     "running" : {
       isFetching: false,
       didInvalidate: false,
@@ -81,3 +70,14 @@ const defaultState = {
     }
   }
 };
+
+export const { toggleMobileOpen } = createActions({
+  TOGGLE_MOBILE_OPEN: () => {},
+});
+
+export const reducer = handleActions(
+  {
+    TOGGLE_MOBILE_OPEN: (state, {payload: mobileOpen}) => ({ ...state, mobileOpen: !state.mobileOpen}),
+  },
+  defaultState
+);

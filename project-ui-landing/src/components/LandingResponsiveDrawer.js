@@ -1,5 +1,10 @@
+// React/Redux imports
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { toggleMobileOpen } from '../actions';
+
+// Material UI Imports
 import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
@@ -10,6 +15,8 @@ import IconButton from '@material-ui/core/IconButton';
 import Hidden from '@material-ui/core/Hidden';
 import Divider from '@material-ui/core/Divider';
 import MenuIcon from '@material-ui/icons/Menu';
+
+// Components imports
 import NavList from './NavList';
 import LandingAppBar from './LandingAppBar';
 
@@ -49,17 +56,17 @@ const styles = theme => ({
 });
 
 class LandingResponsiveDrawer extends Component {
-  state = {
-    mobileOpen: false,
-  };
-
-  handleDrawerToggle = () => {
-    this.setState(state => ({ mobileOpen: !state.mobileOpen }));
-  };
-
   render() {
-    const { classes, theme, children} = this.props;
-    const { handleClickApps, handleClickFinished, handleClickRunning } = this.props;
+    const {
+      classes,
+      theme,
+      children,
+      mobileOpen,
+      handleClickApps,
+      handleClickFinished,
+      handleClickRunning,
+      handleDrawerToggle,
+    } = this.props;
 
     const drawer = (
       <div>
@@ -78,8 +85,8 @@ class LandingResponsiveDrawer extends Component {
          <Drawer
            variant="temporary"
            anchor={theme.direction === 'rtl' ? 'right' : 'left'}
-           open={this.state.mobileOpen}
-           onClose={this.handleDrawerToggle}
+           open={this.mobileOpen}
+           onClose={handleDrawerToggle}
            classes={{
              paper: classes.drawerPaper,
            }}
@@ -110,13 +117,26 @@ class LandingResponsiveDrawer extends Component {
   }
 }
 
+const mapStateToProps = state => ({ mobileOpen: state.mobileOpen });
+
+const mapDispatchToProps = dispatch => ({
+  handleDrawerToggle: () => dispatch(toggleMobileOpen),
+});
+
 LandingResponsiveDrawer.propTypes = {
   classes:             PropTypes.object.isRequired,
   theme:               PropTypes.object.isRequired,
   handleClickApps:     PropTypes.func.isRequired,
   handleClickRunning:  PropTypes.func.isRequired,
   handleClickFinished: PropTypes.func.isRequired,
-  //appBar:              PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(LandingResponsiveDrawer);
+const MappedLandingResponsiveDrawer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LandingResponsiveDrawer)
+
+export default withStyles(
+  styles,
+  { withTheme: true }
+)(MappedLandingResponsiveDrawer);

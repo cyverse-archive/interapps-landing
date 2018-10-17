@@ -8,6 +8,7 @@ import NavList from '../components/NavList';
 import LandingResponsiveDrawer from '../components/LandingResponsiveDrawer';
 import LandingMain from '../components/LandingMain';
 import { Analysis } from '../actions';
+import Provider from './Provider';
 import 'typeface-roboto';
 
 storiesOf('LandingAppBar', module)
@@ -139,6 +140,7 @@ storiesOf('NavList', module)
   });
 
 storiesOf('LandingResponsiveDrawer', module)
+  .addDecorator(story => <Provider story={story()} />)
   .add('default', () => {
     return (
       <LandingResponsiveDrawer
@@ -150,6 +152,7 @@ storiesOf('LandingResponsiveDrawer', module)
   });
 
 storiesOf('LandingMain', module)
+  .addDecorator(story => <Provider story={story()} />)
   .add('default', () => {
     let nums = [...Array(30).keys()];
     let analyses = nums.map(n => new Analysis(
