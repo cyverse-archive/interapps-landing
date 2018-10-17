@@ -35,7 +35,7 @@ const styles = {
   },
   fieldIcon: {
     position: 'relative',
-    top: '-3px',
+    top: '-2px',
   },
   appLink: {
     top: '-5px',
