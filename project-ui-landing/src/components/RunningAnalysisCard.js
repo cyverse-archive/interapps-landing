@@ -1,56 +1,70 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import classnames from 'classnames';
+
+import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import Collapse from '@material-ui/core/Collapse';
+import Computer from '@material-ui/icons/Computer';
 import IconButton from '@material-ui/core/IconButton';
 import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
-import Description from '@material-ui/icons/Description';
-import Computer from '@material-ui/icons/Computer';
 import Assessment from '@material-ui/icons/Assessment';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
-import RunningAnalysisDialog from './RunningAnalysisDialog';
+import green from '@material-ui/core/colors/green';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
+import AccountCircle from '@material-ui/icons/AccountCircle';
+
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const paperMaxWidth = '400px';
 const paperMinWidth = '250px';
 const paperHeight = '300px';
 
-const styles = {
-  descriptionText: {
-    height: '7em',
+const styles = theme => ({
+  root: {
+    flexGrow: 1,
+    marginLeft: 7,
+  },
+  actions: {
+    display: 'flex',
+  },
+  expand: {
+    transform: 'rotate(0deg)',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.shortest,
+    }),
+    marginLeft: 'auto',
+    [theme.breakpoints.up('sm')]: {
+      marginRight: -8,
+    },
   },
   card: {
-    maxWidth: paperMaxWidth,
-    height: paperHeight,
+    width: 300,
   },
-  fieldIcon: {
-    position: 'relative',
-    top: '-2px',
+  avatar: {
+    backgroundColor: green[500],
   },
-  appLink: {
-    top: '-5px',
+  iconCell: {
+    marginTop: "-2px",
   },
-  owner: {
-    marginTop: '5px',
-  },
-};
+});
 
 const ellipsize = (s, limit) => [...s].slice(0, limit-4).join('') + '...';
 
 class RunningAnalysisCard extends Component {
-  state = {
-    dialogOpen: false
-  };
+  state = { expanded: false };
 
-  handleClickMoreInfo = () => {
-    this.setState({dialogOpen: true});
-  };
-
-  handleCloseDialog = () => {
-    this.setState({dialogOpen: false});
+  handleExpandClick = () => {
+    this.setState(state => ({ expanded: !state.expanded }));
   };
 
   handleClickAppLink = () => {
@@ -62,112 +76,76 @@ class RunningAnalysisCard extends Component {
     const { analysisName, analysisLink, owner, description } = this.props;
     const { appName } = this.props;
 
-    let displayDescription = "";
-    if ([...description].length > 240) {
-      displayDescription = ellipsize(description, 240);
-    } else {
-      displayDescription = description;
-    }
-
     let displayAnalysisName = "";
-    if ([...analysisName].length > 28) {
-      displayAnalysisName = ellipsize(analysisName, 28);
+    if ([...analysisName].length > 24) {
+      displayAnalysisName = ellipsize(analysisName, 24);
     } else {
       displayAnalysisName = analysisName;
     }
 
     let displayAppName = "";
-    if ([...appName].length > 28) {
-      displayAppName = ellipsize(appName, 28);
+    if ([...appName].length > 24) {
+      displayAppName = ellipsize(appName, 24);
     } else {
       displayAppName = appName;
     }
 
     let displayOwner = "";
-    if ([...owner].length > 28) {
-      displayOwner = ellipsize(owner, 28);
+    if ([...owner].length > 24) {
+      displayOwner += ellipsize(owner, 24);
     } else {
-      displayOwner = owner;
+      displayOwner += owner;
     }
 
     return (
-      <div>
-        <RunningAnalysisDialog
-          handleClose={this.handleCloseDialog}
-          handleClickLink={this.handleClickAppLink}
-          open={this.state.dialogOpen}
-          analysisName={analysisName}
-          appName={appName}
-          owner={owner}
-          description={description}
-          analysisLink={analysisLink}
+      <Card className={classes.card}>
+        <CardHeader
+          avatar={
+            <Avatar aria-label="Running analysis" className={classes.avatar}>
+              <Assessment />
+            </Avatar>
+          }
+          title={displayAnalysisName}
+          subheader={displayAppName}
         />
 
-        <Card className={classes.card}>
-          <Grid container className={classes.root} spacing={8}>
-            <Grid item xs={12}>
-              <CardContent>
-                <Grid container className={classes.cardContentGrid} spacing={8}>
-                  <Grid item xs={1}>
-                    <Assessment className={classes.fieldIcon} />
-                  </Grid>
-
-                  <Grid item xs={11}>
-                    <Typography gutterBottom>
-                      {displayAnalysisName}
-                    </Typography>
-                  </Grid>
-
-                  <Grid item xs={1}>
-                    <Computer className={classes.fieldIcon} />
-                  </Grid>
-
-                  <Grid item xs={11}>
-                    <Typography gutterBottom>
-                      {displayAppName}
-
-                      <Typography color="textSecondary" gutterBottom>
-                        Added by {displayOwner}
-                      </Typography>
-                    </Typography>
-                  </Grid>
-
-                  <Grid item xs={1}>
-                    <Description className={classes.descriptionIcon} />
-                  </Grid>
-
-                  <Grid item xs={11}>
-                    <Typography className={classes.descriptionText}>
-                      {displayDescription}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </CardContent>
+        <CardContent>
+          <Grid container className={classes.root} spacing={12}>
+            <Grid item xs={1}>
+              <AccountCircle className={classes.iconCell}/>
             </Grid>
-
-            <Grid item xs={12}>
-              <CardActions>
-                <Grid container className={classes.cardActionsGrid} spacing={8}>
-                  <Grid item xs={4}>
-                    <Button
-                      onClick={this.handleClickMoreInfo}
-                      color="secondary"
-                    >
-                      More Info
-                    </Button>
-                  </Grid>
-                  <Grid item xs={6}></Grid>
-                  <Grid item xs={1}>
-                    <IconButton className={classes.appLink} onClick={this.handleClickAppLink}>
-                      <OpenInBrowser />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </CardActions>
+            <Grid item xs={1} />
+            <Grid item xs={10}>
+              <Typography>{displayOwner}</Typography>
             </Grid>
           </Grid>
-        </Card>
-      </div>
+        </CardContent>
+
+        <CardActions className={classes.action} disableActionSpacing>
+          <IconButton className={classes.appLink} onClick={this.handleClickAppLink}>
+            <OpenInBrowser />
+          </IconButton>
+
+          <IconButton
+            className={classnames(classes.expand, {
+              [classes.expandOpen]: this.state.expanded,
+            })}
+            onClick={this.handleExpandClick}
+            aria-expanded={this.state.expanded}
+            aria-label="Show more"
+          >
+            <ExpandMoreIcon />
+          </IconButton>
+        </CardActions>
+
+        <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
+          <CardContent>
+            <Typography>
+              {description}
+            </Typography>
+          </CardContent>
+        </Collapse>
+      </Card>
     );
   }
 }
@@ -181,4 +159,7 @@ RunningAnalysisCard.propTypes = {
   analysisLink: PropTypes.string.isRequired,
 };
 
-export default withStyles(styles)(RunningAnalysisCard);
+export default withStyles(
+  styles,
+  { withTheme: true }
+)(RunningAnalysisCard);
