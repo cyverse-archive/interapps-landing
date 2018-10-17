@@ -91,7 +91,7 @@ class LandingResponsiveDrawer extends Component {
          <Drawer
            variant="temporary"
            anchor={theme.direction === 'rtl' ? 'right' : 'left'}
-           open={this.mobileOpen}
+           open={mobileOpen}
            onClose={handleDrawerToggle}
            classes={{
              paper: classes.drawerPaper,
