@@ -12,11 +12,15 @@ import Assessment from '@material-ui/icons/Assessment';
 import Typography from '@material-ui/core/Typography';
 import RunningAnalysisDialog from './RunningAnalysisDialog';
 import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 
 const paperWidth = '400px';
-const paperHeight = '250px';
+const paperHeight = '265px';
 
 const styles = {
+  descriptionText: {
+    height: '4em',
+  },
   card: {
     width: paperWidth,
     height: paperHeight,
@@ -28,35 +32,15 @@ const styles = {
   title: {
     fontSize: '20px',
     fontWeight: '400',
-    marginBottom: '15px',
-  },
-  pos: {
-    marginBottom: 12,
   },
   fieldIcon: {
-    float: 'left',
     position: 'relative',
-    marginRight: '10px',
     top: '-3px',
   },
   appLink: {
-    float: 'right',
-  },
-  appInfo: {
-    float: 'left',
-    marginTop: '7px',
-    marginLeft: '0px',
-  },
-  cardActions: {
-    display: 'inline-block',
-    width: '100%',
-  },
-  descriptionBlock: {
-    display: 'inline-block',
-    width: '100%',
+    top: '-5px',
   },
   owner: {
-    marginLeft: '34px',
     marginTop: '5px',
   },
 };
@@ -127,43 +111,69 @@ class RunningAnalysisCard extends Component {
           classes={classes}
         />
 
-      <Card className={classes.card}>
-          <CardContent>
-            <Typography className={classes.title} variant="h3" gutterBottom>
-              <Assessment className={classes.fieldIcon} />
+        <Card className={classes.card}>
+          <Grid container className={classes.root} spacing={8}>
+            <Grid item xs={12}>
+              <CardContent>
+                <Grid container className={classes.cardContentGrid} spacing={8}>
+                  <Grid item xs={1}>
+                    <Assessment className={classes.fieldIcon} />
+                  </Grid>
 
-              {displayAnalysisName}
-            </Typography>
+                  <Grid item xs={11}>
+                    <Typography className={classes.title} variant="h3" gutterBottom>
+                      {displayAnalysisName}
+                    </Typography>
+                  </Grid>
 
-            <Typography className={classes.title} variant="h3" gutterBottom>
-              <Computer className={classes.fieldIcon} />
+                  <Grid item xs={1}>
+                    <Computer className={classes.fieldIcon} />
+                  </Grid>
 
-              {displayAppName}
+                  <Grid item xs={11}>
+                    <Typography className={classes.title} variant="h3" gutterBottom>
+                      {displayAppName}
 
-              <Typography color="textSecondary" className={classes.owner} gutterBottom>
-                Added by {displayOwner}
-              </Typography>
-            </Typography>
+                      <Typography color="textSecondary" className={classes.owner} gutterBottom>
+                        Added by {displayOwner}
+                      </Typography>
+                    </Typography>
+                  </Grid>
 
-            <Typography>
-              <Description className={classes.fieldIcon} />
+                  <Grid item xs={1}>
+                    <Description className={classes.descriptionIcon} />
+                  </Grid>
 
-              {displayDescription}
-            </Typography>
-          </CardContent>
+                  <Grid item xs={11}>
+                    <Typography className={classes.descriptionText}>
+                      {displayDescription}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Grid>
 
-          <CardActions className={classes.cardActions}>
-            <Button
-              className={classes.appInfo}
-              onClick={this.handleClickMoreInfo}
-              color="secondary"
-            >
-              More Info
-            </Button>
-            <IconButton className={classes.appLink} onClick={this.handleClickAppLink}>
-              <OpenInBrowser />
-            </IconButton>
-          </CardActions>
+            <Grid item xs={12}>
+              <CardActions>
+                <Grid container className={classes.cardActionsGrid} spacing={8}>
+                  <Grid item xs={4}>
+                    <Button
+                      onClick={this.handleClickMoreInfo}
+                      color="secondary"
+                    >
+                      More Info
+                    </Button>
+                  </Grid>
+                  <Grid item xs={6}></Grid>
+                  <Grid item xs={1}>
+                    <IconButton className={classes.appLink} onClick={this.handleClickAppLink}>
+                      <OpenInBrowser />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              </CardActions>
+            </Grid>
+          </Grid>
         </Card>
       </div>
     );
