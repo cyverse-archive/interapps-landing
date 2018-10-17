@@ -46,8 +46,13 @@ export class App {
   }
 }
 
+export const ShowRunning = 0;
+export const ShowFinished = 1;
+export const ShowApps = 2;
+
 const defaultState = {
   mobileOpen: false,
+  pageToShow: ShowRunning,
   username: "",
   email: "",
   apps : {
@@ -71,13 +76,15 @@ const defaultState = {
   }
 };
 
-export const { toggleMobileOpen } = createActions({
+export const { toggleMobileOpen, setPageToShow } = createActions({
   TOGGLE_MOBILE_OPEN: () => {},
+  SET_PAGE_TO_SHOW: (pageToShow = ShowRunning) => pageToShow,
 });
 
 export const reducer = handleActions(
   {
     TOGGLE_MOBILE_OPEN: (state, {payload: mobileOpen}) => ({ ...state, mobileOpen: !state.mobileOpen}),
+    SET_PAGE_TO_SHOW: (state, {payload: pageToShow}) => ({ ...state, pageToShow: pageToShow}),
   },
   defaultState
 );

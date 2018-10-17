@@ -2,7 +2,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { toggleMobileOpen } from '../actions';
+import {
+  toggleMobileOpen,
+  setPageToShow,
+  ShowRunning,
+  ShowFinished,
+  ShowApps
+} from '../actions';
 
 // Material UI Imports
 import { withStyles } from '@material-ui/core/styles';
@@ -120,15 +126,15 @@ class LandingResponsiveDrawer extends Component {
 const mapStateToProps = state => ({ mobileOpen: state.mobileOpen });
 
 const mapDispatchToProps = dispatch => ({
-  handleDrawerToggle: () => dispatch(toggleMobileOpen),
+  handleDrawerToggle:  () => dispatch(toggleMobileOpen()),
+  handleClickApps:     () => dispatch(setPageToShow(ShowApps)),
+  handleClickFinished: () => dispatch(setPageToShow(ShowFinished)),
+  handleClickRunning:  () => dispatch(setPageToShow(ShowRunning)),
 });
 
 LandingResponsiveDrawer.propTypes = {
   classes:             PropTypes.object.isRequired,
   theme:               PropTypes.object.isRequired,
-  handleClickApps:     PropTypes.func.isRequired,
-  handleClickRunning:  PropTypes.func.isRequired,
-  handleClickFinished: PropTypes.func.isRequired,
 };
 
 const MappedLandingResponsiveDrawer = connect(

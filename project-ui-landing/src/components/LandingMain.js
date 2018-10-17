@@ -1,14 +1,20 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import {
+  Analysis,
+  toggleMobileOpen,
+  setPageToShow,
+  ShowRunning,
+  ShowFinished,
+  ShowApps
+} from '../actions';
+
 import { withStyles } from '@material-ui/core/styles';
+
 import LandingAppBar from './LandingAppBar';
 import LandingResponsiveDrawer from './LandingResponsiveDrawer';
 import RunningAnalysisCardGrid from './RunningAnalysisCardGrid';
-import { Analysis } from '../actions';
-
-const ShowRunning = 0;
-const ShowFinished = 1;
-const ShowApps = 2;
 
 const styles = theme => ({
   root: {
@@ -32,23 +38,18 @@ const styles = theme => ({
 })
 
 class LandingMain extends Component {
-  state = {
-    pageToShow: 0,
-  };
-
-  // need to close over 'this', otherwise it gets re-bound farther down the stack.
-  handleClickApps = () => ( () => this.setState({pageToShow: ShowApps}) );
-
-  handleClickRunning = () => ( () => this.setState({pageToShow: ShowRunning}) );
-
-  handleClickFinished = () => ( () => this.setState({pageToShow: ShowFinished}) );
-
   render() {
-    const { classes, runningAnalyses, finishedAnalyses, appsList } = this.props;
+    const {
+      pageToShow,
+      classes,
+      runningAnalyses,
+      finishedAnalyses,
+      appsList
+    } = this.props;
 
     let mainContent;
 
-    switch (this.state.pageToShow) {
+    switch (pageToShow) {
       case ShowRunning:
         mainContent = (
           <RunningAnalysisCardGrid analyses={runningAnalyses} />
@@ -65,11 +66,7 @@ class LandingMain extends Component {
     return (
       <div>
         <LandingAppBar />
-        <LandingResponsiveDrawer
-          handleClickFinished={this.handleClickFinished()}
-          handleClickRunning={this.handleClickRunning()}
-          handleClickApps={this.handleClickApps()}
-        >
+        <LandingResponsiveDrawer>
           {mainContent}
         </LandingResponsiveDrawer>
       </div>
@@ -84,4 +81,15 @@ LandingMain.propTypes = {
   appsList:         PropTypes.arrayOf(Analysis).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(LandingMain);
+const mapStateToProps = state => ({
+  pageToShow: state.pageToShow,
+});
+
+const MappedLandingMain = connect(
+  mapStateToProps
+)(LandingMain);
+
+export default withStyles(
+  styles,
+  { withTheme: true }
+)(MappedLandingMain);
