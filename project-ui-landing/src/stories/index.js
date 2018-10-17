@@ -12,6 +12,7 @@ import Provider from './Provider';
 import 'typeface-roboto';
 
 storiesOf('LandingAppBar', module)
+  .addDecorator(story => <Provider story={story()} />)
   .add('default', () => (
     <LandingAppBar />
   ));

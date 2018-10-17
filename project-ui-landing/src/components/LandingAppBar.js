@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { toggleMobileOpen } from '../actions';
+
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -21,6 +24,11 @@ const styles = theme => ({
     marginLeft: -12,
     marginRight: 20,
   },
+  navIconHide: {
+  [theme.breakpoints.up('md')]: {
+    display: 'none',
+  },
+},
 });
 
 class LandingAppBar extends Component {
@@ -39,7 +47,7 @@ class LandingAppBar extends Component {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, handleDrawerToggle } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
 
@@ -47,8 +55,17 @@ class LandingAppBar extends Component {
       <div className={classes.root}>
         <AppBar position="static">
           <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="Open drawer"
+              onClick={handleDrawerToggle}
+              className={classes.navIconHide}
+            >
+              <MenuIcon />
+            </IconButton>
+
             <Typography variant="h6" color="inherit" className={classes.grow}>
-              Visual Interactive Computing Environment
+              VICE
             </Typography>
 
             <div>
@@ -89,4 +106,18 @@ LandingAppBar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(LandingAppBar);
+const mapStateToProps = state => ({...state});
+
+const mapDispatchToProps = dispatch => ({
+  handleDrawerToggle: () => dispatch(toggleMobileOpen()),
+});
+
+const MappedLandingAppBar = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LandingAppBar);
+
+export default withStyles(
+  styles,
+  {withTheme: true}
+)(MappedLandingAppBar);
