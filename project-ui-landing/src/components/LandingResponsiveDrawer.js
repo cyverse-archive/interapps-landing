@@ -56,7 +56,10 @@ const styles = theme => ({
   content: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
-    padding: theme.spacing.unit * 3,
+    paddingTop: theme.spacing.unit * 3,
+    paddingBottom: theme.spacing.unit * 3,
+    paddingRight: theme.spacing.unit * 1,
+    paddingLeft: theme.spacing.unit * 1,
     minWidth: 0, // So the Typography noWrap works
   },
 });

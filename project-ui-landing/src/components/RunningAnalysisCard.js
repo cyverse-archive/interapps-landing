@@ -14,7 +14,8 @@ import RunningAnalysisDialog from './RunningAnalysisDialog';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
-const paperWidth = '400px';
+const paperMaxWidth = '400px';
+const paperMinWidth = '250px';
 const paperHeight = '300px';
 
 const styles = {
@@ -22,11 +23,11 @@ const styles = {
     height: '7em',
   },
   card: {
-    width: paperWidth,
+    maxWidth: paperMaxWidth,
     height: paperHeight,
   },
   dialogPaper: {
-    minWidth: paperWidth,
+    minWidth: paperMaxWidth,
     minHeight: paperHeight,
   },
   title: {
@@ -70,29 +71,29 @@ class RunningAnalysisCard extends Component {
     const { appName } = this.props;
 
     let displayDescription = "";
-    if ([...description].length > 280) {
-      displayDescription = ellipsize(description, 280);
+    if ([...description].length > 240) {
+      displayDescription = ellipsize(description, 240);
     } else {
       displayDescription = description;
     }
 
     let displayAnalysisName = "";
-    if ([...analysisName].length > 32) {
-      displayAnalysisName = ellipsize(analysisName, 32);
+    if ([...analysisName].length > 28) {
+      displayAnalysisName = ellipsize(analysisName, 28);
     } else {
       displayAnalysisName = analysisName;
     }
 
     let displayAppName = "";
-    if ([...appName].length > 30) {
-      displayAppName = ellipsize(appName, 30);
+    if ([...appName].length > 28) {
+      displayAppName = ellipsize(appName, 28);
     } else {
       displayAppName = appName;
     }
 
     let displayOwner = "";
-    if ([...owner].length > 34) {
-      displayOwner = ellipsize(owner, 34);
+    if ([...owner].length > 28) {
+      displayOwner = ellipsize(owner, 28);
     } else {
       displayOwner = owner;
     }
