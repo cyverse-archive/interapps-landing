@@ -11,8 +11,26 @@ import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import Description from '@material-ui/icons/Description';
 import Computer from '@material-ui/icons/Computer';
 import Assessment from '@material-ui/icons/Assessment';
+import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import withMobileDialog from '@material-ui/core/withMobileDialog';
+import Grid from '@material-ui/core/Grid';
+ //               className={{ paper: classes.dialogPaper }}
+const styles = {
+  root: {
+    padding: "20px",
+  },
+  fieldIcon: {
+    position: 'relative',
+    top: '-2px',
+  },
+  appLink: {
+    top: '-5px',
+  },
+  owner: {
+    marginTop: '5px',
+  },
+};
 
 class RunningAnalysisDialog extends Component {
   render() {
@@ -25,37 +43,53 @@ class RunningAnalysisDialog extends Component {
               open={open}
               onClose={handleClose}
               aria-labelledby="running-analysis-name"
-              className={{ paper: classes.dialogPaper }}
       >
+        <Grid container spacing={8} className={classes.root}>
+          <Grid item xs={11} />
+          <Grid item xs={1}>
+            <IconButton color="inherit" onClick={handleClose} area-label="Close">
+              <CloseIcon />
+            </IconButton>
+          </Grid>
 
-        <DialogContent>
-          <Typography id="running-analysis-name" className={classes.title} variant="h3" gutterBottom>
+          <Grid item xs={1}>
             <Assessment className={classes.fieldIcon} />
-
-            {analysisName}
-          </Typography>
-
-          <Typography className={classes.title} variant="h3" gutterBottom>
-            <Computer className={classes.fieldIcon} />
-
-            {appName}
-
-            <Typography color="textSecondary" className={classes.owner} gutterBottom>
-              Added by {owner}
+          </Grid>
+          <Grid item xs={11}>
+            <Typography id="running-analysis-name" gutterBottom>
+              {analysisName}
             </Typography>
-          </Typography>
+          </Grid>
 
-          <Typography>
+          <Grid item xs={1}>
+            <Computer className={classes.fieldIcon} />
+          </Grid>
+          <Grid item xs={11}>
+            <Typography gutterBottom>
+              {appName}
+
+              <Typography color="textSecondary" className={classes.owner} gutterBottom>
+                Added by {owner}
+              </Typography>
+            </Typography>
+          </Grid>
+
+          <Grid item xs={1}>
             <Description className={classes.fieldIcon} />
-            {description}
-          </Typography>
-        </DialogContent>
+          </Grid>
+          <Grid item xs={11}>
+            <Typography>
+              {description}
+            </Typography>
+          </Grid>
 
-        <DialogActions>
-          <IconButton className={classes.appLink} onClick={handleClickLink} autoFocus>
-            <OpenInBrowser />
-          </IconButton>
-        </DialogActions>
+          <Grid item xs={11} />
+          <Grid item xs={1}>
+            <IconButton className={classes.appLink} onClick={handleClickLink} autoFocus>
+              <OpenInBrowser />
+            </IconButton>
+          </Grid>
+        </Grid>
       </Dialog>
     );
   };
@@ -73,4 +107,4 @@ RunningAnalysisDialog.propTypes = {
   analysisLink:    PropTypes.string.isRequired,
 };
 
-export default withMobileDialog()(RunningAnalysisDialog);
+export default withStyles(styles)(withMobileDialog()(RunningAnalysisDialog));

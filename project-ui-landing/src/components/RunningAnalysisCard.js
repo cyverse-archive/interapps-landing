@@ -26,14 +26,6 @@ const styles = {
     maxWidth: paperMaxWidth,
     height: paperHeight,
   },
-  dialogPaper: {
-    minWidth: paperMaxWidth,
-    minHeight: paperHeight,
-  },
-  title: {
-    fontSize: '20px',
-    fontWeight: '400',
-  },
   fieldIcon: {
     position: 'relative',
     top: '-2px',
@@ -109,7 +101,6 @@ class RunningAnalysisCard extends Component {
           owner={owner}
           description={description}
           analysisLink={analysisLink}
-          classes={classes}
         />
 
         <Card className={classes.card}>
@@ -122,7 +113,7 @@ class RunningAnalysisCard extends Component {
                   </Grid>
 
                   <Grid item xs={11}>
-                    <Typography className={classes.title} variant="h3" gutterBottom>
+                    <Typography gutterBottom>
                       {displayAnalysisName}
                     </Typography>
                   </Grid>
@@ -132,10 +123,10 @@ class RunningAnalysisCard extends Component {
                   </Grid>
 
                   <Grid item xs={11}>
-                    <Typography className={classes.title} variant="h3" gutterBottom>
+                    <Typography gutterBottom>
                       {displayAppName}
 
-                      <Typography color="textSecondary" className={classes.owner} gutterBottom>
+                      <Typography color="textSecondary" gutterBottom>
                         Added by {displayOwner}
                       </Typography>
                     </Typography>
