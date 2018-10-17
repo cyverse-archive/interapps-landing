@@ -15,11 +15,11 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
 const paperWidth = '400px';
-const paperHeight = '265px';
+const paperHeight = '300px';
 
 const styles = {
   descriptionText: {
-    height: '4em',
+    height: '7em',
   },
   card: {
     width: paperWidth,
@@ -70,8 +70,8 @@ class RunningAnalysisCard extends Component {
     const { appName } = this.props;
 
     let displayDescription = "";
-    if ([...description].length > 140) {
-      displayDescription = ellipsize(description, 140);
+    if ([...description].length > 280) {
+      displayDescription = ellipsize(description, 280);
     } else {
       displayDescription = description;
     }

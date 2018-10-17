@@ -17,6 +17,8 @@ storiesOf('LandingAppBar', module)
     <LandingAppBar />
   ));
 
+let bigDescription = `feugiat sed lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa eget egestas purus viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor eu augue ut lectus arcu bibendum at varius vel pharetra vel turpis nunc eget lorem dolor sed viverra ipsum nunc aliquet bibendum enim facilisis gravida neque convallis a cras semper auctor neque vitae tempus quam pellentesque nec nam aliquam sem et tortor consequat id porta nibh venenatis cras sed felis eget velit aliquet sagittis id consectetur purus ut faucibus pulvinar elementum integer enim neque volutpat ac tincidunt vitae semper quis lectus nulla at volutpat.`
+
 storiesOf('RunningAnalysisCard', module)
   .add('default', () => (
     <RunningAnalysisCard
@@ -27,12 +29,11 @@ storiesOf('RunningAnalysisCard', module)
       owner="Owner Name"
     />
   ))
-  .add('with description longer than 140 chars', () => (
+  .add('with description longer than 280 chars', () => (
     <RunningAnalysisCard
       appName="App Name"
       analysisName="Analysis Name"
-      description="This is a test description of a running analysis. Adding more characters for testing purposes. Hopefully this will have an ellipsis added to the end of it. Adding even more inconsequential text."
-      analysisLink="https://cyverse.org"
+      description={bigDescription}
       owner="Owner Name"
     />
   ))
@@ -40,8 +41,7 @@ storiesOf('RunningAnalysisCard', module)
     <RunningAnalysisCard
       appName="App Name"
       analysisName="Analysis Name12345678901234567890"
-      description="This is a test description of a running analysis. Adding more characters for testing purposes. Hopefully this will have an ellipsis added to the end of it. Adding even more inconsequential text."
-      analysisLink="https://cyverse.org"
+      description={bigDescription}
       owner="Owner Name"
     />
   ))
@@ -49,8 +49,7 @@ storiesOf('RunningAnalysisCard', module)
     <RunningAnalysisCard
       appName="App Name123456789012345678901234567890"
       analysisName="Analysis Name12345678901234567890"
-      description="This is a test description of a running analysis. Adding more characters for testing purposes. Hopefully this will have an ellipsis added to the end of it. Adding even more inconsequential text."
-      analysisLink="https://cyverse.org"
+      description={bigDescription}
       owner="Owner Name"
     />
   ))
@@ -58,7 +57,7 @@ storiesOf('RunningAnalysisCard', module)
     <RunningAnalysisCard
       appName="App Name123456789012345678901234567890"
       analysisName="Analysis Name12345678901234567890"
-      description="This is a test description of a running analysis. Adding more characters for testing purposes. Hopefully this will have an ellipsis added to the end of it. Adding even more inconsequential text."
+      description={bigDescription}
       analysisLink="https://cyverse.org"
       owner="Owner Name123456789012345678901234567801234567890"
     />
