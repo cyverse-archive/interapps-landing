@@ -115,8 +115,8 @@ class RunningAnalysisCard extends Component {
               <Grid item xs={10}>
                 <Typography noWrap>{startDate}</Typography>
               </Grid>
-              <Grid item xs={5} />
-              <Grid item xs={7}>
+              <Grid item xs={4} />
+              <Grid item xs={8}>
                 <ArrowDownward />
               </Grid>
               <Grid item xs={2} />
