@@ -45,7 +45,8 @@ const styles = theme => ({
     },
   },
   card: {
-    width: 300,
+    minWidth: 300,
+    maxWidth: 400,
   },
   avatar: {
     backgroundColor: green[500],
