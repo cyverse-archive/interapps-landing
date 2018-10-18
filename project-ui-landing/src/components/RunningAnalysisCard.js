@@ -54,7 +54,12 @@ const styles = theme => ({
   },
 });
 
-const ellipsize = (s, limit) => [...s].slice(0, limit-4).join('') + '...';
+const ellipsize = (s, limit) => {
+  if ([...s].length > limit) {
+    return [...s].slice(0, limit-4).join('') + '...';
+  }
+  return s;
+}
 
 class RunningAnalysisCard extends Component {
   state = { expanded: false };
@@ -79,87 +84,68 @@ class RunningAnalysisCard extends Component {
       plannedEndDate
     } = this.props;
 
-    let displayAnalysisName = "";
-    if ([...analysisName].length > 24) {
-      displayAnalysisName = ellipsize(analysisName, 24);
-    } else {
-      displayAnalysisName = analysisName;
-    }
-
-    let displayAppName = "";
-    if ([...appName].length > 24) {
-      displayAppName = ellipsize(appName, 24);
-    } else {
-      displayAppName = appName;
-    }
-
-    let displayOwner = "";
-    if ([...owner].length > 24) {
-      displayOwner += ellipsize(owner, 24);
-    } else {
-      displayOwner += owner;
-    }
-
     return (
-      <Card className={classes.card}>
-        <CardHeader
-          avatar={
-            <Avatar aria-label="Running analysis" className={classes.avatar}>
-              <Assessment />
-            </Avatar>
-          }
-          title={displayAnalysisName}
-          subheader={displayAppName}
-        />
+      <div className={classes.card}>
+        <Card>
+          <CardHeader
+            avatar={
+              <Avatar aria-label="Running analysis" className={classes.avatar}>
+                <Assessment />
+              </Avatar>
+            }
+            title={ellipsize(analysisName, 28)}
+            subheader={ellipsize(appName, 26)}
+          />
 
-        <CardContent>
-          <Grid container className={classes.root} spacing={12}>
-            <Grid item xs={1}>
-              <AccountCircle className={classes.iconCell}/>
-            </Grid>
-            <Grid item xs={1} />
-            <Grid item xs={10}>
-              <Typography>{displayOwner}</Typography>
-            </Grid>
-
-            <Grid item xs={2}>
-              <DateRange className={classes.iconCell} />
-            </Grid>
-            <Grid item xs={10}>
-              <Typography>{startDate}</Typography>
-            </Grid>
-            <Grid item xs={2} />
-            <Grid item xs={10}>
-              <Typography>{plannedEndDate}</Typography>
-            </Grid>
-          </Grid>
-        </CardContent>
-
-        <CardActions className={classes.action} disableActionSpacing>
-          <IconButton className={classes.appLink} onClick={this.handleClickAppLink}>
-            <OpenInBrowser />
-          </IconButton>
-
-          <IconButton
-            className={classnames(classes.expand, {
-              [classes.expandOpen]: this.state.expanded,
-            })}
-            onClick={this.handleExpandClick}
-            aria-expanded={this.state.expanded}
-            aria-label="Show more"
-          >
-            <ExpandMoreIcon />
-          </IconButton>
-        </CardActions>
-
-        <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
           <CardContent>
-            <Typography>
-              {description}
-            </Typography>
+            <Grid container className={classes.root} spacing={12}>
+              <Grid item xs={1}>
+                <AccountCircle className={classes.iconCell}/>
+              </Grid>
+              <Grid item xs={1} />
+              <Grid item xs={10}>
+                <Typography noWrap>{owner}</Typography>
+              </Grid>
+
+              <Grid item xs={2}>
+                <DateRange className={classes.iconCell} />
+              </Grid>
+              <Grid item xs={10}>
+                <Typography noWrap>{startDate}</Typography>
+              </Grid>
+              <Grid item xs={2} />
+              <Grid item xs={10}>
+                <Typography noWrap>{plannedEndDate}</Typography>
+              </Grid>
+            </Grid>
           </CardContent>
-        </Collapse>
-      </Card>
+
+          <CardActions className={classes.action} disableActionSpacing>
+            <IconButton className={classes.appLink} onClick={this.handleClickAppLink}>
+              <OpenInBrowser />
+            </IconButton>
+
+            <IconButton
+              className={classnames(classes.expand, {
+                [classes.expandOpen]: this.state.expanded,
+              })}
+              onClick={this.handleExpandClick}
+              aria-expanded={this.state.expanded}
+              aria-label="Show more"
+            >
+              <ExpandMoreIcon />
+            </IconButton>
+          </CardActions>
+
+          <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
+            <CardContent>
+              <Typography>
+                {description}
+              </Typography>
+            </CardContent>
+          </Collapse>
+        </Card>
+      </div>
     );
   }
 }
