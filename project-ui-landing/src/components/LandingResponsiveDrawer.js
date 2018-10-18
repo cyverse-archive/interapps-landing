@@ -55,8 +55,6 @@ const styles = theme => ({
   content: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
-    //paddingTop: theme.spacing.unit * 6,
-    //paddingBottom: theme.spacing.unit * 3,
     paddingRight: theme.spacing.unit * 1,
     paddingLeft: theme.spacing.unit * 1,
     minWidth: 0, // So the Typography noWrap works
@@ -79,7 +77,6 @@ class LandingResponsiveDrawer extends Component {
 
     const drawer = (
       <div>
-        <div className={classes.toolbar} />
         <NavList
           handleClickApps={handleClickApps}
           handleClickFinished={handleClickFinished}
@@ -100,7 +97,7 @@ class LandingResponsiveDrawer extends Component {
              paper: classes.drawerPaper,
            }}
            ModalProps={{
-             keepMounted: true, // Better open performance on mobile.
+             keepMounted: true,
            }}
          >
            {drawer}
@@ -115,6 +112,7 @@ class LandingResponsiveDrawer extends Component {
               paper: classes.drawerPaper,
             }}
           >
+            <div className={classes.toolbar} />
             {drawer}
           </Drawer>
         </Hidden>
