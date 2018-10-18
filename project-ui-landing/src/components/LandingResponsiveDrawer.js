@@ -33,7 +33,6 @@ const drawerWidth = 240;
 const styles = theme => ({
   root: {
     flexGrow: 1,
-    zIndex: 1,
     overflow: 'hidden',
     position: 'relative',
     display: 'flex',
@@ -56,12 +55,13 @@ const styles = theme => ({
   content: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
-    paddingTop: theme.spacing.unit * 3,
-    paddingBottom: theme.spacing.unit * 3,
-    paddingRight: theme.spacing.unit * 1,
-    paddingLeft: theme.spacing.unit * 1,
+    //paddingTop: theme.spacing.unit * 6,
+    //paddingBottom: theme.spacing.unit * 3,
+    //paddingRight: theme.spacing.unit * 1,
+    //paddingLeft: theme.spacing.unit * 1,
     minWidth: 0, // So the Typography noWrap works
   },
+  toolbar: theme.mixins.toolbar
 });
 
 class LandingResponsiveDrawer extends Component {
@@ -118,7 +118,9 @@ class LandingResponsiveDrawer extends Component {
             {drawer}
           </Drawer>
         </Hidden>
+
         <main className={classes.content}>
+          <div className={classes.toolbar} />
           {children}
         </main>
       </div>

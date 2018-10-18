@@ -17,6 +17,9 @@ const styles = theme => ({
   root: {
     flexGrow: 1,
   },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+  },
   grow: {
     flexGrow: 1,
   },
@@ -53,7 +56,7 @@ class LandingAppBar extends Component {
 
     return (
       <div className={classes.root}>
-        <AppBar position="static">
+        <AppBar position="absolute" className={classes.appBar}>
           <Toolbar>
             <IconButton
               color="inherit"

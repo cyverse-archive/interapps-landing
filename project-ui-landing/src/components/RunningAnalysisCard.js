@@ -20,6 +20,7 @@ import Assessment from '@material-ui/icons/Assessment';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import DateRange from '@material-ui/icons/DateRange';
+import ArrowDownward from '@material-ui/icons/ArrowDownward';
 
 const paperMaxWidth = '400px';
 const paperMinWidth = '250px';
@@ -112,6 +113,10 @@ class RunningAnalysisCard extends Component {
               </Grid>
               <Grid item xs={10}>
                 <Typography noWrap>{startDate}</Typography>
+              </Grid>
+              <Grid item xs={5} />
+              <Grid item xs={7}>
+                <ArrowDownward />
               </Grid>
               <Grid item xs={2} />
               <Grid item xs={10}>
