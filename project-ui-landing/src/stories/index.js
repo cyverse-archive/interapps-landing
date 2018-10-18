@@ -180,7 +180,22 @@ storiesOf('LandingResponsiveDrawer', module)
 
 storiesOf('LandingMain', module)
   .addDecorator(story => <Provider story={story()} />)
-  .add('default', () => {
+  .add('one analysis', () => {
+    let analysis = new Analysis(
+      "0",
+      "test-analysis-name",
+      "test-app-name",
+      "this is a test of the running analysis card grid",
+      "test-owner-name",
+      startDate.toLocaleString(),
+      endDate.toLocaleString()
+    );
+
+    return (
+      <LandingMain runningAnalyses={[analysis]} />
+    );
+  })
+  .add('lots of analyses', () => {
     let nums = [...Array(30).keys()];
     let analyses = nums.map(n => new Analysis(
       `${n}`,
