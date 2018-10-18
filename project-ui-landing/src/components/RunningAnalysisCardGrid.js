@@ -30,6 +30,8 @@ class RunningAnalysisCardGrid extends Component {
                     description={value.description}
                     analysisLink={value.link}
                     owner={value.owner}
+                    startDate={value.startDate}
+                    plannedEndDate={value.plannedEndDate}
                   />
                 </Grid>
               ))}

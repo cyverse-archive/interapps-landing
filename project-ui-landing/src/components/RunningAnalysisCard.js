@@ -9,21 +9,17 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Collapse from '@material-ui/core/Collapse';
-import Computer from '@material-ui/icons/Computer';
 import IconButton from '@material-ui/core/IconButton';
-import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
-import Assessment from '@material-ui/icons/Assessment';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import green from '@material-ui/core/colors/green';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
+import Computer from '@material-ui/icons/Computer';
+import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
+import Assessment from '@material-ui/icons/Assessment';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import DateRange from '@material-ui/icons/DateRange';
 
 const paperMaxWidth = '400px';
 const paperMinWidth = '250px';
@@ -72,9 +68,16 @@ class RunningAnalysisCard extends Component {
   };
 
   render() {
-    const { classes } = this.props;
-    const { analysisName, analysisLink, owner, description } = this.props;
-    const { appName } = this.props;
+    const {
+      classes,
+      appName,
+      analysisName,
+      analysisLink,
+      owner,
+      description,
+      startDate,
+      plannedEndDate
+    } = this.props;
 
     let displayAnalysisName = "";
     if ([...analysisName].length > 24) {
@@ -118,6 +121,17 @@ class RunningAnalysisCard extends Component {
             <Grid item xs={10}>
               <Typography>{displayOwner}</Typography>
             </Grid>
+
+            <Grid item xs={2}>
+              <DateRange className={classes.iconCell} />
+            </Grid>
+            <Grid item xs={10}>
+              <Typography>{startDate}</Typography>
+            </Grid>
+            <Grid item xs={2} />
+            <Grid item xs={10}>
+              <Typography>{plannedEndDate}</Typography>
+            </Grid>
           </Grid>
         </CardContent>
 
@@ -151,12 +165,14 @@ class RunningAnalysisCard extends Component {
 }
 
 RunningAnalysisCard.propTypes = {
-  classes:      PropTypes.object.isRequired,
-  analysisName: PropTypes.string.isRequired,
-  appName:      PropTypes.string.isRequired,
-  owner:        PropTypes.string.isRequired,
-  description:  PropTypes.string,
-  analysisLink: PropTypes.string.isRequired,
+  classes:        PropTypes.object.isRequired,
+  analysisName:   PropTypes.string.isRequired,
+  appName:        PropTypes.string.isRequired,
+  owner:          PropTypes.string.isRequired,
+  description:    PropTypes.string,
+  startDate:      PropTypes.number.isRequired,
+  plannedEndDate: PropTypes.number.isRequired,
+  analysisLink:   PropTypes.string.isRequired,
 };
 
 export default withStyles(

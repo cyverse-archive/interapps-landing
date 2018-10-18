@@ -19,21 +19,32 @@ storiesOf('LandingAppBar', module)
 
 let bigDescription = `feugiat sed lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa eget egestas purus viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor eu augue ut lectus arcu bibendum at varius vel pharetra vel turpis nunc eget lorem dolor sed viverra ipsum nunc aliquet bibendum enim facilisis gravida neque convallis a cras semper auctor neque vitae tempus quam pellentesque nec nam aliquam sem et tortor consequat id porta nibh venenatis cras sed felis eget velit aliquet sagittis id consectetur purus ut faucibus pulvinar elementum integer enim neque volutpat ac tincidunt vitae semper quis lectus nulla at volutpat.`
 
+let start = Date.now();
+let end = start + (86400000 * 2);
+let startDate = new Date(start);
+let endDate = new Date(end);
+
 storiesOf('RunningAnalysisCard', module)
-  .add('default', () => (
-    <RunningAnalysisCard
-      appName="App Name"
-      analysisName="Analysis Name"
-      description="This is a test description of a running analysis."
-      analysisLink="https://cyverse.org"
-      owner="Owner Name"
-    />
-  ))
+  .add('default', () => {
+    return (
+      <RunningAnalysisCard
+        appName="App Name"
+        analysisName="Analysis Name"
+        description="This is a test description of a running analysis."
+        analysisLink="https://cyverse.org"
+        startDate={startDate.toLocaleString()}
+        plannedEndDate={endDate.toLocaleString()}
+        owner="Owner Name"
+      />
+    );
+  })
   .add('with description longer than 280 chars', () => (
     <RunningAnalysisCard
       appName="App Name"
       analysisName="Analysis Name"
       description={bigDescription}
+      startDate={startDate.toLocaleString()}
+      plannedEndDate={endDate.toLocaleString()}
       owner="Owner Name"
     />
   ))
@@ -42,6 +53,8 @@ storiesOf('RunningAnalysisCard', module)
       appName="App Name"
       analysisName="Analysis Name12345678901234567890"
       description={bigDescription}
+      startDate={startDate.toLocaleString()}
+      plannedEndDate={endDate.toLocaleString()}
       owner="Owner Name"
     />
   ))
@@ -50,6 +63,8 @@ storiesOf('RunningAnalysisCard', module)
       appName="App Name123456789012345678901234567890"
       analysisName="Analysis Name12345678901234567890"
       description={bigDescription}
+      startDate={startDate.toLocaleString()}
+      plannedEndDate={endDate.toLocaleString()}
       owner="Owner Name"
     />
   ))
@@ -59,6 +74,8 @@ storiesOf('RunningAnalysisCard', module)
       analysisName="Analysis Name12345678901234567890"
       description={bigDescription}
       analysisLink="https://cyverse.org"
+      startDate={startDate.toLocaleString()}
+      plannedEndDate={endDate.toLocaleString()}
       owner="Owner Name123456789012345678901234567801234567890"
     />
   ));
@@ -70,7 +87,9 @@ storiesOf('RunningAnalysisCardGrid', module)
       'test-analysis-name',
       'test-app-name',
       'this is a test of the running analysis card grid',
-      'test-owner-name'
+      'test-owner-name',
+      startDate.toLocaleString(),
+      endDate.toLocaleString()
     );
 
     return (
@@ -84,14 +103,18 @@ storiesOf('RunningAnalysisCardGrid', module)
         'test-analysis-name-0',
         'test-app-name-0',
         'this is a test of the running analysis card grid 0',
-        'test-owner-name 0'
+        'test-owner-name 0',
+        startDate.toLocaleString(),
+        endDate.toLocaleString()
       ),
       new Analysis(
         '1',
         'test-analysis-name-1',
         'test-app-name-1',
         'this is a test of the running analysis card grid 1',
-        'test-owner-name 1'
+        'test-owner-name 1',
+        startDate.toLocaleString(),
+        endDate.toLocaleString()
       )
     ];
 
@@ -106,7 +129,9 @@ storiesOf('RunningAnalysisCardGrid', module)
       `test-analysis-name-${n}`,
       `test-app-name=${n}`,
       `this is a test of the running analysis card grid ${n}`,
-      `test-owner-name ${n}`
+      `test-owner-name ${n}`,
+      startDate.toLocaleString(),
+      endDate.toLocaleString()
     ));
 
     return (
@@ -120,7 +145,9 @@ storiesOf('RunningAnalysisCardGrid', module)
       `test-analysis-name-${n}`,
       `test-app-name=${n}`,
       `this is a test of the running analysis card grid ${n}`,
-      `test-owner-name ${n}`
+      `test-owner-name ${n}`,
+      startDate.toLocaleString(),
+      endDate.toLocaleString()
     ));
 
     return (
@@ -160,7 +187,9 @@ storiesOf('LandingMain', module)
       `test-analysis-name-${n}`,
       `test-app-name=${n}`,
       `this is a test of the running analysis card grid ${n}`,
-      `test-owner-name ${n}`
+      `test-owner-name ${n}`,
+      startDate.toLocaleString(),
+      endDate.toLocaleString()
     ));
 
     return (

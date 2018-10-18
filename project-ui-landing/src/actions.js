@@ -7,12 +7,12 @@ export class Analysis {
     appName,
     description,
     owner,
-    toolName = "",
-    status = "",
     startDate = "",
+    plannedEndDate = "",
     link = "",
+    status = "",
     endDate = "",
-    plannedEndDate = ""
+    toolName = ""
   ) {
     this.uuid = uuid
     this.name = name
