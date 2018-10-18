@@ -54,10 +54,11 @@ const styles = theme => ({
     borderRight: '1px solid rgba(0, 0, 0, 0.1)',
   },
   content: {
-    height: "100vh",
+    minHeight: "100vh",
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
     minWidth: 0, // So the Typography noWrap works
+    padding: 1,
   },
   toolbar: theme.mixins.toolbar
 });
