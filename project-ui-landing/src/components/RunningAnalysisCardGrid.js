@@ -19,25 +19,21 @@ class RunningAnalysisCardGrid extends Component {
     const { classes, analyses } = this.props;
 
     return (
-        <Grid container className={classes.root} spacing={16}>
-          <Grid item xs={12}>
-            <Grid container justify="center" spacing={16}>
-              {analyses.map(value => (
-                <Grid key={value.uuid} item>
-                  <RunningAnalysisCard
-                    appName={value.appName}
-                    analysisName={value.name}
-                    description={value.description}
-                    analysisLink={value.link}
-                    owner={value.owner}
-                    startDate={value.startDate}
-                    plannedEndDate={value.plannedEndDate}
-                  />
-                </Grid>
-              ))}
-            </Grid>
+      <Grid container justify="center" spacing={16}>
+        {analyses.map(value => (
+          <Grid item>
+            <RunningAnalysisCard
+              appName={value.appName}
+              analysisName={value.name}
+              description={value.description}
+              analysisLink={value.link}
+              owner={value.owner}
+              startDate={value.startDate}
+              plannedEndDate={value.plannedEndDate}
+            />
           </Grid>
-        </Grid>
+        ))}
+      </Grid>
     );
   };
 }

@@ -55,8 +55,6 @@ const styles = theme => ({
   content: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
-    paddingRight: theme.spacing.unit * 1,
-    paddingLeft: theme.spacing.unit * 1,
     minWidth: 0, // So the Typography noWrap works
   },
   toolbar: theme.mixins.toolbar

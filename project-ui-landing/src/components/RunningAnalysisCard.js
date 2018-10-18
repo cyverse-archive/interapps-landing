@@ -17,10 +17,12 @@ import Grid from '@material-ui/core/Grid';
 import Computer from '@material-ui/icons/Computer';
 import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import Assessment from '@material-ui/icons/Assessment';
+import Description from '@material-ui/icons/Description';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import DateRange from '@material-ui/icons/DateRange';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
+import Divider from '@material-ui/core/Divider';
 
 const paperMaxWidth = '400px';
 const paperMinWidth = '250px';
@@ -45,14 +47,19 @@ const styles = theme => ({
     },
   },
   card: {
-    minWidth: 300,
-    maxWidth: 400,
+    width: 300,
   },
   avatar: {
     backgroundColor: green[500],
   },
   iconCell: {
     marginTop: "-2px",
+  },
+  field: {
+    marginBottom: "1em",
+  },
+  descField: {
+    width: "100%",
   },
 });
 
@@ -99,32 +106,32 @@ class RunningAnalysisCard extends Component {
             subheader={ellipsize(appName, 26)}
           />
 
-          <CardContent>
-            <Grid container className={classes.root} spacing={12}>
-              <Grid item xs={1}>
-                <AccountCircle className={classes.iconCell}/>
-              </Grid>
-              <Grid item xs={1} />
-              <Grid item xs={10}>
-                <Typography noWrap>{owner}</Typography>
-              </Grid>
+          <Divider light />
 
-              <Grid item xs={2}>
-                <DateRange className={classes.iconCell} />
-              </Grid>
-              <Grid item xs={10}>
-                <Typography noWrap>{startDate}</Typography>
-              </Grid>
-              <Grid item xs={4} />
-              <Grid item xs={8}>
-                <ArrowDownward />
-              </Grid>
-              <Grid item xs={2} />
-              <Grid item xs={10}>
-                <Typography noWrap>{plannedEndDate}</Typography>
-              </Grid>
-            </Grid>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>
+              Submitted By
+            </Typography>
+            <Typography className={classes.field} gutterBottom>
+              {owner}
+            </Typography>
+
+            <Typography color="textSecondary" gutterBottom>
+              Launch Date
+            </Typography>
+            <Typography className={classes.field} gutterBottom noWrap>
+              {startDate}
+            </Typography>
+
+            <Typography color="textSecondary" gutterBottom>
+              Scheduled End Date
+            </Typography>
+            <Typography className={classes.field} gutterBottom noWrap>
+              {plannedEndDate}
+            </Typography>
           </CardContent>
+
+          <Divider light />
 
           <CardActions className={classes.action} disableActionSpacing>
             <IconButton className={classes.appLink} onClick={this.handleClickAppLink}>
@@ -145,7 +152,10 @@ class RunningAnalysisCard extends Component {
 
           <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
             <CardContent>
-              <Typography>
+              <Typography color="textSecondary" gutterBottom>
+                Description
+              </Typography>
+              <Typography className={classes.descField}>
                 {description}
               </Typography>
             </CardContent>
