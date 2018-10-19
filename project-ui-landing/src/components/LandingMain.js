@@ -8,7 +8,10 @@ import {
   ShowRunning,
   ShowCompleted,
   ShowFailed,
-  ShowApps
+  ShowApps,
+  StatusRunning,
+  StatusFailed,
+  StatusCompleted
 } from '../actions';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -43,7 +46,7 @@ class LandingMain extends Component {
     const {
       pageToShow,
       classes,
-      runningAnalyses,
+      analyses,
       finishedAnalyses,
       appsList
     } = this.props;
@@ -53,12 +56,18 @@ class LandingMain extends Component {
     switch (pageToShow) {
       case ShowRunning:
         mainContent = (
-          <AnalysisCardGrid analyses={runningAnalyses} />
+          <AnalysisCardGrid analysisKeys={analyses[StatusRunning]} />
         );
         break;
       case ShowCompleted:
+        mainContent = (
+          <AnalysisCardGrid analysisKeys={analyses[StatusCompleted]} />
+        )
         break;
       case ShowFailed:
+        mainContent = (
+          <AnalysisCardGrid analysisKeys={analyses[StatusFailed]} />
+        );
         break;
       case ShowApps:
         break;
@@ -78,14 +87,15 @@ class LandingMain extends Component {
 }
 
 LandingMain.propTypes = {
-  classes:          PropTypes.object.isRequired,
-  runningAnalyses:  PropTypes.arrayOf(Analysis).isRequired,
-  finishedAnalyses: PropTypes.arrayOf(Analysis).isRequired,
-  appsList:         PropTypes.arrayOf(Analysis).isRequired,
+  classes:  PropTypes.object.isRequired,
+  analyses: PropTypes.object.isRequired,
+  apps:     PropTypes.object.isRequired,
 };
 
 const mapStateToProps = state => ({
   pageToShow: state.pageToShow,
+  analyses:   state.analyses,
+  apps:       state.apps,
 });
 
 const MappedLandingMain = connect(

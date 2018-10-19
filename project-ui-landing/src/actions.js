@@ -62,34 +62,41 @@ const defaultState = {
   email: "",
   apps : {
     index: {},
-    appsList: [] // Only store UUIDs.
   },
   analyses : {
     index: {},
-    "running" : {
-      isFetching: false,
-      didInvalidate: false,
-      lastUpdated: 0,
-      items:[], // Only store UUIDs.
-    },
-    "finished" : {
-      isFetching: false,
-      didInvalidate: false,
-      lastUpdated: 0,
-      items:[] // Only store UUIDs.
-    }
+    [StatusRunning]: [],
+    [StatusCompleted]: [],
+    [StatusFailed]: []
   }
 };
 
-export const { toggleMobileOpen, setPageToShow } = createActions({
+export const { toggleMobileOpen, setPageToShow, addApp, addAnalysis } = createActions({
   TOGGLE_MOBILE_OPEN: () => {},
-  SET_PAGE_TO_SHOW: (pageToShow = ShowRunning) => pageToShow,
+  SET_PAGE_TO_SHOW:   (pageToShow = ShowRunning) => pageToShow,
+  ADD_APP:            (app) => app,
+  ADD_ANALYSIS:       (analysis) => analysis
 });
 
 export const reducer = handleActions(
   {
     TOGGLE_MOBILE_OPEN: (state, {payload: mobileOpen}) => ({ ...state, mobileOpen: !state.mobileOpen}),
-    SET_PAGE_TO_SHOW: (state, {payload: pageToShow}) => ({ ...state, pageToShow: pageToShow}),
+    SET_PAGE_TO_SHOW:   (state, {payload: pageToShow}) => ({ ...state, pageToShow: pageToShow}),
+    ADD_APP:            (state, {payload: app}) => ({ ...state, apps: {index: { ...state.apps.index, [app.uuid]: app}}}),
+    ADD_ANALYSIS:       (state, {payload: analysis}) => {
+      let status = analysis.status;
+      return {
+        ...state,
+        analyses: {
+          ...state.analyses,
+          index: {
+            ...state.analyses.index,
+            [analysis.uuid]: analysis
+          },
+          [analysis.status]: [ ...state.analyses[analysis.status], analysis.uuid ]
+        }
+      };
+    },
   },
   defaultState
 );

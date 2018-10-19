@@ -8,14 +8,29 @@ import NavList from '../components/NavList';
 import LandingResponsiveDrawer from '../components/LandingResponsiveDrawer';
 import LandingMain from '../components/LandingMain';
 import { Analysis } from '../actions';
-import Provider from './Provider';
+import { Provider } from 'react-redux';
+import { newStore } from '../store/configure';
+import { toggleMobileOpen, setPageToShow, addApp, addAnalysis } from '../actions';
 import 'typeface-roboto';
 
+
 storiesOf('LandingAppBar', module)
-  .addDecorator(story => <Provider story={story()} />)
-  .add('default', () => (
-    <LandingAppBar />
-  ));
+  .addDecorator(getStory => {
+    const store = newStore();
+
+    return (
+      <Provider store={store}>
+        <div>
+          {getStory()}
+        </div>
+      </Provider>
+    );
+  })
+  .add('default', () => {
+    return (
+      <LandingAppBar />
+    );
+  });
 
 let bigDescription = `feugiat sed lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa eget egestas purus viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor eu augue ut lectus arcu bibendum at varius vel pharetra vel turpis nunc eget lorem dolor sed viverra ipsum nunc aliquet bibendum enim facilisis gravida neque convallis a cras semper auctor neque vitae tempus quam pellentesque nec nam aliquam sem et tortor consequat id porta nibh venenatis cras sed felis eget velit aliquet sagittis id consectetur purus ut faucibus pulvinar elementum integer enim neque volutpat ac tincidunt vitae semper quis lectus nulla at volutpat.`
 
@@ -90,54 +105,8 @@ storiesOf('AnalysisCard', module)
   ));
 
 storiesOf('AnalysisCardGrid', module)
-  .add('with one card', () => {
-    let analysis = new Analysis(
-      '0',
-      'test-analysis-name',
-      'test-app-name',
-      'this is a test of the running analysis card grid',
-      'test-owner-name',
-      startDate.toLocaleString(),
-      endDate.toLocaleString(),
-      "http://localhost",
-      "Running"
-    );
-
-    return (
-      <AnalysisCardGrid analyses={[analysis]} />
-    );
-  })
-  .add('with two cards', () => {
-    let analyses = [
-      new Analysis(
-        '0',
-        'test-analysis-name-0',
-        'test-app-name-0',
-        'this is a test of the running analysis card grid 0',
-        'test-owner-name 0',
-        startDate.toLocaleString(),
-        endDate.toLocaleString(),
-        "http://localhost",
-        "Running"
-      ),
-      new Analysis(
-        '1',
-        'test-analysis-name-1',
-        'test-app-name-1',
-        'this is a test of the running analysis card grid 1',
-        'test-owner-name 1',
-        startDate.toLocaleString(),
-        endDate.toLocaleString(),
-        "http://localhost",
-        "Running"
-      )
-    ];
-
-    return (
-      <AnalysisCardGrid analyses={analyses} />
-    );
-  })
-  .add('with three cards', () => {
+  .addDecorator(getStory => {
+    const store = newStore();
     let nums = [...Array(3).keys()];
     let analyses = nums.map(n => new Analysis(
       `${n}`,
@@ -149,33 +118,34 @@ storiesOf('AnalysisCardGrid', module)
       endDate.toLocaleString(),
       "http://localhost",
       "Running"
-    ));
+    )).forEach(a => store.dispatch(addAnalysis(a)));
 
     return (
-      <AnalysisCardGrid analyses={analyses} />
+      <Provider store={store}>
+        <div>
+          {getStory()}
+        </div>
+      </Provider>
     );
   })
-  .add('with lots of cards', () => {
-    let nums = [...Array(30).keys()];
-    let analyses = nums.map(n => new Analysis(
-      `${n}`,
-      `test-analysis-name-${n}`,
-      `test-app-name=${n}`,
-      `this is a test of the running analysis card grid ${n}`,
-      `test-owner-name ${n}`,
-      startDate.toLocaleString(),
-      endDate.toLocaleString(),
-      "http://localhost",
-      "Running"
-    ));
-
+  .add('with three cards', () => {
     return (
-      <AnalysisCardGrid analyses={analyses} />
+      <AnalysisCardGrid analysisKeys={[...Array(3).keys()]} />
     );
   });
 
 storiesOf('NavList', module)
-  .addDecorator(story => <Provider story={story()} />)
+  .addDecorator(getStory => {
+    const store = newStore();
+
+    return (
+      <Provider store={store}>
+        <div>
+          {getStory()}
+        </div>
+      </Provider>
+    );
+  })
   .add('default', () => {
     return (
       <NavList />
@@ -183,7 +153,17 @@ storiesOf('NavList', module)
   });
 
 storiesOf('LandingResponsiveDrawer', module)
-  .addDecorator(story => <Provider story={story()} />)
+  .addDecorator(getStory => {
+    const store = newStore();
+
+    return (
+      <Provider store={store}>
+        <div>
+          {getStory()}
+        </div>
+      </Provider>
+    );
+  })
   .add('default', () => {
     return (
       <LandingResponsiveDrawer />
@@ -191,27 +171,12 @@ storiesOf('LandingResponsiveDrawer', module)
   });
 
 storiesOf('LandingMain', module)
-  .addDecorator(story => <Provider story={story()} />)
-  .add('one analysis', () => {
-    let analysis = new Analysis(
-      "0",
-      "test-analysis-name",
-      "test-app-name",
-      "this is a test of the running analysis card grid",
-      "test-owner-name",
-      startDate.toLocaleString(),
-      endDate.toLocaleString(),
-      "http://localhost",
-      "Running"
-    );
+  .addDecorator(getStory => {
+    const store = newStore();
 
-    return (
-      <LandingMain runningAnalyses={[analysis]} />
-    );
-  })
-  .add('lots of analyses', () => {
     let nums = [...Array(30).keys()];
-    let analyses = nums.map(n => new Analysis(
+
+    let running = nums.map(n => new Analysis(
       `${n}`,
       `test-analysis-name-${n}`,
       `test-app-name=${n}`,
@@ -223,7 +188,42 @@ storiesOf('LandingMain', module)
       "Running"
     ));
 
+    let failed = nums.map(n => new Analysis(
+      `${30+n}`,
+      `test-analysis-name-${30+n}`,
+      `test-app-name=${30+n}`,
+      `this is a test of the running analysis card grid ${30+n}`,
+      `test-owner-name ${30+n}`,
+      startDate.toLocaleString(),
+      endDate.toLocaleString(),
+      "http://localhost",
+      "Failed"
+    ));
+
+    let completed = nums.map(n => new Analysis(
+      `${60+n}`,
+      `test-analysis-name-${60+n}`,
+      `test-app-name=${60+n}`,
+      `this is a test of the running analysis card grid ${60+n}`,
+      `test-owner-name ${60+n}`,
+      startDate.toLocaleString(),
+      endDate.toLocaleString(),
+      "http://localhost",
+      "Completed"
+    ));
+
+    [...running, ...failed, ...completed].forEach(a => store.dispatch(addAnalysis(a)));
+
     return (
-      <LandingMain runningAnalyses={analyses} />
+      <Provider store={store}>
+        <div>
+          {getStory()}
+        </div>
+      </Provider>
+    );
+  })
+  .add('lots of analyses', () => {
+    return (
+      <LandingMain />
     );
   })
