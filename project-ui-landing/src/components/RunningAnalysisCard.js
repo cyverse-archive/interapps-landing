@@ -78,7 +78,7 @@ class RunningAnalysisCard extends Component {
   };
 
   handleClickAppLink = () => {
-    alert("link clicked");
+    window.open(this.props.analysisLink);
   };
 
   render() {
