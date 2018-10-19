@@ -90,7 +90,8 @@ class RunningAnalysisCard extends Component {
       owner,
       description,
       startDate,
-      plannedEndDate
+      plannedEndDate,
+      status
     } = this.props;
 
     return (
@@ -109,6 +110,13 @@ class RunningAnalysisCard extends Component {
           <Divider light />
 
           <CardContent>
+            <Typography color="textSecondary" gutterBottom>
+              Status
+            </Typography>
+            <Typography className={classes.field} gutterBottom>
+              {status}
+            </Typography>
+
             <Typography color="textSecondary" gutterBottom>
               Submitted By
             </Typography>
@@ -175,6 +183,7 @@ RunningAnalysisCard.propTypes = {
   startDate:      PropTypes.number.isRequired,
   plannedEndDate: PropTypes.number.isRequired,
   analysisLink:   PropTypes.string.isRequired,
+  status:         PropTypes.string.isRequired,
 };
 
 export default withStyles(

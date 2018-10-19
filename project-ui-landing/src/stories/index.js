@@ -94,7 +94,8 @@ storiesOf('RunningAnalysisCardGrid', module)
       'test-owner-name',
       startDate.toLocaleString(),
       endDate.toLocaleString(),
-      "http://localhost"
+      "http://localhost",
+      "Running"
     );
 
     return (
@@ -111,7 +112,8 @@ storiesOf('RunningAnalysisCardGrid', module)
         'test-owner-name 0',
         startDate.toLocaleString(),
         endDate.toLocaleString(),
-        "http://localhost"
+        "http://localhost",
+        "Running"
       ),
       new Analysis(
         '1',
@@ -121,7 +123,8 @@ storiesOf('RunningAnalysisCardGrid', module)
         'test-owner-name 1',
         startDate.toLocaleString(),
         endDate.toLocaleString(),
-        "http://localhost"
+        "http://localhost",
+        "Running"
       )
     ];
 
@@ -139,7 +142,8 @@ storiesOf('RunningAnalysisCardGrid', module)
       `test-owner-name ${n}`,
       startDate.toLocaleString(),
       endDate.toLocaleString(),
-      "http://localhost"
+      "http://localhost",
+      "Running"
     ));
 
     return (
@@ -156,7 +160,8 @@ storiesOf('RunningAnalysisCardGrid', module)
       `test-owner-name ${n}`,
       startDate.toLocaleString(),
       endDate.toLocaleString(),
-      "http://localhost"
+      "http://localhost",
+      "Running"
     ));
 
     return (
@@ -191,7 +196,8 @@ storiesOf('LandingMain', module)
       "test-owner-name",
       startDate.toLocaleString(),
       endDate.toLocaleString(),
-      "http://localhost"
+      "http://localhost",
+      "Running"
     );
 
     return (
@@ -208,7 +214,8 @@ storiesOf('LandingMain', module)
       `test-owner-name ${n}`,
       startDate.toLocaleString(),
       endDate.toLocaleString(),
-      "http://localhost"
+      "http://localhost",
+      "Running"
     ));
 
     return (
