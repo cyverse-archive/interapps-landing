@@ -47,8 +47,9 @@ export class App {
 }
 
 export const ShowRunning = 0;
-export const ShowFinished = 1;
-export const ShowApps = 2;
+export const ShowCompleted = 1;
+export const ShowFailed = 2;
+export const ShowApps = 3;
 
 const defaultState = {
   mobileOpen: false,

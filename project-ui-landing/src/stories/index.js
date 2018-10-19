@@ -165,6 +165,7 @@ storiesOf('RunningAnalysisCardGrid', module)
   });
 
 storiesOf('NavList', module)
+  .addDecorator(story => <Provider story={story()} />)
   .add('default', () => {
     return (
       <NavList
