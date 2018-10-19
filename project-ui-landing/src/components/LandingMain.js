@@ -6,7 +6,8 @@ import {
   toggleMobileOpen,
   setPageToShow,
   ShowRunning,
-  ShowFinished,
+  ShowCompleted,
+  ShowFailed,
   ShowApps
 } from '../actions';
 
@@ -14,7 +15,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import LandingAppBar from './LandingAppBar';
 import LandingResponsiveDrawer from './LandingResponsiveDrawer';
-import RunningAnalysisCardGrid from './RunningAnalysisCardGrid';
+import AnalysisCardGrid from './AnalysisCardGrid';
 
 const styles = theme => ({
   root: {
@@ -52,10 +53,12 @@ class LandingMain extends Component {
     switch (pageToShow) {
       case ShowRunning:
         mainContent = (
-          <RunningAnalysisCardGrid analyses={runningAnalyses} />
+          <AnalysisCardGrid analyses={runningAnalyses} />
         );
         break;
-      case ShowFinished:
+      case ShowCompleted:
+        break;
+      case ShowFailed:
         break;
       case ShowApps:
         break;

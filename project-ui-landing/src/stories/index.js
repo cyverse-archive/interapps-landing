@@ -2,8 +2,8 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import LandingAppBar from '../components/LandingAppBar';
-import RunningAnalysisCard from '../components/RunningAnalysisCard';
-import RunningAnalysisCardGrid from '../components/RunningAnalysisCardGrid';
+import AnalysisCard from '../components/AnalysisCard';
+import AnalysisCardGrid from '../components/AnalysisCardGrid';
 import NavList from '../components/NavList';
 import LandingResponsiveDrawer from '../components/LandingResponsiveDrawer';
 import LandingMain from '../components/LandingMain';
@@ -24,10 +24,10 @@ let end = start + (86400000 * 2);
 let startDate = new Date(start);
 let endDate = new Date(end);
 
-storiesOf('RunningAnalysisCard', module)
+storiesOf('AnalysisCard', module)
   .add('default', () => {
     return (
-      <RunningAnalysisCard
+      <AnalysisCard
         appName="App Name"
         analysisName="Analysis Name"
         description="This is a test description of a running analysis."
@@ -35,11 +35,12 @@ storiesOf('RunningAnalysisCard', module)
         startDate={startDate.toLocaleString()}
         plannedEndDate={endDate.toLocaleString()}
         owner="Owner Name"
+        status="Running"
       />
     );
   })
   .add('with description longer than 280 chars', () => (
-    <RunningAnalysisCard
+    <AnalysisCard
       appName="App Name"
       analysisName="Analysis Name"
       description={bigDescription}
@@ -47,10 +48,11 @@ storiesOf('RunningAnalysisCard', module)
       startDate={startDate.toLocaleString()}
       plannedEndDate={endDate.toLocaleString()}
       owner="Owner Name"
+      status="Running"
     />
   ))
   .add('and with an analysis name longer than 32 chars', () => (
-    <RunningAnalysisCard
+    <AnalysisCard
       appName="App Name"
       analysisName="Analysis Name12345678901234567890"
       analysisLink="http://localhost"
@@ -58,10 +60,11 @@ storiesOf('RunningAnalysisCard', module)
       startDate={startDate.toLocaleString()}
       plannedEndDate={endDate.toLocaleString()}
       owner="Owner Name"
+      status="Running"
     />
   ))
   .add('and with an app name longer than 30 chars', () => (
-    <RunningAnalysisCard
+    <AnalysisCard
       appName="App Name123456789012345678901234567890"
       analysisName="Analysis Name12345678901234567890"
       analysisLink="http://localhost"
@@ -69,10 +72,11 @@ storiesOf('RunningAnalysisCard', module)
       startDate={startDate.toLocaleString()}
       plannedEndDate={endDate.toLocaleString()}
       owner="Owner Name"
+      status="Running"
     />
   ))
   .add('and with an owner longer than 34 chars', () => (
-    <RunningAnalysisCard
+    <AnalysisCard
       appName="App Name123456789012345678901234567890"
       analysisName="Analysis Name12345678901234567890"
       analysisLink="http://localhost"
@@ -81,10 +85,11 @@ storiesOf('RunningAnalysisCard', module)
       startDate={startDate.toLocaleString()}
       plannedEndDate={endDate.toLocaleString()}
       owner="Owner Name123456789012345678901234567801234567890"
+      status="Running"
     />
   ));
 
-storiesOf('RunningAnalysisCardGrid', module)
+storiesOf('AnalysisCardGrid', module)
   .add('with one card', () => {
     let analysis = new Analysis(
       '0',
@@ -99,7 +104,7 @@ storiesOf('RunningAnalysisCardGrid', module)
     );
 
     return (
-      <RunningAnalysisCardGrid analyses={[analysis]} />
+      <AnalysisCardGrid analyses={[analysis]} />
     );
   })
   .add('with two cards', () => {
@@ -129,7 +134,7 @@ storiesOf('RunningAnalysisCardGrid', module)
     ];
 
     return (
-      <RunningAnalysisCardGrid analyses={analyses} />
+      <AnalysisCardGrid analyses={analyses} />
     );
   })
   .add('with three cards', () => {
@@ -147,7 +152,7 @@ storiesOf('RunningAnalysisCardGrid', module)
     ));
 
     return (
-      <RunningAnalysisCardGrid analyses={analyses} />
+      <AnalysisCardGrid analyses={analyses} />
     );
   })
   .add('with lots of cards', () => {
@@ -165,7 +170,7 @@ storiesOf('RunningAnalysisCardGrid', module)
     ));
 
     return (
-      <RunningAnalysisCardGrid analyses={analyses} />
+      <AnalysisCardGrid analyses={analyses} />
     );
   });
 

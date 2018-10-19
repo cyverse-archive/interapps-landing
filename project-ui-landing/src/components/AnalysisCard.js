@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import classnames from 'classnames';
+import { StatusRunning, StatusFailed, StatusCompleted } from '../actions';
 
 import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
@@ -12,6 +13,8 @@ import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import green from '@material-ui/core/colors/green';
+import blue from '@material-ui/core/colors/blue';
+import red from '@material-ui/core/colors/red';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Computer from '@material-ui/icons/Computer';
@@ -49,8 +52,14 @@ const styles = theme => ({
   card: {
     width: 300,
   },
-  avatar: {
+  runningAnalysisAvatar: {
     backgroundColor: green[500],
+  },
+  completedAnalysisAvatar: {
+    backgroundColor: blue[500],
+  },
+  failedAnalysisAvatar: {
+    backgroundColor: red[500],
   },
   iconCell: {
     marginTop: "-2px",
@@ -94,12 +103,26 @@ class RunningAnalysisCard extends Component {
       status
     } = this.props;
 
+
+    let avatarClass;
+
+    switch (status) {
+      case StatusRunning:
+        avatarClass = classes.runningAnalysisAvatar;
+        break;
+      case StatusCompleted:
+        avatarClass = classes.completedAnalysisAvatar;
+        break;
+      default:
+        avatarClass = classes.failedAnalysisAvatar;
+    }
+
     return (
       <div className={classes.card}>
         <Card>
           <CardHeader
             avatar={
-              <Avatar aria-label="Running analysis" className={classes.avatar}>
+              <Avatar aria-label="Running analysis" className={avatarClass}>
                 <Assessment />
               </Avatar>
             }

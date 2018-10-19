@@ -1,5 +1,9 @@
 import { createActions, handleActions } from 'redux-actions';
 
+export const StatusRunning = "Running";
+export const StatusFailed = "Failed";
+export const StatusCompleted = "Completed";
+
 export class Analysis {
   constructor(
     uuid,

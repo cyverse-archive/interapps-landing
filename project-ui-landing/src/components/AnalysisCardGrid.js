@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import { Analysis } from '../actions';
-import RunningAnalysisCard from './RunningAnalysisCard';
+import AnalysisCard from './AnalysisCard';
 
 const styles = theme => ({
   root: {
@@ -14,7 +14,7 @@ const styles = theme => ({
   },
 });
 
-class RunningAnalysisCardGrid extends Component {
+class AnalysisCardGrid extends Component {
   render() {
     const { classes, analyses } = this.props;
 
@@ -22,7 +22,7 @@ class RunningAnalysisCardGrid extends Component {
       <Grid container justify="center" spacing={16}>
         {analyses.map(value => (
           <Grid item>
-            <RunningAnalysisCard
+            <AnalysisCard
               appName={value.appName}
               analysisName={value.name}
               description={value.description}
@@ -39,9 +39,9 @@ class RunningAnalysisCardGrid extends Component {
   };
 }
 
-RunningAnalysisCardGrid.propTypes = {
+AnalysisCardGrid.propTypes = {
   classes:  PropTypes.object.isRequired,
   analyses: PropTypes.arrayOf(Analysis).isRequired,
 };
 
-export default withStyles(styles)(RunningAnalysisCardGrid);
+export default withStyles(styles)(AnalysisCardGrid);
