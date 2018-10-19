@@ -168,11 +168,7 @@ storiesOf('NavList', module)
   .addDecorator(story => <Provider story={story()} />)
   .add('default', () => {
     return (
-      <NavList
-        handleClickFinished={() => alert("Finished clicked")}
-        handleClickRunning={() => alert("Running clicked")}
-        handleClickApps={() => alert("Apps clicked")}
-      />
+      <NavList />
     );
   });
 
@@ -180,11 +176,7 @@ storiesOf('LandingResponsiveDrawer', module)
   .addDecorator(story => <Provider story={story()} />)
   .add('default', () => {
     return (
-      <LandingResponsiveDrawer
-        handleClickFinished={() => alert("Finished clicked")}
-        handleClickRunning={() => alert("Running clicked")}
-        handleClickApps={() => alert("Apps clicked")}
-      />
+      <LandingResponsiveDrawer />
     );
   });
 
