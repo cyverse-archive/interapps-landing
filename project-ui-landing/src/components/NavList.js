@@ -10,6 +10,7 @@ import Computer from '@material-ui/icons/Computer';
 import Assessment from '@material-ui/icons/Assessment';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+import Divider from '@material-ui/core/Divider';
 
 // Adapted from examples at https://material-ui.com/demos/lists/#nested-list
 
@@ -20,7 +21,7 @@ const styles = theme => ({
     backgroundColor: theme.palette.background.paper,
   },
   nested: {
-    paddingLeft: theme.spacing.unit * 6,
+    paddingLeft: theme.spacing.unit * 5,
   },
 });
 
@@ -57,6 +58,8 @@ class AnalysesList extends Component {
               </ListItem>
             </List>
           </Collapse>
+
+          <Divider light inset/>
 
           <ListItem button onClick={handleClickApps}>
             <ListItemIcon>
