@@ -12,7 +12,7 @@ render(
   <Provider store={store}>
     <App store={store} />
   </Provider>,
-  document.getElementById('root')2
+  document.getElementById('root');
 );
 
 // If you want your app to work offline and load faster, you can change
