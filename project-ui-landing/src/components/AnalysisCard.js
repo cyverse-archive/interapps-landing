@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import classnames from 'classnames';
-import { StatusRunning, StatusFailed, StatusCompleted } from '../actions';
+import { StatusRunning, StatusCompleted } from '../actions';
 
 import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
@@ -17,7 +17,6 @@ import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
 import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import Assessment from '@material-ui/icons/Assessment';
-import Description from '@material-ui/icons/Description';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Divider from '@material-ui/core/Divider';
 
@@ -75,7 +74,6 @@ class AnalysisCard extends Component {
       classes,
       appName,
       analysisName,
-      analysisLink,
       owner,
       description,
       startDate,

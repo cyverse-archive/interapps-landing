@@ -64,7 +64,6 @@ class AppCard extends Component {
     const {
       classes,
       name,
-      link,
       creator,
       description,
       toolName,

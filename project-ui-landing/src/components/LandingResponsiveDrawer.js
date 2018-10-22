@@ -7,18 +7,10 @@ import { toggleMobileOpen } from '../actions';
 // Material UI Imports
 import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
 import Hidden from '@material-ui/core/Hidden';
-import Divider from '@material-ui/core/Divider';
-import MenuIcon from '@material-ui/icons/Menu';
 
 // Components imports
 import NavList from './NavList';
-import LandingAppBar from './LandingAppBar';
 
 // Adapted from the examples at https://material-ui.com/demos/drawers/#responsive-drawer
 
@@ -65,10 +57,6 @@ class LandingResponsiveDrawer extends Component {
       theme,
       children,
       mobileOpen,
-      handleClickApps,
-      handleClickCompleted,
-      handleClickFailed,
-      handleClickRunning,
       handleDrawerToggle,
     } = this.props;
 

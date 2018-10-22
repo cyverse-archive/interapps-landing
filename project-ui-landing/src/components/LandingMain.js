@@ -2,9 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
-  Analysis,
-  toggleMobileOpen,
-  setPageToShow,
   ShowRunning,
   ShowCompleted,
   ShowFailed,
@@ -30,25 +27,19 @@ const styles = theme => ({
     position: 'relative',
     display: 'flex',
   },
-  // appBar: {
-  //   zIndex: theme.zIndex.drawer + 1,
-  // },
   content: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
     padding: theme.spacing.unit * 3,
     minWidth: 0, // So the Typography noWrap works
   },
-  //toolbar: theme.mixins.toolbar,
 })
 
 class LandingMain extends Component {
   render() {
     const {
       pageToShow,
-      classes,
       analyses,
-      finishedAnalyses,
       apps
     } = this.props;
 

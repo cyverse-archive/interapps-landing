@@ -86,7 +86,6 @@ export const reducer = handleActions(
     SET_PAGE_TO_SHOW:   (state, {payload: pageToShow}) => ({ ...state, pageToShow: pageToShow}),
     ADD_APP:            (state, {payload: app}) => ({ ...state, apps: {index: { ...state.apps.index, [app.uuid]: app}}}),
     ADD_ANALYSIS:       (state, {payload: analysis}) => {
-      let status = analysis.status;
       return {
         ...state,
         analyses: {

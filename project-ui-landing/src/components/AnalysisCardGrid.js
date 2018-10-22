@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import { Analysis } from '../actions';
 import AnalysisCard from './AnalysisCard';
 
 class AnalysisCardGrid extends Component {
   render() {
-    const { classes, analysesIndex, analysisKeys } = this.props;
+    const { analysesIndex, analysisKeys } = this.props;
 
     return (
       <Grid container justify="center" spacing={16}>
