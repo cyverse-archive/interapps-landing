@@ -3,12 +3,13 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import LandingAppBar from '../components/LandingAppBar';
 import AppCard from '../components/AppCard';
+import AppCardGrid from '../components/AppCardGrid';
 import AnalysisCard from '../components/AnalysisCard';
 import AnalysisCardGrid from '../components/AnalysisCardGrid';
 import NavList from '../components/NavList';
 import LandingResponsiveDrawer from '../components/LandingResponsiveDrawer';
 import LandingMain from '../components/LandingMain';
-import { Analysis } from '../actions';
+import { Analysis, App } from '../actions';
 import { Provider } from 'react-redux';
 import { newStore } from '../store/configure';
 import { toggleMobileOpen, setPageToShow, addApp, addAnalysis } from '../actions';
@@ -146,6 +147,34 @@ storiesOf('AnalysisCardGrid', module)
       <AnalysisCardGrid analysisKeys={[...Array(3).keys()]} />
     );
   });
+
+  storiesOf('AppCardGrid', module)
+    .addDecorator(getStory => {
+      const store = newStore();
+      let nums = [...Array(3).keys()];
+      let analyses = nums.map(n => new App(
+        `${n}`,
+        `test-app-name-${n}`,
+        `test-tool-name=${n}`,
+        `0.0.${n}`,
+        `this is a test of the app card grid ${n}`,
+        `test-creator-name ${n}`,
+        "http://localhost"
+      )).forEach(a => store.dispatch(addApp(a)));
+
+      return (
+        <Provider store={store}>
+          <div>
+            {getStory()}
+          </div>
+        </Provider>
+      );
+    })
+    .add('with three cards', () => {
+      return (
+        <AppCardGrid appKeys={[...Array(3).keys()]} />
+      );
+    });
 
 storiesOf('NavList', module)
   .addDecorator(getStory => {

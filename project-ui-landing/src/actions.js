@@ -39,7 +39,8 @@ export class App {
     toolName,
     toolVersion,
     description,
-    creator
+    creator,
+    link
   ) {
     this.uuid = uuid
     this.name = name
@@ -47,6 +48,7 @@ export class App {
     this.toolVersion = toolVersion
     this.description = description
     this.creator = creator
+    this.link = link
   }
 }
 

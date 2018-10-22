@@ -6,15 +6,6 @@ import Grid from '@material-ui/core/Grid';
 import { Analysis } from '../actions';
 import AnalysisCard from './AnalysisCard';
 
-const styles = theme => ({
-  root: {
-    flexGrow: 1,
-  },
-  control: {
-    padding: theme.spacing.unit * 2,
-  },
-});
-
 class AnalysisCardGrid extends Component {
   render() {
     const { classes, analysesIndex, analysisKeys } = this.props;
@@ -54,4 +45,4 @@ const MappedAnalysisCardGrid = connect(
   mapStateToProps
 )(AnalysisCardGrid);
 
-export default withStyles(styles)(MappedAnalysisCardGrid);
+export default MappedAnalysisCardGrid;

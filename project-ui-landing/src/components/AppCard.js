@@ -57,14 +57,14 @@ class AppCard extends Component {
   };
 
   handleClickAppLink = () => {
-    window.open(this.props.appLink);
+    window.open(this.props.link);
   };
 
   render() {
     const {
       classes,
-      appName,
-      appLink,
+      name,
+      link,
       creator,
       description,
       toolName,
@@ -82,7 +82,7 @@ class AppCard extends Component {
                 <Computer />
               </Avatar>
             }
-            title={ellipsize(appName, 28)}
+            title={ellipsize(name, 28)}
             subheader={ellipsize(subheader)}
           />
 
@@ -100,7 +100,7 @@ class AppCard extends Component {
           <Divider light />
 
           <CardActions disableActionSpacing>
-            <IconButton onclick={this.handleClickAppLink}>
+            <IconButton onClick={this.handleClickAppLink}>
               <PlayCircleFilled />
             </IconButton>
 
@@ -134,11 +134,12 @@ class AppCard extends Component {
 
 AppCard.propTypes = {
   classes:     PropTypes.object.isRequired,
-  appName:     PropTypes.string.isRequired,
+  name:        PropTypes.string.isRequired,
   creator:     PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   toolName:    PropTypes.string.isRequired,
   toolVersion: PropTypes.string.isRequired,
+  link:        PropTypes.string.isRequired,
 };
 
 export default withStyles(
