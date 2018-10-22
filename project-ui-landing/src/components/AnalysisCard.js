@@ -59,7 +59,7 @@ const ellipsize = (s, limit) => {
   return s;
 }
 
-class RunningAnalysisCard extends Component {
+class AnalysisCard extends Component {
   state = { expanded: false };
 
   handleExpandClick = () => {
@@ -177,7 +177,7 @@ class RunningAnalysisCard extends Component {
   }
 }
 
-RunningAnalysisCard.propTypes = {
+AnalysisCard.propTypes = {
   classes:        PropTypes.object.isRequired,
   analysisName:   PropTypes.string.isRequired,
   appName:        PropTypes.string.isRequired,
@@ -192,4 +192,4 @@ RunningAnalysisCard.propTypes = {
 export default withStyles(
   styles,
   { withTheme: true }
-)(RunningAnalysisCard);
+)(AnalysisCard);
