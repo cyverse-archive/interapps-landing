@@ -15,30 +15,13 @@ import Typography from '@material-ui/core/Typography';
 import green from '@material-ui/core/colors/green';
 import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
-import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import Computer from '@material-ui/icons/Computer';
 import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
 import Assessment from '@material-ui/icons/Assessment';
 import Description from '@material-ui/icons/Description';
-import AccountCircle from '@material-ui/icons/AccountCircle';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import DateRange from '@material-ui/icons/DateRange';
-import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import Divider from '@material-ui/core/Divider';
 
-const paperMaxWidth = '400px';
-const paperMinWidth = '250px';
-const paperHeight = '300px';
-
 const styles = theme => ({
-  root: {
-    flexGrow: 1,
-    marginLeft: 7,
-  },
-  actions: {
-    display: 'flex',
-  },
   expand: {
     transform: 'rotate(0deg)',
     transition: theme.transitions.create('transform', {
@@ -60,9 +43,6 @@ const styles = theme => ({
   },
   failedAnalysisAvatar: {
     backgroundColor: red[500],
-  },
-  iconCell: {
-    marginTop: "-2px",
   },
   field: {
     marginBottom: "1em",
