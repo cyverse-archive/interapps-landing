@@ -2,6 +2,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import LandingAppBar from '../components/LandingAppBar';
+import AppCard from '../components/AppCard';
 import AnalysisCard from '../components/AnalysisCard';
 import AnalysisCardGrid from '../components/AnalysisCardGrid';
 import NavList from '../components/NavList';
@@ -103,6 +104,18 @@ storiesOf('AnalysisCard', module)
       status="Running"
     />
   ));
+
+storiesOf('AppCard', module)
+  .add('default', () => (
+    <AppCard
+      appName="App Name"
+      creator="Creator Name"
+      appLink="http://localhost"
+      description="Test description for an app card."
+      toolName="Tool Name"
+      toolVersion="0.0.1"
+    />
+  ))
 
 storiesOf('AnalysisCardGrid', module)
   .addDecorator(getStory => {
