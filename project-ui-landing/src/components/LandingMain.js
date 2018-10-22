@@ -19,6 +19,7 @@ import { withStyles } from '@material-ui/core/styles';
 import LandingAppBar from './LandingAppBar';
 import LandingResponsiveDrawer from './LandingResponsiveDrawer';
 import AnalysisCardGrid from './AnalysisCardGrid';
+import AppCardGrid from './AppCardGrid';
 
 const styles = theme => ({
   root: {
@@ -48,7 +49,7 @@ class LandingMain extends Component {
       classes,
       analyses,
       finishedAnalyses,
-      appsList
+      apps
     } = this.props;
 
     let mainContent;
@@ -70,6 +71,9 @@ class LandingMain extends Component {
         );
         break;
       case ShowApps:
+        mainContent = (
+          <AppCardGrid appKeys={Object.keys(apps.index)} />
+        );
         break;
       default:
         console.log('unknown value for pageToShow');

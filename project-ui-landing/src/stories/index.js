@@ -256,6 +256,17 @@ storiesOf('LandingMain', module)
 
     [...running, ...failed, ...completed].forEach(a => store.dispatch(addAnalysis(a)));
 
+    let appnums = [...Array(30).keys()];
+    let apps = appnums.map(n => new App(
+      `${n}`,
+      `test-app-name-${n}`,
+      `test-tool-name=${n}`,
+      `0.0.${n}`,
+      `this is a test of the app card grid ${n}`,
+      `test-creator-name ${n}`,
+      "http://localhost"
+    )).forEach(a => store.dispatch(addApp(a)));
+
     return (
       <Provider store={store}>
         <div>
