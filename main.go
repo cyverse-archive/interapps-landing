@@ -282,84 +282,39 @@ func (a *API) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(js))
 }
 
-const runningAnalysesQuery = `
-query RunningAnalyses($username: String) {
+const analysesQuery = `
+query GetAnalyses($username: String) {
   analyses: jobs (
     where: {
       _and: {
-        status: {_eq: "Running"},
-        usersByuserId: {username: {_eq: $username}}}
-    	}
+        status: {_in: ["Running", "Completed", "Failed", "Cancelled"]},
+        usersByuserId: {username: {_eq: $username}}},
+        subdomain: {_is_null: false}
+      }
   ) {
-    id
+    uuid: id
     appID: app_id
     appName: app_name
-		description: job_description
+    description: job_description
     user: usersByuserId {
       username
     }
     startDate: start_date
     endDate: end_date
     plannedEndDate: planned_end_date
+    subdomain
   }
 }
 `
 
-// RunningAnalyses returns a list of analyses that are in the running state.
-func (a *API) RunningAnalyses(w http.ResponseWriter, r *http.Request) {
-	var err error
-	u := r.FormValue("user")
-
-	client := graphql.NewClient(a.graphqlBase)
-	req := graphql.NewRequest(runningAnalysesQuery)
-	req.Var("username", u)
-
-	var data interface{}
-
-	if err = client.Run(context.Background(), req, &data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	dataJSON, err := json.Marshal(&data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintln(w, string(dataJSON))
-}
-
-const finishedAnalysesQuery = `
-query FinishedAnalyses($username: String) {
-  analyses: jobs (
-    where: {
-      _and: {
-        status: {_in: ["Completed", "Failed", "Cancelled"]},
-        usersByuserId: {username: {_eq: $username}}}
-    	}
-  ) {
-    id
-    appID: app_id
-    appName: app_name
-		description: job_description
-    user: usersByuserId {
-      username
-    }
-    startDate: start_date
-    endDate: end_date
-    plannedEndDate: planned_end_date
-  }
-}
-`
-
-// FinishedAnalyses returns a list of analyses that are in the Completed,
+// GetAnalyses returns a list of analyses that are in the Completed,
 // Failed, or Cancelled states.
-func (a *API) FinishedAnalyses(w http.ResponseWriter, r *http.Request) {
+func (a *API) GetAnalyses(w http.ResponseWriter, r *http.Request) {
 	var err error
 	u := r.FormValue("user")
 
 	client := graphql.NewClient(a.graphqlBase)
-	req := graphql.NewRequest(finishedAnalysesQuery)
+	req := graphql.NewRequest(analysesQuery)
 	req.Var("username", u)
 
 	var data interface{}
@@ -660,12 +615,9 @@ func main() {
 		fmt.Fprintf(w, "I'm healthy.")
 	})
 
-	api := r.PathPrefix("/api/").Subrouter()
+	api := r.PathPrefix("/api").Subrouter()
 	api.Path("/url-ready").Queries("url", "").HandlerFunc(p.URLIsReady)
-
-	analyses := api.PathPrefix("/analyses").Subrouter()
-	analyses.Path("/running").Queries("user", "").HandlerFunc(p.RunningAnalyses)
-	analyses.Path("/finished").Queries("user", "").HandlerFunc(p.FinishedAnalyses)
+	api.Path("/analyses").Queries("user", "").HandlerFunc(p.GetAnalyses)
 
 	jobs := api.PathPrefix("/jobs/").Subrouter()
 	jobs.Path("/status-updates").Queries("url", "").HandlerFunc(p.LookupJobStatusUpdates)
