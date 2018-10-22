@@ -43,9 +43,10 @@ const styles = theme => ({
     minHeight: "100vh",
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
-    paddingTop: theme.spacing.unit * 2,
+    //marginTop: theme.spacing.unit * 2,
+    //paddingTop: theme.spacing.unit * 2,
     minWidth: 0, // So the Typography noWrap works
-    padding: 1,
+    //padding: 1,
   },
   toolbar: theme.mixins.toolbar
 });

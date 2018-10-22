@@ -1,18 +1,28 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
 import AppCard from './AppCard';
 
+
+const styles = theme => ({
+  grid: {
+    marginTop: theme.spacing.unit * 1,
+    marginBottom: theme.spacing.unit * 1,
+  },
+});
+
 class AppCardGrid extends Component {
   render() {
     const {
+      classes,
       appIndex,
       appKeys
     } = this.props;
 
     return (
-      <Grid container justify="center" spacing={16}>
+      <Grid container className={classes.grid} justify="center" spacing={16}>
         {appKeys.map(key => (
           <Grid item>
             <AppCard
@@ -44,4 +54,8 @@ const MappedAppCardGrid = connect(
   mapStateToProps
 )(AppCardGrid);
 
-export default MappedAppCardGrid;
+
+export default withStyles(
+  styles,
+  { withTheme: true }
+)(MappedAppCardGrid);
