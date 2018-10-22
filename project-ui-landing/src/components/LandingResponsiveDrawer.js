@@ -20,9 +20,8 @@ const styles = theme => ({
   root: {
     flexGrow: 1,
     overflow: 'hidden',
-    position: 'relative',
     display: 'flex',
-
+    minHeight: '100vh',
   },
   navIconHide: {
     [theme.breakpoints.up('md')]: {
@@ -32,21 +31,19 @@ const styles = theme => ({
   drawerPaper: {
     width: drawerWidth,
     [theme.breakpoints.up('md')]: {
-      position: 'relative',
+      position: 'fixed',
     },
-    borderRight: '0px',
   },
   navListPermanent: {
     borderRight: '1px solid rgba(0, 0, 0, 0.1)',
   },
   content: {
-    minHeight: "100vh",
     flexGrow: 1,
     backgroundColor: theme.palette.background.default,
-    //marginTop: theme.spacing.unit * 2,
-    //paddingTop: theme.spacing.unit * 2,
     minWidth: 0, // So the Typography noWrap works
-    //padding: 1,
+    [theme.breakpoints.up('md')]: {
+      paddingLeft: drawerWidth,
+    },
   },
   toolbar: theme.mixins.toolbar
 });

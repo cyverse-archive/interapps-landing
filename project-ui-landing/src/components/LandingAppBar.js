@@ -56,7 +56,7 @@ class LandingAppBar extends Component {
 
     return (
       <div className={classes.root}>
-        <AppBar position="absolute" className={classes.appBar}>
+        <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
             <IconButton
               color="inherit"
