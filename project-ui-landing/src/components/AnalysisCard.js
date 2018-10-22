@@ -66,7 +66,7 @@ class AnalysisCard extends Component {
     this.setState(state => ({ expanded: !state.expanded }));
   };
 
-  handleClickAppLink = () => {
+  handleClickAnalysisLink = () => {
     window.open(this.props.analysisLink);
   };
 
@@ -144,8 +144,8 @@ class AnalysisCard extends Component {
 
           <Divider light />
 
-          <CardActions className={classes.action} disableActionSpacing>
-            <IconButton className={classes.appLink} onClick={this.handleClickAppLink}>
+          <CardActions disableActionSpacing>
+            <IconButton onClick={this.handleClickAnalysisLink}>
               <OpenInBrowser />
             </IconButton>
 
