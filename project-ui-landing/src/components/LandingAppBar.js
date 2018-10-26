@@ -13,6 +13,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { withStyles } from '@material-ui/core/styles';
 
+import logo from '../images/logo.png';
+
 const styles = theme => ({
   root: {
     flexGrow: 1,
@@ -22,6 +24,7 @@ const styles = theme => ({
   },
   grow: {
     flexGrow: 1,
+    marginTop: '3px',
   },
   menuButton: {
     marginLeft: -12,
@@ -67,9 +70,9 @@ class LandingAppBar extends Component {
               <MenuIcon />
             </IconButton>
 
-            <Typography variant="h6" color="inherit" className={classes.grow}>
-              VICE
-            </Typography>
+              <div className={classes.grow}>
+                <img src={logo} height={32} alt="logo"/>
+              </div>
 
             <div>
               <IconButton

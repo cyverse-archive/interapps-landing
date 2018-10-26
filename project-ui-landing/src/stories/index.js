@@ -13,19 +13,25 @@ import { Analysis, App } from '../actions';
 import { Provider } from 'react-redux';
 import { newStore } from '../store/configure';
 import { toggleMobileOpen, setPageToShow, addApp, addAnalysis } from '../actions';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { theme } from '../components/App';
 import 'typeface-roboto';
 
+const Wrapper = ({store, theme, children}) => (
+  <Provider store={store}>
+    <MuiThemeProvider theme={theme}>
+      {children}
+    </MuiThemeProvider>
+  </Provider>
+);
 
 storiesOf('LandingAppBar', module)
   .addDecorator(getStory => {
     const store = newStore();
-
     return (
-      <Provider store={store}>
-        <div>
-          {getStory()}
-        </div>
-      </Provider>
+      <Wrapper store={store} theme={theme}>
+        {getStory()}
+      </Wrapper>
     );
   })
   .add('default', () => {
@@ -135,11 +141,9 @@ storiesOf('AnalysisCardGrid', module)
     )).forEach(a => store.dispatch(addAnalysis(a)));
 
     return (
-      <Provider store={store}>
-        <div>
-          {getStory()}
-        </div>
-      </Provider>
+      <Wrapper store={store} theme={theme}>
+        {getStory()}
+      </Wrapper>
     );
   })
   .add('with three cards', () => {
@@ -163,11 +167,9 @@ storiesOf('AnalysisCardGrid', module)
       )).forEach(a => store.dispatch(addApp(a)));
 
       return (
-        <Provider store={store}>
-          <div>
-            {getStory()}
-          </div>
-        </Provider>
+        <Wrapper store={store} theme={theme}>
+          {getStory()}
+        </Wrapper>
       );
     })
     .add('with three cards', () => {
@@ -181,11 +183,9 @@ storiesOf('NavList', module)
     const store = newStore();
 
     return (
-      <Provider store={store}>
-        <div>
-          {getStory()}
-        </div>
-      </Provider>
+      <Wrapper store={store} theme={theme}>
+        {getStory()}
+      </Wrapper>
     );
   })
   .add('default', () => {
@@ -199,11 +199,9 @@ storiesOf('LandingResponsiveDrawer', module)
     const store = newStore();
 
     return (
-      <Provider store={store}>
-        <div>
-          {getStory()}
-        </div>
-      </Provider>
+      <Wrapper store={store} theme={theme}>
+        {getStory()}
+      </Wrapper>
     );
   })
   .add('default', () => {
@@ -268,11 +266,9 @@ storiesOf('LandingMain', module)
     )).forEach(a => store.dispatch(addApp(a)));
 
     return (
-      <Provider store={store}>
-        <div>
-          {getStory()}
-        </div>
-      </Provider>
+      <Wrapper store={store} theme={theme}>
+        {getStory()}
+      </Wrapper>
     );
   })
   .add('lots of analyses', () => {
