@@ -20,6 +20,8 @@ import Assessment from '@material-ui/icons/Assessment';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Divider from '@material-ui/core/Divider';
 
+import { palette } from './App';
+
 const styles = theme => ({
   expand: {
     transform: 'rotate(0deg)',
@@ -35,13 +37,13 @@ const styles = theme => ({
     width: 300,
   },
   runningAnalysisAvatar: {
-    backgroundColor: green[500],
+    backgroundColor: palette.lightGreen,
   },
   completedAnalysisAvatar: {
-    backgroundColor: blue[500],
+    backgroundColor: palette.blue,
   },
   failedAnalysisAvatar: {
-    backgroundColor: red[500],
+    backgroundColor: palette.red,
   },
   field: {
     marginBottom: "1em",

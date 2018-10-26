@@ -25,6 +25,8 @@ import green from '@material-ui/core/colors/green';
 import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
 
+import { palette } from './App';
+
 // Adapted from examples at https://material-ui.com/demos/lists/#nested-list
 
 const styles = theme => ({
@@ -37,13 +39,13 @@ const styles = theme => ({
     paddingLeft: theme.spacing.unit * 6,
   },
   runningAnalysisIcon: {
-    color: green[500],
+    color: palette.lightGreen,
   },
   completedAnalysisIcon: {
-    color: blue[500],
+    color: palette.blue,
   },
   failedAnalysisIcon: {
-    color: red[500],
+    color: palette.red,
   },
 });
 

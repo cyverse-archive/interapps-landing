@@ -15,7 +15,8 @@ import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Computer from '@material-ui/icons/Computer';
 import PlayCircleFilled from '@material-ui/icons/PlayCircleFilled';
-import orange from '@material-ui/core/colors/orange';
+
+import { palette } from './App';
 
 const ellipsize = (s, limit) => {
   if ([...s].length > limit) {
@@ -39,7 +40,7 @@ const styles = theme => ({
     width: 300,
   },
   appAvatar: {
-    backgroundColor: orange[500],
+    backgroundColor: palette.orange,
   },
   field: {
     marginBottom: "1em",

@@ -15,7 +15,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import withMobileDialog from '@material-ui/core/withMobileDialog';
 import Grid from '@material-ui/core/Grid';
- //               className={{ paper: classes.dialogPaper }}
+
 const styles = {
   root: {
     padding: "20px",
