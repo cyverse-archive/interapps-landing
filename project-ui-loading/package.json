@@ -1,5 +1,5 @@
 {
-  "name": "interapps-landing",
+  "name": "interapps-loading",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -9,13 +9,15 @@
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
-    "react-redux": "^5.0.7",
+    "react-redux": "^5.1.0",
     "react-router-dom": "^4.3.1",
     "react-scripts": "^1.1.5",
     "redux": "^4.0.0",
     "redux-actions": "^2.6.1",
     "redux-logger": "^3.0.6",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "storybook": "^1.0.0",
+    "typeface-roboto": "0.0.54"
   },
   "scripts": {
     "start": "react-scripts start",
