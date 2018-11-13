@@ -161,6 +161,121 @@ func (a *API) EndpointConfig(subdomain string) (*Endpoint, error) {
 	return ept, nil
 }
 
+// ViceAnalysis contains the information about a VICE specific analysis stored
+// in the database.
+type ViceAnalysis struct {
+	ID               string  `json:"id"`
+	JobName          string  `json:"job_name"`
+	JobDescription   string  `json:"job_description"`
+	ResultFolderPath string  `json:"result_folder_path"`
+	Status           string  `json:"status"`
+	Subdomain        string  `json:"subdomain"`
+	StartDate        string  `json:"start_date"`
+	EndDate          string  `json:"end_date"`
+	PlannedEndDate   string  `json:"planned_end_date"`
+	UserID           string  `json:"user_id"`
+	Username         string  `json:"username"`
+	AppID            string  `json:"app_id"`
+	AppName          string  `json:"app_name"`
+	AppDescription   string  `json:"app_description"`
+	AppEditedDate    string  `json:"app_edited_date"`
+	ToolID           string  `json:"tool_id"`
+	ToolName         string  `json:"tool_name"`
+	ToolDescription  string  `json:"tool_description"`
+	ToolVersion      string  `json:"tool_version"`
+	WorkingDirectory string  `json:"working_directory"`
+	EntryPoint       string  `json:"entry_point"`
+	UID              int     `json:"uid"`
+	MinCPUCores      float32 `json:"min_cpu_cores"`
+	MaxCPUCores      float32 `json:"max_cpu_cores"`
+	PIDsLimit        float32 `json:"pids_limit"`
+	SkipTMPMount     bool    `json:"skip_tmp_mount"`
+	Port             int     `json:"container_port"`
+	ImageID          string  `json:"image_id"`
+	ImageName        string  `json:"image_name"`
+	ImageTag         string  `json:"image_tag"`
+	ImageURL         string  `json:"image_url"`
+	Step             int     `json:"step"`
+}
+
+const lookupViceAnalyses = `
+query ViceAnalyses($username: String) {
+  vice_analyses(
+    where: {
+      username: {_eq: $username}
+    }
+  ) {
+    id
+    job_name
+    job_description
+    result_folder_path
+    status
+    subdomain
+    start_date
+    end_date
+    planned_end_date
+    user_id
+    username
+    app_id
+    app_name
+    app_description
+    app_edited_date
+    tool_id
+    tool_name
+    tool_description
+    tool_version
+    working_directory
+    entrypoint
+    uid
+    min_cpu_cores
+    max_cpu_cores
+    pids_limit
+    skip_tmp_mount
+    container_port
+    image_id
+    image_name
+    image_tag
+    image_url
+    step
+  }
+}
+`
+
+// ViceAnalyses is a http handler that returns the results of a query against
+// the graphql server for a list of analyses that the user can access.
+func (a *API) ViceAnalyses(w http.ResponseWriter, r *http.Request) {
+	var (
+		ok  bool
+		err error
+	)
+
+	u := r.FormValue("user")
+
+	client := graphql.NewClient(a.graphqlBase)
+	req := graphql.NewRequest(lookupViceAnalyses)
+	req.Var("username", u)
+
+	data := map[string][]ViceAnalysis{}
+
+	if err = client.Run(context.Background(), req, &data); err != nil {
+		http.Error(w, fmt.Sprintf("error from vice analyses query for user %s: %s", u, err), http.StatusInternalServerError)
+		return
+	}
+
+	if _, ok = data["vice_analyses"]; !ok {
+		http.Error(w, fmt.Sprintf("missing vice_analyses field for user %s", u), http.StatusInternalServerError)
+		return
+	}
+
+	js, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error marshalling response from vice analyses query for user %s: %s", u, err), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, string(js))
+}
+
 const lookupExternalUUIDQuery = `
 query ExternalID($subdomain: String) {
 	jobs(where: {subdomain: {_eq: $subdomain}}) {
@@ -280,56 +395,6 @@ func (a *API) LookupJobStatusUpdates(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintln(w, string(js))
-}
-
-const analysesQuery = `
-query GetAnalyses($username: String) {
-  analyses: jobs (
-    where: {
-      _and: {
-        status: {_in: ["Running", "Completed", "Failed", "Cancelled"]},
-        usersByuserId: {username: {_eq: $username}}},
-        subdomain: {_is_null: false}
-      }
-  ) {
-    uuid: id
-    appID: app_id
-    appName: app_name
-    description: job_description
-    user: usersByuserId {
-      username
-    }
-    startDate: start_date
-    endDate: end_date
-    plannedEndDate: planned_end_date
-    subdomain
-  }
-}
-`
-
-// GetAnalyses returns a list of analyses that are in the Completed,
-// Failed, or Cancelled states.
-func (a *API) GetAnalyses(w http.ResponseWriter, r *http.Request) {
-	var err error
-	u := r.FormValue("user")
-
-	client := graphql.NewClient(a.graphqlBase)
-	req := graphql.NewRequest(analysesQuery)
-	req.Var("username", u)
-
-	var data interface{}
-
-	if err = client.Run(context.Background(), req, &data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	dataJSON, err := json.Marshal(&data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Fprintln(w, string(dataJSON))
 }
 
 // URLIsReady returns true if the Ingress for the provided URL exists and if a
@@ -617,7 +682,7 @@ func main() {
 
 	api := r.PathPrefix("/api").Subrouter()
 	api.Path("/url-ready").Queries("url", "").HandlerFunc(p.URLIsReady)
-	api.Path("/analyses").Queries("user", "").HandlerFunc(p.GetAnalyses)
+	api.Path("/analyses").Queries("user", "").HandlerFunc(p.ViceAnalyses)
 
 	jobs := api.PathPrefix("/jobs/").Subrouter()
 	jobs.Path("/status-updates").Queries("url", "").HandlerFunc(p.LookupJobStatusUpdates)
