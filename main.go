@@ -567,13 +567,21 @@ func main() {
 		loadingUIPath            = flag.String("loading-ui-path", "./ui-loading", "Path to the loading UI build.")
 		landingUIPath            = flag.String("landing-ui-path", "./ui-landing", "Path to the landing UI build.")
 		disableCustomHeaderMatch = flag.Bool("disable-custom-header-match", false, "Disables usage of the X-Frontend-Url header for subdomain matching. Use Host header instead. Useful during development.")
+		mode                     = flag.String("mode", "loading", "Which mode to run in. Valid values are 'landing' and 'loading', without the quotes.")
 	)
+
+	const landing = "landing"
+	const loading = "loading"
 
 	flag.Parse()
 
 	// make sure the configuration object has sane defaults.
 	if cfg, err = configurate.InitDefaults(*configPath, defaultConfig); err != nil {
 		log.Fatal(err)
+	}
+
+	if *mode != loading && *mode != landing {
+		log.Fatal("--mode must be either 'landing' or 'loading', without the quotes")
 	}
 
 	casBaseCfg := cfg.GetString("cas.base")
@@ -688,26 +696,31 @@ func main() {
 	jobs.Path("/status-updates").Queries("url", "").HandlerFunc(p.LookupJobStatusUpdates)
 
 	// Loading page routes
-	loading := r.PathPrefix("/loading").Subrouter()
-	loading.Path("/static").Handler(
-		http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*loadingUIPath, "static")))),
-	)
-	loading.Path("/").
-		Queries("url", "").
-		HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.ServeFile(w, r, filepath.Join(*loadingUIPath, "index.html"))
-		})
+	if *mode == loading {
+		//loading := r.PathPrefix("/").Subrouter()
+		r.Path("/static").Handler(
+			http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*loadingUIPath, "static")))),
+		)
+		r.Path("/").
+			Queries("url", "").
+			HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.ServeFile(w, r, filepath.Join(*loadingUIPath, "index.html"))
+			})
+
+	}
 
 	// landing page routes
-	landing := r.PathPrefix("/landing").Subrouter()
-	landing.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(c.ValidateTicket))
-	landing.PathPrefix("/").MatcherFunc(c.NeedsSession).Handler(http.HandlerFunc(c.RedirectToCAS))
-	landing.Path("/static").Handler(
-		http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*landingUIPath, "static")))),
-	)
-	landing.Path("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join(*landingUIPath, "index.html"))
-	})
+	if *mode == landing {
+		//landing := r.PathPrefix("/landing/").Subrouter()
+		r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(c.ValidateTicket))
+		r.PathPrefix("/").MatcherFunc(c.NeedsSession).Handler(http.HandlerFunc(c.RedirectToCAS))
+		r.Path("/static").Handler(
+			http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*landingUIPath, "static")))),
+		)
+		r.Path("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFile(w, r, filepath.Join(*landingUIPath, "index.html"))
+		})
+	}
 
 	server := &http.Server{
 		Handler: r,

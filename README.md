@@ -17,7 +17,8 @@ You will need to set the following environment variables for the top-level NPM p
 * `NPM_CONFIG_GRAPHQL_HOSTNAME` - The hostname for the local/port-forwarded graphql server.
 * `NPM_CONFIG_GRAPHQL_PORT` - The port for the local/port-forwarded graphql server.
 * `NPM_CONFIG_INGRESS_URL` - The URL for the VICE ingress.
-* `NPM_CONFIG_API_HOST` - The domain and port that the API will be listening on.
+* `NPM_CONFIG_LOADING_API_HOST` - The domain and port that the loading page API will be listening on.
+* `NPM_CONFIG_LANDING_API_HOST` - The domain and port that the landing page API will be listening on.
 * `NPM_CONFIG_VICE_URL` - The base URL for the development version of VICE.
 
 A `config.sh` script has been included that you can either use as a reference or modify to your liking.
