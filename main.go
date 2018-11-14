@@ -697,12 +697,10 @@ func main() {
 
 	// Loading page routes
 	if *mode == loading {
-		//loading := r.PathPrefix("/").Subrouter()
-		r.Path("/static").Handler(
+		r.PathPrefix("/static/").Handler(
 			http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*loadingUIPath, "static")))),
 		)
-		r.Path("/").
-			Queries("url", "").
+		r.PathPrefix("/").
 			HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				http.ServeFile(w, r, filepath.Join(*loadingUIPath, "index.html"))
 			})
@@ -714,10 +712,10 @@ func main() {
 		//landing := r.PathPrefix("/landing/").Subrouter()
 		r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(c.ValidateTicket))
 		r.PathPrefix("/").MatcherFunc(c.NeedsSession).Handler(http.HandlerFunc(c.RedirectToCAS))
-		r.Path("/static").Handler(
+		r.PathPrefix("/static/").Handler(
 			http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*landingUIPath, "static")))),
 		)
-		r.Path("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			http.ServeFile(w, r, filepath.Join(*landingUIPath, "index.html"))
 		})
 	}
