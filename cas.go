@@ -215,7 +215,7 @@ func (c *CAS) ValidateTicket(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.Values[sessionKey] = username
+	s.Values[sessionKey] = fmt.Sprintf("%s@iplantcollaborative.org", username)
 	s.Save(r, w)
 
 	http.Redirect(w, r, svcURL.String(), http.StatusFound)

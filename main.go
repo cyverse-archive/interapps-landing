@@ -41,7 +41,7 @@ type API struct {
 	viceDomain       string // The domain for VICE apps.
 	refreshEnabled   bool   // Whether or not to look up information through the graphql server.
 	graphqlBase      string // The base URL to the graphql server.
-
+	sessionStore     *sessions.CookieStore
 }
 
 // URLMatches returns true if the given URL is a subdomain of the configured
@@ -245,11 +245,22 @@ query ViceAnalyses($username: String) {
 // the graphql server for a list of analyses that the user can access.
 func (a *API) ViceAnalyses(w http.ResponseWriter, r *http.Request) {
 	var (
-		ok  bool
-		err error
+		ok      bool
+		err     error
+		u       string // stores the username, either from the query or from a cookie.
+		session *sessions.Session
 	)
 
-	u := r.FormValue("user")
+	if u = r.FormValue("user"); u == "" {
+		session, err = a.sessionStore.Get(r, sessionName)
+		if err != nil {
+			err = errors.Wrap(err, "error getting session")
+			log.Error(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		u = session.Values[sessionKey].(string)
+	}
 
 	client := graphql.NewClient(a.graphqlBase)
 	req := graphql.NewRequest(lookupViceAnalyses)
@@ -673,6 +684,7 @@ func main() {
 		viceDomain:       viceDomain,
 		refreshEnabled:   !*disableAutoRefresh,
 		graphqlBase:      *graphqlBase,
+		sessionStore:     sessionStore,
 	}
 
 	c := &CAS{
@@ -690,7 +702,7 @@ func main() {
 
 	api := r.PathPrefix("/api").Subrouter()
 	api.Path("/url-ready").Queries("url", "").HandlerFunc(p.URLIsReady)
-	api.Path("/analyses").Queries("user", "").HandlerFunc(p.ViceAnalyses)
+	api.Path("/analyses").HandlerFunc(p.ViceAnalyses)
 
 	jobs := api.PathPrefix("/jobs/").Subrouter()
 	jobs.Path("/status-updates").Queries("url", "").HandlerFunc(p.LookupJobStatusUpdates)
