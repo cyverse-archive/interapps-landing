@@ -21,10 +21,6 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import Divider from '@material-ui/core/Divider';
 
-import green from '@material-ui/core/colors/green';
-import blue from '@material-ui/core/colors/blue';
-import red from '@material-ui/core/colors/red';
-
 import { palette } from './App';
 
 // Adapted from examples at https://material-ui.com/demos/lists/#nested-list

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import '../css/App.css';
 import LandingMain from './LandingMain';
+import Ticker from './Ticker';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 export const palette = {
@@ -15,7 +16,7 @@ export const palette = {
   darkBlue:    '#004471', // 0, 68, 113
   darkestBlue: '#142248', // 20, 34, 72
   white:       '#ffffff',
-  red:         '#e60424', //'#8a3324', 
+  red:         '#e60424', //'#8a3324',
 };
 
 export const theme = createMuiTheme({
@@ -33,6 +34,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <Ticker store={this.props.store}/>
         <MuiThemeProvider theme={theme}>
           <LandingMain />
         </MuiThemeProvider>
