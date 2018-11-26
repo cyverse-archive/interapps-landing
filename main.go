@@ -700,6 +700,9 @@ func main() {
 		fmt.Fprintf(w, "I'm healthy.")
 	})
 
+	r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(c.ValidateTicket))
+	r.PathPrefix("/").MatcherFunc(c.NeedsSession).Handler(http.HandlerFunc(c.RedirectToCAS))
+
 	api := r.PathPrefix("/api").Subrouter()
 	api.Path("/url-ready").Queries("url", "").HandlerFunc(p.URLIsReady)
 	api.Path("/analyses").HandlerFunc(p.ViceAnalyses)
@@ -721,9 +724,6 @@ func main() {
 
 	// landing page routes
 	if *mode == landing {
-		//landing := r.PathPrefix("/landing/").Subrouter()
-		r.PathPrefix("/").Queries("ticket", "").Handler(http.HandlerFunc(c.ValidateTicket))
-		r.PathPrefix("/").MatcherFunc(c.NeedsSession).Handler(http.HandlerFunc(c.RedirectToCAS))
 		r.PathPrefix("/static/").Handler(
 			http.StripPrefix("/static/", http.FileServer(http.Dir(filepath.Join(*landingUIPath, "static")))),
 		)

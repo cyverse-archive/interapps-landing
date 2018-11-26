@@ -133,7 +133,6 @@ export const {
 
 export const fetchAnalyses = () => {
   return dispatch => {
-    console.log("wtf");
     return axios.get(`/api/analyses`, {withCredentials: true}).then(
       response => response.data.vice_analyses.forEach(i => dispatch(addAnalysis(i)))
     ).catch(function(error) {
