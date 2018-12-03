@@ -4,7 +4,7 @@ const args = [
 
 const opts = {
   stdio: 'inherit',
-  cwd: 'project-ui-loading',
+  cwd: 'client-loading',
   shell: true
 };
 
