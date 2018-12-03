@@ -15,13 +15,13 @@ cd $orig_dir
 
 echo $(pwd)
 
-if [ -d ./build/loading ]; then
-rm -rf ./build/loading
+if [ -d ./build/client-loading ]; then
+rm -rf ./build/client-loading
 fi
 
-if [ -d ./build/landing ]; then
-	rm -rf ./build/landing
+if [ -d ./build/client-landing ]; then
+	rm -rf ./build/client-landing
 fi
 
-mv client-loading/build ./build/loading
-mv client-landing/build ./build/landing
+mv client-loading/build ./build/client-loading
+mv client-landing/build ./build/client-landing
