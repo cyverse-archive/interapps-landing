@@ -1,5 +1,5 @@
 {
-  "name": "project-ui-landing",
+  "name": "client-landing",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -11,7 +11,7 @@
     "react": "^16.4.1",
     "react-dom": "^16.5.2",
     "react-redux": "^5.0.7",
-    "react-scripts": "^1.1.5",
+    "react-scripts": "^2.1.1",
     "redux": "^4.0.0",
     "redux-actions": "^2.6.1",
     "redux-logger": "^3.0.6",
@@ -36,5 +36,11 @@
     "http-proxy-middleware": "^0.19.0"
   },
   "proxy": "http://localhost:8083",
-  "homepage": "."
+  "homepage": ".",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
