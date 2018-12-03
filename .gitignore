@@ -11,6 +11,7 @@ interapps-landing
 
 # dependencies
 /node_modules
+server/node_modules
 
 # testing
 /coverage
