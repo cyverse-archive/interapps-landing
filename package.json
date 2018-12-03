@@ -10,8 +10,7 @@
     "redux-thunk": "^2.3.0"
   },
   "scripts": {
-    "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "concurrently \"node port-forward.js\" \"node start-server.js\"",
+    "start": "concurrently \"npm run client\"",
     "client": "concurrently \"node start-loading-ui.js\" \"node start-landing-ui.js\""
   },
   "devDependencies": {
