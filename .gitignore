@@ -10,8 +10,7 @@ interapps-landing
 *.key
 
 # dependencies
-/node_modules
-server/node_modules
+**/node_modules
 
 # testing
 /coverage
