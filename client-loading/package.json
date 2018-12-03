@@ -4,14 +4,14 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^3.1.0",
-    "ajv": "^6.5.3",
+    "ajv": "^6.5.4",
     "axios": "^0.18.0",
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "^1.1.5",
+    "react-scripts": "^2.1.1",
     "redux": "^4.0.0",
     "redux-actions": "^2.6.1",
     "redux-logger": "^3.0.6",
@@ -36,5 +36,11 @@
     "redux-devtools": "^3.4.1"
   },
   "proxy": "http://localhost:8082",
-  "homepage": "."
+  "homepage": ".",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
