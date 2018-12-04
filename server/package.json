@@ -2,6 +2,7 @@
   "name": "vice-server",
   "version": "0.0.1",
   "description": "The server-side component for the VICE UIs.",
+  "repository": "https://github.com/cyverse-de/interapps-landing",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
