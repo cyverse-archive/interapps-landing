@@ -2,13 +2,6 @@
   "name": "interapps-landing-server",
   "version": "0.0.1",
   "private": true,
-  "dependencies": {
-    "axios": "^0.18.0",
-    "babel-core": "6.26.3",
-    "redux-actions": "^2.6.1",
-    "redux-logger": "^3.0.6",
-    "redux-thunk": "^2.3.0"
-  },
   "scripts": {
     "start": "concurrently \"npm run client\"",
     "client": "concurrently \"node start-loading-ui.js\" \"node start-landing-ui.js\""
