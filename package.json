@@ -1,10 +1,11 @@
 {
-  "name": "interapps-landing-server",
+  "name": "vice-ui-server",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "concurrently \"npm run client\"",
-    "client": "concurrently \"node start-loading-ui.js\" \"node start-landing-ui.js\""
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "client": "concurrently \"node start-loading-ui.js\" \"node start-landing-ui.js\"",
+    "server": "node start-server.js"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
