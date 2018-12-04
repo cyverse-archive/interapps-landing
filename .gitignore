@@ -8,6 +8,8 @@ cas-server
 interapps-landing
 *.crt
 *.key
+**/.env
+**/dist
 
 # dependencies
 **/node_modules
