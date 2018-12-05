@@ -1,6 +1,4 @@
 import express from 'express';
-import cookieParser from 'cookie-parser';
-import crypto from 'crypto';
 
 import db, { analysesQuery } from './db';
 import hasValidSubdomain from './subdomain';
@@ -24,7 +22,6 @@ apirouter.get("/analyses",(req, res) => {
     });
 });
 
-app.use(cookieParser(crypto.randomBytes(256).toString('hex')));
 app.use('/api', apirouter);
 
 app.get('/healthz', (req, res) => res.send("I'm healthy."));
