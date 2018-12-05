@@ -1,7 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
-import db, { viceAnalyses } from './db';
+import db, { analysesQuery } from './db';
 
 const sessionName = 'proxy-session';
 const sessionKey = 'proxy-session-key';
@@ -41,12 +41,6 @@ function hasValidSubdomain(str) {
   const fields = subdomainRegex.exec(str);
   return fields[0] !== undefined && fields[1] !== undefined;
 }
-
-const analysesQuery = `
-SELECT *
-  FROM vice_analyses
- WHERE username = $1;
-`;
 
 apirouter.get("/analyses",(req, res) => {
     const username = req.query.user;
