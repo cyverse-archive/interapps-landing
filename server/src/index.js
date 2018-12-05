@@ -19,8 +19,8 @@ apirouter.get("/url-ready", (req, res) => {
 // escapeRegExp will escape a string so that it can be safely interpolated into
 // a regular expression string as a literal string. Taken from:
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 // getSubdomainRegex will construct a RegExp object that can be used to tell if
