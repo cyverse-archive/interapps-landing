@@ -5,12 +5,11 @@ import crypto from 'crypto';
 import db, { analysesQuery } from './db';
 import hasValidSubdomain from './subdomain';
 
+
 const sessionName = 'proxy-session';
 const sessionKey = 'proxy-session-key';
-
 const app = express();
 const port = process.env.PORT || 60000;
-
 const apirouter = express.Router();
 
 apirouter.get("/url-ready", (req, res) => {
@@ -23,11 +22,6 @@ apirouter.get("/analyses",(req, res) => {
     db.any(analysesQuery, [username]).then(data => {
       res.send(JSON.stringify({"vice_analyses" : data}));
     });
-});
-
-apirouter.get("/url-ready", (req, res) => {
-  const requrl = new URL(req.query.url);
-  const reqhost = requrl.hostname;
 });
 
 app.use(cookieParser(crypto.randomBytes(256).toString('hex')));
