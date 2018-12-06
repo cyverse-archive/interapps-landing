@@ -4,14 +4,14 @@
   "description": "The server-side component for the VICE UIs.",
   "license": "BSD-3-Clause",
   "repository": "https://github.com/cyverse-de/interapps-landing",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "prestart": "npm run build",
     "start": "node -r dotenv/config dist/index.js",
-    "dev": "nodemon  src/index.js --exec \"node -r dotenv/config -r babel-register\"",
+    "dev": "nodemon --exec \"babel-node -r dotenv/config -r babel-register\"",
     "clean": "rimraf dist",
     "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist",
-    "test": "jest --watch",
+    "test": "DOTENV_CONFIG_PATH=./.env.test jest --watch --setupFiles dotenv/config",
     "lint": "esw -w src test"
   },
   "babel": {
@@ -49,17 +49,22 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "morgan": "^1.9.1",
+    "node-fetch": "^2.3.0",
     "pg-promise": "^8.5.3",
     "resource-router-middleware": "^0.7.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.0",
     "@babel/core": "^7.2.0",
+    "@babel/node": "^7.2.0",
     "@babel/preset-env": "^7.2.0",
     "@babel/register": "^7.0.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
     "dotenv": "^6.1.0",
     "jest": "^23.6.0",
     "nodemon": "^1.18.7",
+    "regenerator-runtime": "^0.13.1",
     "rimraf": "^2.6.2"
   }
 }
