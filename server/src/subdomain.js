@@ -36,5 +36,8 @@ export function extractSubdomain(urlWithSubdomain) {
 // and is part of the configured VICE_DOMAIN.
 export default function hasValidSubdomain(str) {
   const fields = subdomainRegex.exec(str);
-  return fields[0] !== undefined && fields[1] !== undefined;
+  return fields !== null &&
+         fields.length >= 2 &&
+         fields[0] !== undefined &&
+         fields[1] !== undefined;
 }
