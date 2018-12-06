@@ -9,4 +9,8 @@ SELECT *
  WHERE username = $1;
 `;
 
+export function viceAnalyses(username, dataCallback) {
+  db.any(analysesQuery, [username]).then(dataCallback);
+}
+
 export default db;

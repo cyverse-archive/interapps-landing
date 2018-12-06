@@ -1,6 +1,6 @@
 import express from 'express';
 
-import db, { analysesQuery } from './db';
+import { viceAnalyses } from './db';
 import hasValidSubdomain from './subdomain';
 
 
@@ -17,9 +17,9 @@ apirouter.get("/url-ready", (req, res) => {
 
 apirouter.get("/analyses",(req, res) => {
     const username = req.query.user;
-    db.any(analysesQuery, [username]).then(data => {
+    viceAnalyses(username, (data) => {
       res.send(JSON.stringify({"vice_analyses" : data}));
-    });
+    })
 });
 
 app.use('/api', apirouter);
