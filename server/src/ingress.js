@@ -6,7 +6,10 @@ const appExposerHeader = process.env.APP_EXPOSER_HEADER;
 // Fetches K8s Endpoint information about the subdomain from the app-exposer
 // service, returns a promise with the response body parsed as JSON.
 export async function endpointConfig(subdomain) {
-  const endpointAPI = new URL(`/endpoint/${subdomain}`, ingressURL);
+  console.log(ingressURL)
+  let endpointAPI = new URL(ingressURL);
+  endpointAPI.pathname = `/endpoint/${subdomain}`;
+
   const reqOptions = {
     headers: {
       "Host" : appExposerHeader
