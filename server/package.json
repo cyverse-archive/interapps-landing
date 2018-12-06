@@ -2,6 +2,7 @@
   "name": "vice-server",
   "version": "0.0.1",
   "description": "The server-side component for the VICE UIs.",
+  "license": "BSD-3-Clause",
   "repository": "https://github.com/cyverse-de/interapps-landing",
   "main": "index.js",
   "scripts": {

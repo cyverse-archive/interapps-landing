@@ -1,6 +1,7 @@
 {
   "name": "vice-ui-server",
   "version": "0.0.1",
+	"license": "BSD-3-Clause",
   "private": true,
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
