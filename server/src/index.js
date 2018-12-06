@@ -1,7 +1,13 @@
+// Entrypoint into the server-side VICE UI code.
+//
+// Check the ../.env.example file to see what configuration settings need to be
+// set.
+
 import express from 'express';
 
 import { viceAnalyses } from './db';
-import hasValidSubdomain from './subdomain';
+import hasValidSubdomain, { extractSubdomain } from './subdomain';
+import { ingressExists } from './ingress';
 
 
 const sessionName = 'proxy-session';
@@ -12,7 +18,11 @@ const apirouter = express.Router();
 
 apirouter.get("/url-ready", (req, res) => {
   const url_to_check = req.query.url;
-  res.send(url_to_check);
+  if (hasValidSubdomain(url_to_check)) {
+    res.send(ingressExists(extractSubdomain(url_to_check)));
+  } else {
+    throw new Error(`no valid subdomain found in ${url_to_check}`);
+  }
 });
 
 apirouter.get("/analyses",(req, res) => {
