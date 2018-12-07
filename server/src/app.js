@@ -14,7 +14,7 @@ apirouter.get("/url-ready", async (req, res) => {
   const urlToCheck = req.query.url;
 
   if (!hasValidSubdomain(urlToCheck)) {
-    throw new Error(`no valid subdomain found in ${url_to_check}`);
+    throw new Error(`no valid subdomain found in ${urlToCheck}`);
   }
 
   const subdomain = extractSubdomain(urlToCheck);
@@ -50,7 +50,8 @@ apirouter.get("/url-ready", async (req, res) => {
     .catch(e => false);
   }
 
-  res.send(JSON.stringify({"ready":ready}));
+  res.setHeader('Content-Type', 'application/json');
+  res.send(JSON.stringify({ready: ready}));
 });
 
 apirouter.get("/analyses", async (req, res) => {
