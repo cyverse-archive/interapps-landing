@@ -12,7 +12,7 @@ export class IngressError extends Error {
 
 // Fetches K8s Endpoint information about the subdomain from the app-exposer
 // service, returns a promise with the response body parsed as JSON.
-export async function endpointConfig(subdomain, errorcb) {
+export async function endpointConfig(subdomain) {
   let endpointAPI = new URL(ingressURL);
   endpointAPI.pathname = `/endpoint/${subdomain}`;
 
