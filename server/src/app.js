@@ -8,7 +8,9 @@ const app = express();
 app.get('/healthz', (req, res) => res.send("I'm healthy."));
 app.get('/', (req, res) => res.send("Hello, World!"));
 
-async function urlReadyHandler(req, res) {
+const apirouter = express.Router();
+
+apirouter.get("/url-ready", async (req, res) => {
   const urlToCheck = req.query.url;
 
   if (!hasValidSubdomain(urlToCheck)) {
@@ -49,18 +51,14 @@ async function urlReadyHandler(req, res) {
   }
 
   res.send(JSON.stringify({"ready":ready}));
-}
+});
 
-async function viceAnalysesHandler(req, res) {
+apirouter.get("/analyses", async (req, res) => {
   const username = req.query.user;
   viceAnalyses(username, (data) => {
     res.send(JSON.stringify({"vice_analyses" : data}));
   })
-}
-
-const apirouter = express.Router();
-apirouter.get("/url-ready", urlReadyHandler);
-apirouter.get("/analyses", viceAnalysesHandler);
+});
 
 app.use('/api', apirouter);
 
