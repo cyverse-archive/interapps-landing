@@ -5,15 +5,13 @@ import { ingressExists, endpointConfig } from './ingress';
 import compression from 'compression';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'path';
 const fetch = require('node-fetch');
 
 const app = express();
 app.use(compression());
 app.use(helmet());
 app.use(morgan('combined'));
-
-app.get('/healthz', (req, res) => res.send("I'm healthy."));
-app.get('/', (req, res) => res.send("Hello, World!"));
 
 const apirouter = express.Router();
 
@@ -68,5 +66,11 @@ apirouter.get("/analyses", async (req, res) => {
 });
 
 app.use('/api', apirouter);
+app.get('/healthz', (req, res) => res.send("I'm healthy."));
+
+const uiDir = process.env.UI || '../../client-landing/build';
+const uiPath = path.join(__dirname, uiDir);
+console.log(uiPath);
+app.use(express.static(uiPath));
 
 export default app;

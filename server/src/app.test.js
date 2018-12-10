@@ -75,7 +75,7 @@ describe('test the handlers', () => {
   test('/ succeeds', (done) => {
     return request(app)
       .get('/')
-      .expect(200, 'Hello, World!', done);
+      .expect(200, done);
   });
 
   test('/api/url-ready returns true', (done) => {
