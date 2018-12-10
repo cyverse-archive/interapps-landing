@@ -7,10 +7,10 @@
   "main": "src/index.js",
   "scripts": {
     "prestart": "npm run build",
-    "start": "node -r dotenv/config dist/index.js",
+    "start": "node -r dotenv/config build/index.js",
     "dev": "nodemon --exec \"babel-node -r dotenv/config -r babel-register\"",
-    "clean": "rimraf dist",
-    "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist",
+    "clean": "rimraf build",
+    "build": "npm run clean && mkdir -p build && babel src -s -D -d build",
     "test": "DOTENV_CONFIG_PATH=./.env.test jest --watch --setupFiles dotenv/config",
     "lint": "esw -w src test"
   },

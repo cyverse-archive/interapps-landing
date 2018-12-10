@@ -10,6 +10,7 @@ interapps-landing
 *.key
 **/.env
 **/dist
+**/build
 
 # dependencies
 **/node_modules

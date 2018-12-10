@@ -7,13 +7,16 @@
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "client": "concurrently \"node start-loading-ui.js\" \"node start-landing-ui.js\"",
     "server": "concurrently \"npm run port-forward\" \"node start-server.js\"",
-    "port-forward" : "node -r dotenv/config port-forward.js"
+    "port-forward": "node -r dotenv/config port-forward.js",
+    "clean": "concurrently \"rimraf server/build\" \"rimraf client-loading/build\" \"rimraf client-landing/build\"",
+    "clean-all": "concurrently \"npm run clean\" \"rimraf server/node_modules\" \"rimraf client-loading/node_modules\" \"rimraf client-landing/node_modules\""
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-runtime": "^6.26.0",
     "concurrently": "^4.0.1",
-    "dotenv": "^6.1.0"
+    "dotenv": "^6.1.0",
+    "rimraf": "^2.6.2"
   },
   "dependencies": {
     "cookie-parser": "^1.4.3"
