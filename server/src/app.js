@@ -19,12 +19,11 @@ apirouter.get("/url-ready", async (req, res) => {
 
   const subdomain = extractSubdomain(urlToCheck);
 
-  let ready = ingressExists(subdomain);
+  let ready = await ingressExists(subdomain);
   let endpoint;
 
   if (ready) {
     endpoint = await endpointConfig(subdomain).catch(e => {
-      console.log(e);
       ready = false;
     });
   }
