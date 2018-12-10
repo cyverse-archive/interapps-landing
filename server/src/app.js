@@ -4,11 +4,13 @@ import hasValidSubdomain, { extractSubdomain } from './subdomain';
 import { ingressExists, endpointConfig } from './ingress';
 import compression from 'compression';
 import helmet from 'helmet';
+import morgan from 'morgan';
 const fetch = require('node-fetch');
 
 const app = express();
 app.use(compression());
 app.use(helmet());
+app.use(morgan('combined'));
 
 app.get('/healthz', (req, res) => res.send("I'm healthy."));
 app.get('/', (req, res) => res.send("Hello, World!"));
