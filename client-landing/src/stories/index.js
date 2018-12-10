@@ -1,6 +1,5 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
 import LandingAppBar from '../components/LandingAppBar';
 import AppCard from '../components/AppCard';
 import AppCardGrid from '../components/AppCardGrid';
@@ -9,11 +8,10 @@ import AnalysisCardGrid from '../components/AnalysisCardGrid';
 import NavList from '../components/NavList';
 import LandingResponsiveDrawer from '../components/LandingResponsiveDrawer';
 import LandingMain from '../components/LandingMain';
-import { Analysis, App } from '../actions';
+import { addAnalysis, addApp, Analysis, App } from '../actions';
 import { Provider } from 'react-redux';
 import { newStore } from '../store/configure';
-import { toggleMobileOpen, setPageToShow, addApp, addAnalysis } from '../actions';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import { theme } from '../components/App';
 import 'typeface-roboto';
 
@@ -115,30 +113,30 @@ storiesOf('AnalysisCard', module)
 storiesOf('AppCard', module)
   .add('default', () => (
     <AppCard
-      appName="App Name"
+      name="App Name"
       creator="Creator Name"
       appLink="http://localhost"
       description="Test description for an app card."
       toolName="Tool Name"
       toolVersion="0.0.1"
     />
-  ))
+  ));
 
 storiesOf('AnalysisCardGrid', module)
   .addDecorator(getStory => {
     const store = newStore();
     let nums = [...Array(3).keys()];
-    let analyses = nums.map(n => new Analysis(
-      `${n}`,
-      `test-analysis-name-${n}`,
-      `test-app-name=${n}`,
-      `this is a test of the running analysis card grid ${n}`,
-      `test-owner-name ${n}`,
-      startDate.toLocaleString(),
-      endDate.toLocaleString(),
-      "http://localhost",
-      "Running"
-    )).forEach(a => store.dispatch(addAnalysis(a)));
+    let analyses = nums.map(n => new Analysis({
+        id: `${n}`,
+        job_name: `test-analysis-name-${n}`,
+        app_name: `test-app-name=${n}`,
+        job_description: `this is a test of the running analysis card grid ${n}`,
+        username: `test-owner-name ${n}`,
+        start_date: startDate.toLocaleString(),
+        end_date: endDate.toLocaleString(),
+        subdomain: "http://localhost",
+        status: "Running",
+    })).forEach(a => store.dispatch(addAnalysis(a)));
 
     return (
       <Wrapper store={store} theme={theme}>
@@ -213,57 +211,58 @@ storiesOf('LandingResponsiveDrawer', module)
 storiesOf('LandingMain', module)
   .addDecorator(getStory => {
     const store = newStore();
-
     let nums = [...Array(30).keys()];
 
-    let running = nums.map(n => new Analysis(
-      `${n}`,
-      `test-analysis-name-${n}`,
-      `test-app-name=${n}`,
-      `this is a test of the running analysis card grid ${n}`,
-      `test-owner-name ${n}`,
-      startDate.toLocaleString(),
-      endDate.toLocaleString(),
-      "http://localhost",
-      "Running"
-    ));
+    let running = nums.map(n => new Analysis({
+          id: `${n}`,
+          job_name: `test-analysis-name-${n}`,
+          app_name: `test-app-name=${n}`,
+          job_description: `this is a test of the running analysis card grid ${n}`,
+          username: `test-owner-name ${n}`,
+          start_date: startDate.toLocaleString(),
+          end_date: endDate.toLocaleString(),
+          subdomain: "http://localhost",
+          status: "Running",
+      }));
 
-    let failed = nums.map(n => new Analysis(
-      `${30+n}`,
-      `test-analysis-name-${30+n}`,
-      `test-app-name=${30+n}`,
-      `this is a test of the running analysis card grid ${30+n}`,
-      `test-owner-name ${30+n}`,
-      startDate.toLocaleString(),
-      endDate.toLocaleString(),
-      "http://localhost",
-      "Failed"
-    ));
 
-    let completed = nums.map(n => new Analysis(
-      `${60+n}`,
-      `test-analysis-name-${60+n}`,
-      `test-app-name=${60+n}`,
-      `this is a test of the running analysis card grid ${60+n}`,
-      `test-owner-name ${60+n}`,
-      startDate.toLocaleString(),
-      endDate.toLocaleString(),
-      "http://localhost",
-      "Completed"
-    ));
+     let failed = nums.map(n => new Analysis({
+              id: `${30 + n}`,
+              job_name: `test-analysis-name-${30 + n}`,
+              app_name: `test-app-name=${30 + n}`,
+              job_description: `this is a test of the running analysis card grid ${30 + n}`,
+              username: `test-owner-name ${30 + n}`,
+              start_date: startDate.toLocaleString(),
+              end_date: endDate.toLocaleString(),
+              subdomain: "http://localhost",
+              status: "Failed",
+          }))
+      ;
 
-    [...running, ...failed, ...completed].forEach(a => store.dispatch(addAnalysis(a)));
+      let completed = nums.map(n => new Analysis({
+          id: `${60 + n}`,
+          job_name: `test-analysis-name-${60 + n}`,
+          app_name: `test-app-name=${30 + n}`,
+          job_description: `this is a test of the running analysis card grid ${60 + n}`,
+          username: `test-owner-name ${60 + n}`,
+          start_date: startDate.toLocaleString(),
+          end_date: endDate.toLocaleString(),
+          subdomain: "http://localhost",
+          status: "Failed",
+      }));
 
-    let appnums = [...Array(30).keys()];
-    let apps = appnums.map(n => new App(
-      `${n}`,
-      `test-app-name-${n}`,
-      `test-tool-name=${n}`,
-      `0.0.${n}`,
-      `this is a test of the app card grid ${n}`,
-      `test-creator-name ${n}`,
-      "http://localhost"
-    )).forEach(a => store.dispatch(addApp(a)));
+      [...running, ...failed, ...completed].forEach(a => store.dispatch(addAnalysis(a)));
+
+      let appnums = [...Array(30).keys()];
+      let apps = appnums.map(n => new App(
+          `${n}`,
+          `test-app-name-${n}`,
+          `test-tool-name=${n}`,
+          `0.0.${n}`,
+          `this is a test of the app card grid ${n}`,
+          `test-creator-name ${n}`,
+          "http://localhost"
+      )).forEach(a => store.dispatch(addApp(a)));
 
     return (
       <Wrapper store={store} theme={theme}>
