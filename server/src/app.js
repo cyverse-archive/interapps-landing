@@ -2,9 +2,14 @@ import express from 'express';
 import { viceAnalyses } from './db';
 import hasValidSubdomain, { extractSubdomain } from './subdomain';
 import { ingressExists, endpointConfig } from './ingress';
+import compression from 'compression';
+import helmet from 'helmet';
 const fetch = require('node-fetch');
 
 const app = express();
+app.use(compression());
+app.use(helmet());
+
 app.get('/healthz', (req, res) => res.send("I'm healthy."));
 app.get('/', (req, res) => res.send("Hello, World!"));
 
