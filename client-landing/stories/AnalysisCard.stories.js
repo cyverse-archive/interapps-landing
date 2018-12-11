@@ -10,7 +10,7 @@ class AnalysisCardTest extends Component {
         return (
               <AnalysisCard
                   appName="App Name"
-                  analysisName="Analysis Name"
+                  analysisName="Analysis Name Analysis Name Analysis Name Analysis Name"
                   description="This is a test description of a running analysis."
                   analysisLink="http://localhost"
                   startDate={startDate.toLocaleString()}
