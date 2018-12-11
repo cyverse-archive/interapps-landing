@@ -1,8 +1,5 @@
 const fetch = require('node-fetch');
 
-const ingressURL = process.env.INGRESS;
-const appExposerHeader = process.env.APP_EXPOSER_HEADER;
-
 export class IngressError extends Error {
   constructor(...args) {
     super(...args);
@@ -13,12 +10,12 @@ export class IngressError extends Error {
 // Fetches K8s Endpoint information about the subdomain from the app-exposer
 // service, returns a promise with the response body parsed as JSON.
 export async function endpointConfig(subdomain) {
-  let endpointAPI = new URL(ingressURL);
+  let endpointAPI = new URL(process.env.INGRESS);
   endpointAPI.pathname = `/endpoint/${subdomain}`;
 
   const reqOptions = {
     headers: {
-      "Host" : appExposerHeader
+      "Host" : process.env.APP_EXPOSER_HEADER
     }
   };
   return fetch(endpointAPI.toString(), reqOptions)
@@ -27,10 +24,10 @@ export async function endpointConfig(subdomain) {
 
 // Returns true if an ingress exists for the subdomain passed in.
 export async function ingressExists(subdomain) {
-  const ingressAPI = new URL(`/ingress/${subdomain}`, ingressURL);
+  const ingressAPI = new URL(`/ingress/${subdomain}`, process.env.INGRESS);
   const reqOptions = {
     headers: {
-      "Host" : appExposerHeader
+      "Host" : process.env.APP_EXPOSER_HEADER
     }
   };
   return fetch(ingressAPI.toString(), reqOptions)

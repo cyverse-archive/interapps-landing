@@ -5,17 +5,18 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// We're calling this here so that it only gets called once, avoiding creating
+// and compiling a RegExp object for each request.
+//let subdomainRegex = getSubdomainRegex();
+
 // getSubdomainRegex will construct a RegExp object that can be used to tell if
 // a subdomain is included in the string it's applied to. Uses the VICE_DOMAIN
 // environment variable.
 function getSubdomainRegex() {
-  const viceDomain = escapeRegExp(process.env.VICE_DOMAIN);
+  const viceURL = new URL(process.env.VICE_DOMAIN);
+  const viceDomain = escapeRegExp(viceURL.host);
   return new RegExp(`(a.*\.)?${viceDomain}(:[0-9]+)?`);
 }
-
-// We're calling this here so that it only gets called once, avoiding creating
-// and compiling a RegExp object for each request.
-export const subdomainRegex = getSubdomainRegex();
 
 export function extractSubdomain(urlWithSubdomain) {
   const u = new URL(urlWithSubdomain);
@@ -35,7 +36,7 @@ export function extractSubdomain(urlWithSubdomain) {
 // hasValidSubdomain checks to see if the `str` parameter contains a subdomain
 // and is part of the configured VICE_DOMAIN.
 export default function hasValidSubdomain(str) {
-  const fields = subdomainRegex.exec(str);
+  const fields = getSubdomainRegex().exec(str);
   return fields !== null &&
          fields.length >= 2 &&
          fields[0] !== undefined &&

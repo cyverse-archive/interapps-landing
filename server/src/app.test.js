@@ -2,6 +2,13 @@ import request from 'supertest';
 import app from './app';
 const nock = require('nock');
 
+beforeAll(() => {
+  process.env.APP_EXPOSER_HEADER = "app-exposer";
+  process.env.INGRESS = "http://localhost:8082";
+  process.env.DB = "postgres://user:password@host:port/db";
+  process.env.VICE_DOMAIN = "https://cyverse.run:4343";
+  process.env.INGRESS= "http://localhost:8082";
+});
 afterEach(nock.cleanAll);
 
 function ingressExistsTrue() {
@@ -79,7 +86,7 @@ describe('test the handlers', () => {
   });
 
   test('/api/url-ready returns true', (done) => {
-    const url = 'http://afoo.cyverse.run:4343';
+    const url = 'https://afoo.cyverse.run:4343';
     const endpoint = {
       "IP": "127.0.0.1",
       "Port": 1247

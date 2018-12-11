@@ -11,7 +11,7 @@
     "dev": "nodemon --exec \"babel-node -r dotenv/config -r babel-register\"",
     "clean": "rimraf build",
     "build": "npm run clean && mkdir -p build && babel src -s -D -d build",
-    "test": "DOTENV_CONFIG_PATH=./.env.test jest --watch --setupFiles dotenv/config",
+    "test": "jest --watch",
     "lint": "esw -w src test"
   },
   "babel": {

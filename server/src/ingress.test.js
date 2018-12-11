@@ -2,6 +2,13 @@ const nock = require('nock');
 
 import { endpointConfig, ingressExists, IngressError} from './ingress';
 
+beforeAll(() => {
+  process.env.APP_EXPOSER_HEADER = "app-exposer";
+  process.env.INGRESS = "http://localhost:8082";
+  process.env.DB = "postgres://user:password@host:port/db";
+  process.env.VICE_DOMAIN = "https://cyverse.run:4343";
+  process.env.INGRESS= "http://localhost:8082";
+});
 afterEach(nock.cleanAll);
 
 describe('endpointConfig', () => {

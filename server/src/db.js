@@ -5,8 +5,16 @@
 
 const initOptions = {};
 const pgp = require('pg-promise')(initOptions);
-const cn = process.env.DB;
-const db = pgp(cn);
+
+let db;
+
+function getDB() {
+  if (db !== undefined && db !== null) {
+    return db;
+  }
+  const cn = process.env.DB;
+  db = pgp(cn);
+}
 
 export const analysesQuery = `
 SELECT *
@@ -15,7 +23,5 @@ SELECT *
 `;
 
 export function viceAnalyses(username, dataCallback) {
-  db.any(analysesQuery, [username]).then(dataCallback);
+  getDB().any(analysesQuery, [username]).then(dataCallback);
 }
-
-export default db;
