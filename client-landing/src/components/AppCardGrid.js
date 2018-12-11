@@ -26,12 +26,13 @@ class AppCardGrid extends Component {
         {appKeys.map(key => (
           <Grid item>
             <AppCard
-              name={appIndex[key].name}
-              toolName={appIndex[key].toolName}
-              toolVersion={appIndex[key].toolVersion}
-              creator={appIndex[key].creator}
-              description={appIndex[key].description}
-              link={appIndex[key].link}
+                uuid={appIndex[key].uuid}
+                name={appIndex[key].name}
+                toolName={appIndex[key].toolName}
+                toolVersion={appIndex[key].toolVersion}
+                creator={appIndex[key].creator}
+                description={appIndex[key].description}
+                link={appIndex[key].link}
             />
           </Grid>
         ))}

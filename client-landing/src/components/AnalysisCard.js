@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import classnames from 'classnames';
-import { StatusRunning, StatusCompleted } from '../actions';
+import { StatusCompleted, StatusRunning } from '../actions';
 
 import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
@@ -48,14 +48,14 @@ const styles = theme => ({
   descField: {
     width: "100%",
   },
+    overflow: {
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        display: 'inline-block',
+        maxWidth: 100,
+    }
 });
-
-const ellipsize = (s, limit) => {
-  if ([...s].length > limit) {
-    return [...s].slice(0, limit-4).join('') + '...';
-  }
-  return s;
-}
 
 class AnalysisCard extends Component {
   state = { expanded: false };
@@ -98,13 +98,13 @@ class AnalysisCard extends Component {
       <div className={classes.card}>
         <Card>
           <CardHeader
-            avatar={
+              avatar={
               <Avatar aria-label="Running analysis" className={avatarClass}>
                 <Assessment />
               </Avatar>
             }
-            title={ellipsize(analysisName, 28)}
-            subheader={ellipsize(appName, 26)}
+              title={<span title={analysisName} className={classes.overflow}>{analysisName}</span>}
+              subheader={<span title={appName} className={classes.overflow}>{appName}</span>}
           />
 
           <Divider light />

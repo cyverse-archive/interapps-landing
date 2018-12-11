@@ -1,52 +1,20 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import classnames from 'classnames';
-
-import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import Collapse from '@material-ui/core/Collapse';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import Computer from '@material-ui/icons/Computer';
-import PlayCircleFilled from '@material-ui/icons/PlayCircleFilled';
-
-import { palette } from './App';
-
-const ellipsize = (s, limit) => {
-  if ([...s].length > limit) {
-    return [...s].slice(0, limit-4).join('') + '...';
-  }
-  return s;
-}
+import goldstar from "../../src/images/star-gold.gif";
+import whitestar from "../../src/images/star-white.gif";
+import redstar from "../../src/images/star-red.gif";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
+import Rating from "react-rating";
+import IconButton from "@material-ui/core/IconButton";
 
 const styles = theme => ({
-  expand: {
-    transform: 'rotate(0deg)',
-    transition: theme.transitions.create('transform', {
-      duration: theme.transitions.duration.shortest,
-    }),
-    marginLeft: 'auto',
-    [theme.breakpoints.up('sm')]: {
-      marginRight: -8,
-    },
-  },
   card: {
-    width: 300,
-  },
-  appAvatar: {
-    backgroundColor: palette.orange,
-  },
-  field: {
-    marginBottom: "1em",
-  },
-  descField: {
-    width: "100%",
+      width: 265,
+      margin: 5,
+      height: 100,
   },
 });
 
@@ -62,84 +30,90 @@ class AppCard extends Component {
   };
 
   render() {
-    const {
-      classes,
-      name,
-      creator,
-      description,
-      toolName,
-      toolVersion
-    } = this.props;
+      const {
+          classes,
+          uuid,
+          name,
+          creator,
+      } = this.props;
 
-    let subheader = `${toolName}, ${toolVersion}`;
+      let avatarImgSrc = "https://www.gravatar.com/avatar/" + uuid + "?d=identicon&s=60";
+      return (
+          <div className={classes.card}>
+              <Card>
+                  <CardContent>
+                      <div style={{float: "left", marginRight: 5}}>
+                          <div><img src={avatarImgSrc}/></div>
+                          <div style={{
+                              textAlign: 'center'
+                          }}>
+                              de
+                          </div>
+                      </div>
+                      <div>
+                          <div>
+                          <span title={name} style={{
+                              position: "relative",
+                              top: -15,
+                              fontSize: 12,
+                              textOverflow: 'ellipsis',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap',
+                              display: 'inline-block',
+                              maxWidth: 100,
+                          }}>
+                              {name}
+                          </span>
+                              <span style={{position: "relative", top: -15, right: -15,}}>
+                              <IconButton
+                                  aria-label="More"
+                                  aria-owns={open ? 'long-menu' : null}
+                                  aria-haspopup="true">
+                                  <MoreVertIcon/>
+                              </IconButton>
+                          </span>
+                          </div>
+                          <div style={{
+                              position: "relative",
+                              top: 0,
+                              fontSize: 12,
+                              fontStyle: "italic",
+                              textOverflow: 'ellipsis',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap',
+                              display: 'inline-block',
+                              maxWidth: 100,
+                          }}>
+                              {creator}
+                          </div>
+                          <div style={{position: "relative", top: 5}}>
+                              <Rating
+                                  placeholderRating={3.5}
+                                  emptySymbol={<img src={whitestar} className="icon"/>}
+                                  fullSymbol={<img src={goldstar} className="icon"/>}
+                                  placeholderSymbol={<img src={redstar} className="icon"/>}
+                                  fractions={2}
+                              />
+                              (3)
+                          </div>
+                      </div>
 
-    return (
-      <div className={classes.card}>
-        <Card>
-          <CardHeader
-            avatar={
-              <Avatar aria-label="App" className={classes.appAvatar}>
-                <Computer />
-              </Avatar>
-            }
-            title={ellipsize(name, 28)}
-            subheader={ellipsize(subheader)}
-          />
-
-          <Divider light />
-
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Creator
-            </Typography>
-            <Typography className={classes.field} gutterBottom>
-              {creator}
-            </Typography>
-          </CardContent>
-
-          <Divider light />
-
-          <CardActions disableActionSpacing>
-            <IconButton onClick={this.handleClickAppLink}>
-              <PlayCircleFilled />
-            </IconButton>
-
-            <IconButton
-              className={classnames(classes.expand, {
-                [classes.expandOpen]: this.state.expanded,
-              })}
-              onClick={this.handleExpandClick}
-              aria-expanded={this.state.expanded}
-              aria-label="Show more"
-            >
-              <ExpandMoreIcon />
-            </IconButton>
-          </CardActions>
-
-          <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Description
-              </Typography>
-              <Typography className={classes.descField}>
-                {description}
-              </Typography>
-            </CardContent>
-          </Collapse>
-        </Card>
-      </div>
-    );
+                  </CardContent>
+              </Card>
+          </div>
+      );
   }
 }
 
 AppCard.propTypes = {
-  classes:     PropTypes.object.isRequired,
-  name:        PropTypes.string.isRequired,
-  creator:     PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  toolName:    PropTypes.string.isRequired,
-  toolVersion: PropTypes.string.isRequired,
-  link:        PropTypes.string.isRequired,
+    classes: PropTypes.object.isRequired,
+    uuid: PropTypes.object.isRequired,
+    name: PropTypes.string.isRequired,
+    creator: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    toolName: PropTypes.string.isRequired,
+    toolVersion: PropTypes.string.isRequired,
+    link: PropTypes.string.isRequired,
 };
 
 export default withStyles(
