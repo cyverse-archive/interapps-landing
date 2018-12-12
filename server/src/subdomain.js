@@ -19,22 +19,30 @@ function escapeRegExp(string) {
 function getSubdomainRegex() {
   const viceURL = new url.URL(process.env.VICE_DOMAIN);
   const viceDomain = escapeRegExp(viceURL.host);
+  debug(`getSubdomainRegex: escaped VICE_DOMAIN: ${viceDomain}`);
   return new RegExp(`(a.*\.)?${viceDomain}(:[0-9]+)?`);
 }
 
 export function extractSubdomain(urlWithSubdomain) {
   const u = new url.URL(urlWithSubdomain);
   const fields = u.hostname.split(".");
+
+  debug(`hostname split; url: ${urlWithSubdomain}; fields: ${fields}`);
+
   if (fields.length < 2) {
     throw new Error(`no subdomain found in ${urlWithSubdomain}`);
   }
   if (fields.length === 2) {
     if (fields[0] === 'www') {
+      debug(`extractSubdomain; URL: ${urlWithSubdomain}; return ''`);
       return "";
     }
+    debug(`extractSubdomain; URL: ${urlWithSubdomain}; return ${field[0]}`);
     return fields[0];
   }
-  return fields.slice(0,fields.length-2).join('.');
+  const retval = fields.slice(0,fields.length-2).join('.');
+  debug(`extractSubdomain; URL: ${urlWithSubdomain}; return ${retval}`);
+  return retval;
 }
 
 // hasValidSubdomain checks to see if the `str` parameter contains a subdomain
