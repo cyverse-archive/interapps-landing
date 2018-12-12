@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
 const fetch = require('node-fetch');
+const debug = require('debug')('app');
 
 const app = express();
 app.use(compression());
@@ -18,32 +19,45 @@ const apirouter = express.Router();
 apirouter.get("/url-ready", async (req, res) => {
   const urlToCheck = req.query.url;
 
+  debug(`url-ready; URL: ${urlToCheck}`);
+
   if (!hasValidSubdomain(urlToCheck)) {
+    debug(`url-ready; URL: ${urlToCheck}; hasValidSubdomain: false`);
     throw new Error(`no valid subdomain found in ${urlToCheck}`);
   }
 
   const subdomain = extractSubdomain(urlToCheck);
+  debug(`url-ready; URL: ${urlToCheck}; subdomain: ${subdomain}`);
 
   let ready = await ingressExists(subdomain);
   let endpoint;
 
+  debug(`url-ready; URL: ${urlToCheck}; ready after ingress check: ${ready}`);
+
   if (ready) {
     endpoint = await endpointConfig(subdomain).catch(e => {
+      debug(`url-ready: URL: ${urlToCheck}; endpoint config error: ${e}`);
       ready = false;
     });
   }
+
+  debug(`url-ready; URL: ${urlToCheck}; ready after fetching endpoint config: ${ready}`);
 
   if (ready) {
     ready = await fetch(urlToCheck, {
       "redirect": "manual"
     })
     .then(resp => {
-      if (resp.ok) {
+      debug(`url-ready; URL: ${urlToCheck}; fetch response: ${resp.status}`);
+      if (resp.status >= 200 && resp.status < 400) {
         return true;
       }
       return false;
-    }).catch(e => false);
+    })
+    .catch(e => false);
   }
+
+  debug(`url-ready; URL: ${urlToCheck}; ready after fetching URL: ${ready}`);
 
   if (ready) {
     ready = await fetch(`http://${endpoint.IP}:${endpoint.Port}/url-ready`, {
@@ -51,8 +65,14 @@ apirouter.get("/url-ready", async (req, res) => {
     })
     .then(resp => resp.json())
     .then(data => data["ready"])
+    .then(data => {
+      debug(`url-ready; URL: ${urlToCheck}; fetch endpoint response: ${data}`);
+      return data;
+    })
     .catch(e => false);
   }
+
+  debug(`url-ready; URL: ${urlToCheck}; ready after fetching endpoint: ${ready}`);
 
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify({ready: ready}));

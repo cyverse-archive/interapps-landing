@@ -23,9 +23,9 @@ export async function endpointConfig(subdomain) {
   };
   debug(`fetching endpoint config from ${endpointAPI.toString()} for ${subdomain}`);
   return fetch(endpointAPI.toString(), reqOptions)
-    .then(response => response.json())
-    .then(response => {
-      debug(`response from ${endpointAPI.toString()} for ${subdomain}: ${response.text()}`);
+    .then(response =>  {
+      debug(`response from ${endpointAPI.toString()} for ${subdomain}: ${response.status}`);
+      return response.json();
     });
 }
 
@@ -45,8 +45,9 @@ export async function ingressExists(subdomain) {
       }
       return false;
     })
-    .then(response => {
-      debug(`ingress check; subdomain: ${subdomain}; api: ${ingressAPI.toString()}; response: ${response}`);
+    .then(value => {
+      debug(`ingress check; subdomain: ${subdomain}; api: ${ingressAPI.toString()}; ok: ${value}`);
+      return value;
     })
     .catch(e => {return false;});
 }
