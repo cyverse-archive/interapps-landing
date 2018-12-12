@@ -37,6 +37,8 @@ class AppCard extends Component {
           creator,
       } = this.props;
 
+      const open = this.state.expanded;
+
       let avatarImgSrc = "https://www.gravatar.com/avatar/" + uuid + "?d=identicon&s=60";
       return (
           <div className={classes.card}>
