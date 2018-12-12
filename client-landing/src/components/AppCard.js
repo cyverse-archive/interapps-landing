@@ -45,7 +45,7 @@ class AppCard extends Component {
               <Card>
                   <CardContent>
                       <div style={{float: "left", marginRight: 5}}>
-                          <div><img src={avatarImgSrc}/></div>
+                          <div><img src={avatarImgSrc} alt="avatar image"/></div>
                           <div style={{
                               textAlign: 'center'
                           }}>
@@ -91,9 +91,9 @@ class AppCard extends Component {
                           <div style={{position: "relative", top: 5}}>
                               <Rating
                                   placeholderRating={3.5}
-                                  emptySymbol={<img src={whitestar} className="icon"/>}
-                                  fullSymbol={<img src={goldstar} className="icon"/>}
-                                  placeholderSymbol={<img src={redstar} className="icon"/>}
+                                  emptySymbol={<img src={whitestar} className="icon" alt="white star"/>}
+                                  fullSymbol={<img src={goldstar} className="icon" alt="gold star"/>}
+                                  placeholderSymbol={<img src={redstar} className="icon" alt="red star"/>}
                                   fractions={2}
                               />
                               (3)
