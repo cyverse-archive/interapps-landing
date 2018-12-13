@@ -18,12 +18,15 @@ The server project uses dotenv to configure set of environment variables. The fu
 
 * PORT - The port number the server will listen on for requests.
 * DB - The connection string for the DE database
-* VICE_DOMAIN - The public-facing hostname and port, used for extracting subdomain information.
+* VICE_DOMAIN - The public-facing base URL for VICE, used for extracting subdomain information.
 * APP_EXPOSER_HEADER - The HTTP Host header value for accessing the app-exposer service API.
 * INGRESS - The URL to the Kubernetes Ingress.
 * UI - The relative path to the built UI that the server should serve up on `/`. It's relative to the index.js file in the `server/src/index.js` file.
+* DEBUG - Optional, can contain a comma-separated list of modules in src for which to enable debug logging. Can also be set to `*`.
 
 A sample `.env` file is provided at `server/.env.example`. All `.env` files should be blocked from being checked in by the `.gitignore`, but make sure you don't accidentally check in a file with sensitive info.
+
+The `.env` file for the server project should be located in the `server/` subdirectory.
 
 ### Initializing
 
@@ -54,6 +57,10 @@ You can run them with:
 You can fire up everything (minus storybook instances) by executing `npm start` from the top-level directory. This should open up a couple of browser tabs with the landing and loading pages.
 
 Each of the UI projects is configured to reverse proxy requests to the server instance that gets started up. Make sure you have your `.env` file created at `server/.env`.
+
+You can also just fire up the dev version of the landing page with `npm run landing` in the top-level directory. Similarly, you can fire up the loading page with `npm run loading` in the same location.
+
+The code for the server and the UIs should auto-reload if a change is detected in their respective source files. That should only occur during development and not in the container created for deployment.
 
 ### Storybook
 
