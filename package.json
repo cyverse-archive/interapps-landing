@@ -5,8 +5,10 @@
   "private": true,
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
+    "landing": "concurrently \"npm run server\" \"node start-landing-ui.js\"",
+    "loading": "concurrently \"npm run server\" \"node start-loading-ui.js\"",
     "client": "concurrently \"node start-loading-ui.js\" \"node start-landing-ui.js\"",
-    "server": "concurrently \"npm run port-forward\" \"node start-server.js\"",
+    "server": "concurrently \"node start-server.js\"",
     "port-forward": "node -r dotenv/config port-forward.js",
     "clean": "concurrently \"rimraf server/build\" \"rimraf client-loading/build\" \"rimraf client-landing/build\"",
     "clean-all": "concurrently \"npm run clean\" \"rimraf server/node_modules\" \"rimraf client-loading/node_modules\" \"rimraf client-landing/node_modules\""

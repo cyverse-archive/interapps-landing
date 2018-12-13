@@ -36,7 +36,7 @@
     "http-proxy-middleware": "^0.19.0",
     "redux-devtools": "^3.4.1"
   },
-  "proxy": "http://localhost:8082",
+  "proxy": "http://localhost:60000",
   "homepage": ".",
   "browserslist": [
     ">0.2%",
