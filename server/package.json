@@ -11,8 +11,8 @@
     "dev": "nodemon ./src/index.js --exec \"node -r dotenv/config -r @babel/register\"",
     "clean": "rimraf build",
     "build": "npm run clean && mkdir -p build && babel src -s -D -d build",
-    "test": "jest --watch",
-    "lint": "esw -w src test"
+    "test": "jest",
+		"watch-test": "jest --watch"
   },
   "babel": {
     "presets": [

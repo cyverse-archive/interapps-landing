@@ -27,7 +27,7 @@ node('docker') {
         dockerPusher = "push-${env.BUILD_TAG}"
         try {
             stage "Test"
-            sh "docker run --rm --name ${dockerTestRunner} --entrypoint 'go' ${dockerRepo} test github.com/cyverse-de/${service.repo}"
+            sh "docker run --rm --name ${dockerTestRunner} --entrypoint 'npm' ${dockerRepo} run test"
 
             milestone 100
             stage "Docker Push"
