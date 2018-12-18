@@ -12,7 +12,7 @@
     "clean": "rimraf build",
     "build": "npm run clean && mkdir -p build && babel src -s -D -d build",
     "test": "jest",
-		"watch-test": "jest --watch"
+    "watch-test": "jest --watch"
   },
   "babel": {
     "presets": [
@@ -44,6 +44,7 @@
     "@babel/polyfill": "^7.0.0",
     "body-parser": "^1.18.3",
     "compression": "^1.7.3",
+    "connect-redis": "^3.4.0",
     "cors": "^2.8.5",
     "debug": "^4.1.0",
     "eslint": "^5.9.0",
@@ -63,6 +64,7 @@
     "@babel/register": "^7.0.0",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
+    "client-oauth2": "^4.2.3",
     "dotenv": "^6.1.0",
     "jest": "^23.6.0",
     "nock": "^10.0.3",

@@ -1,20 +1,102 @@
 import express from 'express';
 import { viceAnalyses } from './db';
 import hasValidSubdomain, { extractSubdomain } from './subdomain';
-import { ingressExists, endpointConfig } from './ingress';
+import { endpointConfig, ingressExists } from './ingress';
 import compression from 'compression';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
+
+
 const fetch = require('node-fetch');
 const debug = require('debug')('app');
+
+
+var session = require('express-session');
+var RedisStore = require('connect-redis')(session);
 
 const app = express();
 app.use(compression());
 app.use(helmet());
 app.use(morgan('combined'));
 
+let sess = {
+    store: new RedisStore({host: process.env.REDIS_HOST, port: process.env.REDIS_PORT}),
+    secret: 'interapps',
+    resave: false,
+    saveUninitialized: false,
+};
+
+if (app.get('env') === 'production') {
+    app.set('trust proxy', 1); // trust first proxy
+    sess.cookie.secure = true; // serve secure cookies
+}
+app.use(session(sess));
+
+app.use(function (req, res, next) {
+    if (!req.session) {
+        return next(new Error('Unable to handle session')) // handle error
+    }
+    next() // otherwise continue
+});
+
+
 const apirouter = express.Router();
+
+
+var ClientOAuth2 = require('client-oauth2');
+
+var cyverseAuth = new ClientOAuth2({
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    accessTokenUri: process.env.ACCESS_TOKEN_URI,
+    authorizationUri: process.env.AUTHORIZATION_URI,
+    redirectUri: process.env.REDIRECT_URI,
+});
+
+
+apirouter.get('/auth/provider', function (req, res) {
+    var uri = cyverseAuth.code.getUri();
+    debug("cyverse auth---->" + cyverseAuth.code.getUri());
+    res.redirect(uri);
+});
+
+apirouter.get('/auth/provider/callback', function (req, res) {
+    let username = "";
+    cyverseAuth.code.getToken(req.originalUrl)
+        .then(function (user) {
+            console.log(user); //=> { accessToken: '...', tokenType: 'bearer', ... }
+            fetch(process.env.PROFILE_URI + user.accessToken)
+                .then(res =>
+                    res.json()
+                )
+                .then(json => {
+                    console.log("user=>" + json.id);
+                    username = json.id;
+                    // We should store the token into a database.
+                    return res.redirect(process.env.SERVER_NAME + "/?user=" + username);
+                });
+        })
+});
+
+apirouter.get('/logout', function (req, res) {
+    debug("cyverse auth logout---->" + process.env.LOGOUT);
+    res.redirect(process.env.LOGOUT);
+});
+
+// test session with redis
+apirouter.get('/test', function (req, res, next) {
+    if (req.session.views) {
+        req.session.views++;
+        res.setHeader('Content-Type', 'text/html');
+        res.write('<p>views: ' + req.session.views + '</p>');
+        res.write('<p>expires in: ' + (req.session.cookie.maxAge / 1000) + 's</p>');
+        res.end();
+    } else {
+        req.session.views = 1;
+        res.end('welcome to the session demo. refresh!');
+    }
+});
 
 apirouter.get("/url-ready", async (req, res) => {
   const urlToCheck = req.query.url;
@@ -84,6 +166,7 @@ apirouter.get("/analyses", async (req, res) => {
     res.send(JSON.stringify({"vice_analyses" : data}));
   })
 });
+
 
 app.use('/api', apirouter);
 app.get('/healthz', (req, res) => res.send("I'm healthy."));
