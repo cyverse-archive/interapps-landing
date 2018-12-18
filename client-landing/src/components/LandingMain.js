@@ -33,7 +33,7 @@ const styles = theme => ({
     padding: theme.spacing.unit * 3,
     minWidth: 0, // So the Typography noWrap works
   },
-})
+});
 
 class LandingMain extends Component {
   render() {
@@ -54,7 +54,7 @@ class LandingMain extends Component {
       case ShowCompleted:
         mainContent = (
           <AnalysisCardGrid analysisKeys={analyses[StatusCompleted]} />
-        )
+        );
         break;
       case ShowFailed:
         mainContent = (

@@ -1,18 +1,21 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { toggleMobileOpen } from '../actions';
+import queryString from "query-string";
 
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
 import { withStyles } from '@material-ui/core/styles';
 
 import logo from '../images/logo.png';
+import constants from '../constants';
+
+import Button from "@material-ui/core/Button";
 
 const styles = theme => ({
   root: {
@@ -36,6 +39,28 @@ const styles = theme => ({
 },
 });
 
+function Login(props) {
+    if (props.username.user) {
+        return (
+            <div>
+                Welcome {props.username.user},
+                <a
+                    style={{textDecoration: 'underline', cursor: 'pointer', padding: 3}}
+                    href={constants.LOGOUT_URL}>
+                    Logout
+                </a>
+            </div>
+        )
+    } else {
+        return (
+            <Button variant="raised" color="primary" href={constants.LOGIN_URL} style={{margin:1}}>
+                Login
+                <AccountCircle style={{margin: 1}}/>
+            </Button>
+        )
+    }
+}
+
 class LandingAppBar extends Component {
   state = {
     anchorEl: null
@@ -49,13 +74,22 @@ class LandingAppBar extends Component {
   // Called when the menu is closed.
   handleClose = () => {
     this.setState({ anchorEl: null });
+      axios.get("/api/auth/provider")
+          .then(function (response) {
+              console.log(response);
+          })
+          .catch(function (error) {
+              console.log(error);
+          });
+
   };
 
   render() {
     const { classes, handleDrawerToggle } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
-
+      const username = queryString.parse(window.location.search);
+      console.log("parsed user name is " + username.user);
     return (
       <div className={classes.root}>
         <AppBar position="fixed" className={classes.appBar}>
@@ -72,34 +106,9 @@ class LandingAppBar extends Component {
               <div className={classes.grow}>
                 <img src={logo} height={32} alt="logo"/>
               </div>
-
-            <div>
-              <IconButton
-                aria-owns={open ? 'menu-appbar' : null}
-                aria-haspopup="true"
-                onClick={this.handleMenu}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={open}
-                onClose={this.handleClose}
-              >
-                <MenuItem onClick={this.handleClose}>My Account</MenuItem>
-              </Menu>
-            </div>
+              <div>
+                  <Login username={username}/>
+              </div>
           </Toolbar>
         </AppBar>
       </div>
