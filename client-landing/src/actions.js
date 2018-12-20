@@ -41,38 +41,38 @@ export class Analysis {
     image_url,
     step
   }) {
-    this.uuid = id
-    this.name = job_name
-    this.description = job_description
-    this.resultFolderPath = result_folder_path
-    this.subdomain = subdomain
-    this.userID = user_id
-    this.appID = app_id
-    this.appName = app_name
-    this.appDescription = app_description
-    this.appEditedDate = app_edited_date
-    this.toolID = tool_id
-    this.toolName = tool_name
-    this.toolDescription = tool_description
-    this.toolVersion = tool_version
-    this.workingDirectory = working_directory
-    this.entrypoint = entrypoint
-    this.uid = uid
-    this.minCPUCores = min_cpu_cores
-    this.maxCPUCores = max_cpu_cores
-    this.pidsLimit = pids_limit
-    this.skipTmpMount = skip_tmp_mount
-    this.containerPort = container_port
-    this.imageID = image_id
-    this.imageName = image_name
-    this.imageTag = image_tag
-    this.imageURL = image_url
-    this.step = step
-    this.owner = username
-    this.status = status
-    this.startDate = start_date
-    this.endDate = end_date
-    this.plannedEndDate = planned_end_date
+      this.uuid = id;
+      this.name = job_name;
+      this.description = job_description;
+      this.resultFolderPath = result_folder_path;
+      this.subdomain = subdomain;
+      this.userID = user_id;
+      this.appID = app_id;
+      this.appName = app_name;
+      this.appDescription = app_description;
+      this.appEditedDate = app_edited_date;
+      this.toolID = tool_id;
+      this.toolName = tool_name;
+      this.toolDescription = tool_description;
+      this.toolVersion = tool_version;
+      this.workingDirectory = working_directory;
+      this.entrypoint = entrypoint;
+      this.uid = uid;
+      this.minCPUCores = min_cpu_cores;
+      this.maxCPUCores = max_cpu_cores;
+      this.pidsLimit = pids_limit;
+      this.skipTmpMount = skip_tmp_mount;
+      this.containerPort = container_port;
+      this.imageID = image_id;
+      this.imageName = image_name;
+      this.imageTag = image_tag;
+      this.imageURL = image_url;
+      this.step = step;
+      this.owner = username;
+      this.status = status;
+      this.startDate = start_date;
+      this.endDate = end_date;
+      this.plannedEndDate = planned_end_date;
   }
 }
 
@@ -86,13 +86,13 @@ export class App {
     creator,
     link
   ) {
-    this.uuid = uuid
-    this.name = name
-    this.toolName = toolName
-    this.toolVersion = toolVersion
-    this.description = description
-    this.creator = creator
-    this.link = link
+      this.uuid = uuid;
+      this.name = name;
+      this.toolName = toolName;
+      this.toolVersion = toolVersion;
+      this.description = description;
+      this.creator = creator;
+      this.link = link;
   }
 }
 
@@ -134,7 +134,7 @@ export const {
 export const fetchAnalyses = () => {
   return dispatch => {
     return axios.get(`/api/analyses`, {withCredentials: true}).then(
-      response => response.data.vice_analyses.forEach(i => dispatch(addAnalysis(i)))
+        response => response.data.vice_analyses.forEach(i => dispatch(addAnalysis(new Analysis(i))))
     ).catch(function(error) {
       console.log('error from server: ', error.message);
     });
@@ -147,17 +147,19 @@ export const reducer = handleActions(
     SET_PAGE_TO_SHOW:   (state, {payload: pageToShow}) => ({ ...state, pageToShow: pageToShow}),
     ADD_APP:            (state, {payload: app}) => ({ ...state, apps: {index: { ...state.apps.index, [app.uuid]: app}}}),
     ADD_ANALYSIS:       (state, {payload: analysis}) => {
-      return {
-        ...state,
-        analyses: {
-          ...state.analyses,
-          index: {
-            ...state.analyses.index,
-            [analysis.uuid]: analysis
-          },
-          [analysis.status]: [ ...state.analyses[analysis.status], analysis.uuid ]
+        if (state.analyses[analysis.status].includes(analysis.uuid)) {
+            return {...state};
         }
-      };
+        return {
+            ...state,
+            analyses: {
+                ...state.analyses,
+                index: {
+                    [analysis.uuid]: analysis
+                },
+                [analysis.status]: [...state.analyses[analysis.status], analysis.uuid]
+            }
+        };
     },
   },
   defaultState

@@ -11,7 +11,7 @@ export const newStore = () => createStore(
     thunkMiddleware,
     loggerMiddleware
   )
-)
+);
 
 const store = newStore();
 export default store;

@@ -9,11 +9,11 @@ const pgp = require('pg-promise')(initOptions);
 let db;
 
 function getDB() {
-  if (db !== undefined && db !== null) {
+    if (db === undefined || db === null) {
+        const cn = process.env.DB;
+        db = pgp(cn);
+    }
     return db;
-  }
-  const cn = process.env.DB;
-  db = pgp(cn);
 }
 
 export const analysesQuery = `

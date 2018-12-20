@@ -71,30 +71,36 @@ apirouter.get('/auth/provider/callback', function (req, res) {
                     res.json()
                 )
                 .then(json => {
-                    console.log("user=>" + json.id);
+                    console.log("json=>" + json);
+                    console.log("user=>" + json.id + ". isExpired==>" + user.expired());
                     username = json.id;
-                    // We should store the token into a database.
+                    req.session.accessToken = user.accessToken;
+                    req.session.username = username;
+                    req.session.expired = user.expired();
+
+                    // redirect user to app
                     return res.redirect(process.env.SERVER_NAME + "/?user=" + username);
                 });
         })
 });
 
 apirouter.get('/logout', function (req, res) {
+    req.session.accessToken = null;
+    req.session.username = null;
+    req.session.expired = true;
     debug("cyverse auth logout---->" + process.env.LOGOUT);
     res.redirect(process.env.LOGOUT);
 });
 
 // test session with redis
 apirouter.get('/test', function (req, res, next) {
-    if (req.session.views) {
-        req.session.views++;
+    if (req.session.accessToken) {
         res.setHeader('Content-Type', 'text/html');
-        res.write('<p>views: ' + req.session.views + '</p>');
-        res.write('<p>expires in: ' + (req.session.cookie.maxAge / 1000) + 's</p>');
+        res.write('<p>token: ' + req.session.accessToken + '</p>');
+        res.write('<p>expired:' + req.session.expired + '</p>');
         res.end();
     } else {
-        req.session.views = 1;
-        res.end('welcome to the session demo. refresh!');
+        res.end('No token. Please login!');
     }
 });
 
@@ -161,7 +167,8 @@ apirouter.get("/url-ready", async (req, res) => {
 });
 
 apirouter.get("/analyses", async (req, res) => {
-  const username = req.query.user;
+    debug("calling get analyses for " + req.session.username);
+  const username = req.session.username + "@iplantcollaborative.org";
   viceAnalyses(username, (data) => {
     res.send(JSON.stringify({"vice_analyses" : data}));
   })
