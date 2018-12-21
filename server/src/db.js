@@ -19,9 +19,11 @@ function getDB() {
 export const analysesQuery = `
 SELECT *
   FROM vice_analyses
- WHERE username = $1;
+ WHERE username = $1
+  AND
+ STATUS = $2      
 `;
 
-export function viceAnalyses(username, dataCallback) {
-  getDB().any(analysesQuery, [username]).then(dataCallback);
+export function viceAnalyses(username,status, dataCallback) {
+  getDB().any(analysesQuery, [username, status]).then(dataCallback);
 }

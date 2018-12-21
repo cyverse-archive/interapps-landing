@@ -167,9 +167,10 @@ apirouter.get("/url-ready", async (req, res) => {
 });
 
 apirouter.get("/analyses", async (req, res) => {
-    debug("calling get analyses for " + req.session.username);
+  debug("calling get analyses for " + req.session.username + " with query=" + req.query.status);
   const username = req.session.username + "@iplantcollaborative.org";
-  viceAnalyses(username, (data) => {
+  const status = req.query.status;
+  viceAnalyses(username, status, (data) => {
     res.send(JSON.stringify({"vice_analyses" : data}));
   })
 });
