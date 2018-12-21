@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { newStore } from "../src/store/configure";
-import { addAnalysis, Analysis } from "../src/actions";
+import { addAnalyses, Analysis } from "../src/actions";
 import AnalysisCardGrid from "../src/components/AnalysisCardGrid";
 
 
@@ -23,10 +23,12 @@ class AnalysisCardGridTest extends Component {
             end_date: endDate.toLocaleString(),
             subdomain: "http://localhost",
             status: "Running",
-        })).forEach(a => store.dispatch(addAnalysis(a)));
+        }));
+
+        store.dispatch(addAnalyses(analyses));
 
         return (
-            <AnalysisCardGrid analysisKeys={[...Array(3).keys()]} store={store}/>
+            <AnalysisCardGrid analyses={analyses} store={store}/>
         )
     }
 }

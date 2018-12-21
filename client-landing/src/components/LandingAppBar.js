@@ -66,24 +66,6 @@ class LandingAppBar extends Component {
     anchorEl: null
   };
 
-  // Called when the menu button is clicked.
-  handleMenu = event => {
-    this.setState({ anchorEl: event.currentTarget });
-  };
-
-  // Called when the menu is closed.
-  handleClose = () => {
-    this.setState({ anchorEl: null });
-      axios.get("/api/auth/provider")
-          .then(function (response) {
-              console.log(response);
-          })
-          .catch(function (error) {
-              console.log(error);
-          });
-
-  };
-
   render() {
     const { classes, handleDrawerToggle } = this.props;
     const { anchorEl } = this.state;

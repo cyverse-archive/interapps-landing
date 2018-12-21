@@ -34,7 +34,6 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Ticker store={this.props.store}/>
         <MuiThemeProvider theme={theme}>
           <LandingMain />
         </MuiThemeProvider>

@@ -3,11 +3,15 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import {
-  setPageToShow,
-  ShowRunning,
-  ShowCompleted,
-  ShowFailed,
-  ShowApps
+    setPageToShow,
+    ShowRunning,
+    ShowCompleted,
+    ShowFailed,
+    fetchAnalyses,
+    ShowApps,
+    StatusCompleted,
+    StatusRunning,
+    StatusFailed,
 } from '../actions';
 
 import List from '@material-ui/core/List';
@@ -125,9 +129,9 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   handleClickApps:      () => dispatch(setPageToShow(ShowApps)),
-  handleClickCompleted: () => dispatch(setPageToShow(ShowCompleted)),
-  handleClickFailed:    () => dispatch(setPageToShow(ShowFailed)),
-  handleClickRunning:   () => dispatch(setPageToShow(ShowRunning)),
+  handleClickCompleted: () => {dispatch(setPageToShow(ShowCompleted)); dispatch(fetchAnalyses(StatusCompleted))},
+  handleClickFailed:    () => {dispatch(setPageToShow(ShowFailed)); dispatch(fetchAnalyses(StatusFailed))},
+  handleClickRunning:   () => {dispatch(setPageToShow(StatusRunning)); dispatch(fetchAnalyses(StatusRunning))},
 });
 
 const MappedAnalysesList = connect(

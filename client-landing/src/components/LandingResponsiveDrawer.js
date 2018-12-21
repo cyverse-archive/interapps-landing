@@ -119,7 +119,7 @@ LandingResponsiveDrawer.propTypes = {
 const MappedLandingResponsiveDrawer = connect(
   mapStateToProps,
   mapDispatchToProps
-)(LandingResponsiveDrawer)
+)(LandingResponsiveDrawer);
 
 export default withStyles(
   styles,

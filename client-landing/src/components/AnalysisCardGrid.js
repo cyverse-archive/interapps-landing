@@ -14,21 +14,21 @@ const styles = theme => ({
 
 class AnalysisCardGrid extends Component {
   render() {
-    const { classes, analysesIndex, analysisKeys } = this.props;
+    const { classes, analyses } = this.props;
 
     return (
       <Grid container className={classes.grid} justify="center" spacing={16}>
-        {analysisKeys.map(key => (
+        {analyses.map(analysis => (
           <Grid item>
             <AnalysisCard
-              appName={analysesIndex[key].appName}
-              analysisName={analysesIndex[key].name}
-              description={analysesIndex[key].description}
-              analysisLink={analysesIndex[key].link}
-              owner={analysesIndex[key].owner}
-              startDate={analysesIndex[key].startDate}
-              plannedEndDate={analysesIndex[key].plannedEndDate}
-              status={analysesIndex[key].status}
+              appName={analysis.appName}
+              analysisName={analysis.name}
+              description={analysis.description}
+              analysisLink={analysis.link}
+              owner={analysis.owner}
+              startDate={analysis.startDate}
+              plannedEndDate={analysis.plannedEndDate}
+              status={analysis.status}
             />
           </Grid>
         ))}
@@ -43,7 +43,7 @@ AnalysisCardGrid.propTypes = {
 };
 
 const mapStateToProps = state => ({
-  analysesIndex: state.analyses.index
+  analyses: state.analyses
 });
 
 const MappedAnalysisCardGrid = connect(

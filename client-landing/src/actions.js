@@ -109,32 +109,30 @@ const defaultState = {
   apps : {
     index: {},
   },
-  analyses : {
-    index: {},
-    [StatusRunning]: [],
-    [StatusCompleted]: [],
-    [StatusFailed]: []
-  }
+  analyses : []
 };
 
 export const {
   toggleMobileOpen,
   setPageToShow,
   addApp,
-  addAnalysis,
+  addAnalyses,
   toggleFetchingApps,
   toggleFetchingAnalyses
 } = createActions({
   TOGGLE_MOBILE_OPEN: () => {},
   SET_PAGE_TO_SHOW:   (pageToShow = ShowRunning) => pageToShow,
   ADD_APP:            (app) => app,
-  ADD_ANALYSIS:       (analysis) => analysis
+  ADD_ANALYSES:       (analyses) => analyses
 });
 
-export const fetchAnalyses = () => {
+export const fetchAnalyses = (status) => {
   return dispatch => {
-    return axios.get(`/api/analyses`, {withCredentials: true}).then(
-        response => response.data.vice_analyses.forEach(i => dispatch(addAnalysis(new Analysis(i))))
+      return axios.get(`/api/analyses?status=` + status, {withCredentials: true}).then(
+        response => {
+          const results = response.data.vice_analyses.map(i => (new Analysis(i)));
+          dispatch(addAnalyses(results));
+        }
     ).catch(function(error) {
       console.log('error from server: ', error.message);
     });
@@ -146,19 +144,10 @@ export const reducer = handleActions(
     TOGGLE_MOBILE_OPEN: (state, {payload: mobileOpen}) => ({ ...state, mobileOpen: !state.mobileOpen}),
     SET_PAGE_TO_SHOW:   (state, {payload: pageToShow}) => ({ ...state, pageToShow: pageToShow}),
     ADD_APP:            (state, {payload: app}) => ({ ...state, apps: {index: { ...state.apps.index, [app.uuid]: app}}}),
-    ADD_ANALYSIS:       (state, {payload: analysis}) => {
-        if (state.analyses[analysis.status].includes(analysis.uuid)) {
-            return {...state};
-        }
+    ADD_ANALYSES:       (state, {payload: analyses}) => {
         return {
             ...state,
-            analyses: {
-                ...state.analyses,
-                index: {
-                    [analysis.uuid]: analysis
-                },
-                [analysis.status]: [...state.analyses[analysis.status], analysis.uuid]
-            }
+            analyses: analyses
         };
     },
   },
