@@ -37,7 +37,7 @@ export async function ingressExists(subdomain) {
       "Host" : process.env.APP_EXPOSER_HEADER
     }
   };
-  debug(`ingress check; subdomain: ${subdomain}; api ${ingressAPI.toString()}`)
+  debug(`ingress check; subdomain: ${subdomain}; api ${ingressAPI.toString()}`);
   return fetch(ingressAPI.toString(), reqOptions)
     .then(response => {
       if (response.ok) {

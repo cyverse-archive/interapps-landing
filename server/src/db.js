@@ -24,6 +24,21 @@ SELECT *
  STATUS = $2      
 `;
 
+export const appsQyuery = `
+SELECT DISTINCT a.id, a.name, a.description
+   FROM apps a
+JOIN app_steps s ON a.id = s.app_id
+JOIN tasks t ON s.task_id = t.id
+JOIN job_types jt ON t.job_type_id = jt.id
+   WHERE jt.name= 'Interactive'
+    AND  a.id IN ($1:csv)
+   ORDER BY a.name;
+`;
+
 export function viceAnalyses(username,status, dataCallback) {
   getDB().any(analysesQuery, [username, status]).then(dataCallback);
+}
+
+export function viceApps(appIds, dataCallback) {
+    getDB().any(appsQyuery, [appIds]).then(dataCallback);
 }

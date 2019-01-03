@@ -1,7 +1,8 @@
 import express from 'express';
-import { viceAnalyses } from './db';
+import { viceAnalyses, viceApps } from './db';
 import hasValidSubdomain, { extractSubdomain } from './subdomain';
 import { endpointConfig, ingressExists } from './ingress';
+import {getAppsForUser} from './permissions';
 import compression from 'compression';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -56,23 +57,19 @@ var cyverseAuth = new ClientOAuth2({
 
 
 apirouter.get('/auth/provider', function (req, res) {
-    var uri = cyverseAuth.code.getUri();
-    debug("cyverse auth---->" + cyverseAuth.code.getUri());
-    res.redirect(uri);
+    res.redirect(cyverseAuth.code.getUri());
 });
 
 apirouter.get('/auth/provider/callback', function (req, res) {
     let username = "";
     cyverseAuth.code.getToken(req.originalUrl)
         .then(function (user) {
-            console.log(user); //=> { accessToken: '...', tokenType: 'bearer', ... }
+            debug(user); //=> { accessToken: '...', tokenType: 'bearer', ... }
             fetch(process.env.PROFILE_URI + user.accessToken)
                 .then(res =>
                     res.json()
                 )
                 .then(json => {
-                    console.log("json=>" + json);
-                    console.log("user=>" + json.id + ". isExpired==>" + user.expired());
                     username = json.id;
                     req.session.accessToken = user.accessToken;
                     req.session.username = username;
@@ -82,6 +79,18 @@ apirouter.get('/auth/provider/callback', function (req, res) {
                     return res.redirect(process.env.SERVER_NAME + "/?user=" + username);
                 });
         })
+});
+
+
+apirouter.get('/', function (req, res) {
+    debug("**** handle request for / *****");
+    if(!req.session.accessToken || req.session.expired) {
+        res.redirect(cyverseAuth.code.getUri());
+    } else {
+        // redirect user to app
+        res.redirect(process.env.SERVER_NAME + "/?user=" + req.session.username);
+    }
+
 });
 
 apirouter.get('/logout', function (req, res) {
@@ -168,11 +177,29 @@ apirouter.get("/url-ready", async (req, res) => {
 
 apirouter.get("/analyses", async (req, res) => {
   debug("calling get analyses for " + req.session.username + " with query=" + req.query.status);
-  const username = req.session.username + "@iplantcollaborative.org";
-  const status = req.query.status;
-  viceAnalyses(username, status, (data) => {
-    res.send(JSON.stringify({"vice_analyses" : data}));
-  })
+    if (!req.session.accessToken || req.session.expired) {
+       res.status(403).send("You are not authorized to view this page. Please login!");
+    } else {
+        const username = req.session.username + "@iplantcollaborative.org";
+        const status = req.query.status;
+        viceAnalyses(username, status, (data) => {
+           res.send(JSON.stringify({"vice_analyses": data}));
+        });
+    }
+});
+
+apirouter.get("/apps", async (req, res) => {
+    debug("calling get apps for " + req.session.username);
+    if (!req.session.accessToken || req.session.expired) {
+        res.status(403).send("You are not authorized to view this page. Please login!");
+    } else {
+        const username = req.session.username;
+        let app_ids = await getAppsForUser(username);
+        viceApps(app_ids,(data) => {
+            debug("apps=>" + JSON.stringify(data));
+            res.send(JSON.stringify({"apps": data}));
+        });
+    }
 });
 
 
@@ -181,7 +208,7 @@ app.get('/healthz', (req, res) => res.send("I'm healthy."));
 
 const uiDir = process.env.UI || '../../client-landing/build';
 const uiPath = path.join(__dirname, uiDir);
-console.log(uiPath);
+debug(uiPath);
 app.use(express.static(uiPath));
 
 export default app;
