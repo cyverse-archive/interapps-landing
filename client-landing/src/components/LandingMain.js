@@ -2,13 +2,15 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
-  ShowRunning,
-  ShowCompleted,
-  ShowFailed,
-  ShowApps,
-  StatusRunning,
-  StatusFailed,
-  StatusCompleted
+    loggedIn,
+    ShowApps,
+    ShowCompleted,
+    ShowError,
+    ShowFailed,
+    ShowRunning,
+    StatusCompleted,
+    StatusFailed,
+    StatusRunning
 } from '../actions';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -17,6 +19,10 @@ import LandingAppBar from './LandingAppBar';
 import LandingResponsiveDrawer from './LandingResponsiveDrawer';
 import AnalysisCardGrid from './AnalysisCardGrid';
 import AppCardGrid from './AppCardGrid';
+import ErrorCard from './ErrorCard';
+import queryString from "query-string";
+
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = theme => ({
   root: {
@@ -36,36 +42,49 @@ const styles = theme => ({
 });
 
 class LandingMain extends Component {
+
   render() {
     const {
       pageToShow,
       analyses,
-      apps
+      apps,
+      handleLogin,
+      httpCode,
+      loading,
     } = this.props;
+
+    const username = queryString.parse(window.location.search);
+    handleLogin(username.user);
+    console.log("parsed user name is " + username.user);
 
     let mainContent;
 
     switch (pageToShow) {
       case ShowRunning:
         mainContent = (
-          <AnalysisCardGrid analysisKeys={analyses[StatusRunning]} />
+          <AnalysisCardGrid/>
         );
         break;
       case ShowCompleted:
         mainContent = (
-          <AnalysisCardGrid analysisKeys={analyses[StatusCompleted]} />
+          <AnalysisCardGrid/>
         );
         break;
       case ShowFailed:
         mainContent = (
-          <AnalysisCardGrid analysisKeys={analyses[StatusFailed]} />
+          <AnalysisCardGrid/>
         );
         break;
       case ShowApps:
         mainContent = (
-          <AppCardGrid appKeys={Object.keys(apps.index)} />
+          <AppCardGrid/>
         );
         break;
+      case ShowError:
+          mainContent = (
+              <ErrorCard httpCode={httpCode}/>
+          );
+          break;
       default:
         console.log('unknown value for pageToShow');
     }
@@ -74,6 +93,9 @@ class LandingMain extends Component {
       <div>
         <LandingAppBar />
         <LandingResponsiveDrawer>
+            {loading &&
+            <CircularProgress color="primary" style={{position: 'relative', top: 300, left: 200}}/>
+            }
           {mainContent}
         </LandingResponsiveDrawer>
       </div>
@@ -91,10 +113,18 @@ const mapStateToProps = state => ({
   pageToShow: state.pageToShow,
   analyses:   state.analyses,
   apps:       state.apps,
+  httpCode:   state.httpCode,
+  loading:    state.loading,
+});
+
+
+const mapDispatchToProps = dispatch => ({
+    handleLogin: (username) => dispatch(loggedIn(username)),
 });
 
 const MappedLandingMain = connect(
-  mapStateToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(LandingMain);
 
 export default withStyles(

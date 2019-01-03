@@ -9,11 +9,13 @@ import redstar from "../../src/images/star-red.gif";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import Rating from "react-rating";
 import IconButton from "@material-ui/core/IconButton";
+import md5 from "md5";
+import constants from '../constants';
 
 const styles = theme => ({
   card: {
       width: 265,
-      margin: 5,
+      margin: 15,
       height: 100,
   },
 });
@@ -39,11 +41,11 @@ class AppCard extends Component {
 
       const open = this.state.expanded;
 
-      let avatarImgSrc = "https://www.gravatar.com/avatar/" + uuid + "?d=identicon&s=60";
+      let avatarImgSrc = constants.GRAVATAR_URL + md5(uuid) + "?" + constants.GRAVATAR_OPTIONS;
       return (
           <div className={classes.card}>
               <Card>
-                  <CardContent>
+                  <CardContent style={{paddingLeft: 10, paddingRight: 0}}>
                       <div style={{float: "left", marginRight: 5}}>
                           <div><img src={avatarImgSrc} alt="avatar image"/></div>
                           <div style={{
@@ -53,10 +55,9 @@ class AppCard extends Component {
                           </div>
                       </div>
                       <div>
-                          <div>
-                          <span title={name} style={{
+                          <div title={name} style={{
                               position: "relative",
-                              top: -15,
+                              top: -5,
                               fontSize: 12,
                               textOverflow: 'ellipsis',
                               overflow: 'hidden',
@@ -65,41 +66,39 @@ class AppCard extends Component {
                               maxWidth: 100,
                           }}>
                               {name}
-                          </span>
-                              <span style={{position: "relative", top: -15, right: -15,}}>
+                          </div>
+                           <div style={{position: 'relative', float: 'right', top: -18,}}>
                               <IconButton
                                   aria-label="More"
                                   aria-owns={open ? 'long-menu' : null}
                                   aria-haspopup="true">
                                   <MoreVertIcon/>
                               </IconButton>
-                          </span>
-                          </div>
-                          <div style={{
-                              position: "relative",
-                              top: 0,
-                              fontSize: 12,
-                              fontStyle: "italic",
-                              textOverflow: 'ellipsis',
-                              overflow: 'hidden',
-                              whiteSpace: 'nowrap',
-                              display: 'inline-block',
-                              maxWidth: 100,
-                          }}>
-                              {creator}
-                          </div>
-                          <div style={{position: "relative", top: 5}}>
-                              <Rating
-                                  placeholderRating={3.5}
-                                  emptySymbol={<img src={whitestar} className="icon" alt="white star"/>}
-                                  fullSymbol={<img src={goldstar} className="icon" alt="gold star"/>}
-                                  placeholderSymbol={<img src={redstar} className="icon" alt="red star"/>}
-                                  fractions={2}
-                              />
-                              (3)
                           </div>
                       </div>
-
+                      <div style={{
+                          position: "relative",
+                          top: 20,
+                          fontSize: 12,
+                          fontStyle: "italic",
+                          textOverflow: 'ellipsis',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap',
+                          display: 'inline-block',
+                          maxWidth: 100,
+                      }}>
+                          {creator}
+                      </div>
+                      <div style={{position: "relative", top: 25}}>
+                          <Rating
+                              placeholderRating={3.5}
+                              emptySymbol={<img src={whitestar} className="icon" alt="white star"/>}
+                              fullSymbol={<img src={goldstar} className="icon" alt="gold star"/>}
+                              placeholderSymbol={<img src={redstar} className="icon" alt="red star"/>}
+                              fractions={2}
+                          />
+                          (3)
+                      </div>
                   </CardContent>
               </Card>
           </div>

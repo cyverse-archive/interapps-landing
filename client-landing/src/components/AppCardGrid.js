@@ -18,21 +18,21 @@ class AppCardGrid extends Component {
     const {
       classes,
       appIndex,
-      appKeys
+      apps
     } = this.props;
 
     return (
       <Grid container className={classes.grid} justify="center" spacing={16}>
-        {appKeys.map(key => (
+        {apps.map(app => (
           <Grid item>
             <AppCard
-                uuid={appIndex[key].uuid}
-                name={appIndex[key].name}
-                toolName={appIndex[key].toolName}
-                toolVersion={appIndex[key].toolVersion}
-                creator={appIndex[key].creator}
-                description={appIndex[key].description}
-                link={appIndex[key].link}
+                uuid={app.uuid}
+                name={app.name}
+                toolName={app.toolName}
+                toolVersion={app.toolVersion}
+                creator={app.creator}
+                description={app.description}
+                link={app.link}
             />
           </Grid>
         ))}
@@ -43,12 +43,11 @@ class AppCardGrid extends Component {
 
 AppCardGrid.propTypes = {
   classes:  PropTypes.object.isRequired,
-  appKeys:  PropTypes.array.isRequired,
-  appIndex: PropTypes.object.isRequired,
+  apps:  PropTypes.array.isRequired,
 };
 
 const mapStateToProps = state => ({
-  appIndex: state.apps.index
+  apps: state.apps
 });
 
 const MappedAppCardGrid = connect(

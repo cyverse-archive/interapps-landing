@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import '../css/App.css';
 import LandingMain from './LandingMain';
-import Ticker from './Ticker';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 
 export const palette = {
   orange:      '#f19e1f', // 241, 158, 31
@@ -27,6 +26,9 @@ export const theme = createMuiTheme({
     secondary: {
       main: palette.lightBlue,
     },
+    error: {
+      main: palette.red,
+    }
   },
 });
 

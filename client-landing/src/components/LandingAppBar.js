@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { toggleMobileOpen } from '../actions';
-import queryString from "query-string";
+import { toggleMobileOpen, loggedIn } from '../actions';
+
 
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -40,10 +39,10 @@ const styles = theme => ({
 });
 
 function Login(props) {
-    if (props.username.user) {
+    if (props.username) {
         return (
             <div>
-                Welcome {props.username.user},
+                Welcome {props.username},
                 <a
                     style={{textDecoration: 'underline', cursor: 'pointer', padding: 3}}
                     href={constants.LOGOUT_URL}>
@@ -67,11 +66,9 @@ class LandingAppBar extends Component {
   };
 
   render() {
-    const { classes, handleDrawerToggle } = this.props;
+    const { classes, handleDrawerToggle, username} = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
-      const username = queryString.parse(window.location.search);
-      console.log("parsed user name is " + username.user);
     return (
       <div className={classes.root}>
         <AppBar position="fixed" className={classes.appBar}>
@@ -106,6 +103,7 @@ const mapStateToProps = state => ({...state});
 
 const mapDispatchToProps = dispatch => ({
   handleDrawerToggle: () => dispatch(toggleMobileOpen()),
+  handleLogin: (username) => dispatch(loggedIn(username)),
 });
 
 const MappedLandingAppBar = connect(

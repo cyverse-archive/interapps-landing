@@ -1,4 +1,4 @@
-import { createActions, handleActions } from 'redux-actions';
+import {createActions, handleActions} from 'redux-actions';
 
 import axios from 'axios';
 
@@ -77,16 +77,16 @@ export class Analysis {
 }
 
 export class App {
-  constructor(
-    uuid,
-    name,
-    toolName,
-    toolVersion,
-    description,
-    creator,
-    link
-  ) {
-      this.uuid = uuid;
+    constructor({
+                    id,
+                    name,
+                    toolName,
+                    toolVersion,
+                    description,
+                    creator,
+                    link
+                }) {
+        this.uuid = id;
       this.name = name;
       this.toolName = toolName;
       this.toolVersion = toolVersion;
@@ -100,56 +100,104 @@ export const ShowRunning = 0;
 export const ShowCompleted = 1;
 export const ShowFailed = 2;
 export const ShowApps = 3;
+export const ShowError = 4;
 
 const defaultState = {
   mobileOpen: false,
   pageToShow: ShowRunning,
   username: "",
   email: "",
-  apps : {
-    index: {},
-  },
-  analyses : []
+    apps: [],
+    analyses: [],
+    httpCode: 200,
+    loading: false,
 };
 
 export const {
   toggleMobileOpen,
   setPageToShow,
-  addApp,
+    addApps,
   addAnalyses,
-  toggleFetchingApps,
-  toggleFetchingAnalyses
+    loggedIn,
+    setHttpCode,
+    toggleLoading,
 } = createActions({
   TOGGLE_MOBILE_OPEN: () => {},
   SET_PAGE_TO_SHOW:   (pageToShow = ShowRunning) => pageToShow,
-  ADD_APP:            (app) => app,
-  ADD_ANALYSES:       (analyses) => analyses
+    ADD_APPS: (apps) => apps,
+    ADD_ANALYSES: (analyses) => analyses,
+    LOGGED_IN: (username) => username,
+    SET_HTTP_CODE: (httpCode) => httpCode,
+    TOGGLE_LOADING: () => {
+    },
 });
 
 export const fetchAnalyses = (status) => {
   return dispatch => {
+      dispatch(toggleLoading());
       return axios.get(`/api/analyses?status=` + status, {withCredentials: true}).then(
         response => {
           const results = response.data.vice_analyses.map(i => (new Analysis(i)));
           dispatch(addAnalyses(results));
+            dispatch(setHttpCode(200));
+            dispatch(toggleLoading());
         }
     ).catch(function(error) {
       console.log('error from server: ', error.message);
+          dispatch(setHttpCode(error.response.status));
+          dispatch(setPageToShow(ShowError));
+          dispatch(toggleLoading());
     });
   };
 };
 
+export const fetchApps = () => {
+    return dispatch => {
+        dispatch(toggleLoading());
+        return axios.get(`/api/apps`, {withCredentials: true}).then(
+            response => {
+                const results = response.data.apps.map(i => (new App(i)));
+                dispatch(addApps(results));
+                dispatch(setHttpCode(200));
+                dispatch(toggleLoading());
+            }
+        ).catch(function (error) {
+            console.log('error from server: ', error.message);
+            dispatch(setHttpCode(error.response.status));
+            dispatch(setPageToShow(ShowError));
+            dispatch(toggleLoading());
+        });
+    };
+};
+
 export const reducer = handleActions(
-  {
-    TOGGLE_MOBILE_OPEN: (state, {payload: mobileOpen}) => ({ ...state, mobileOpen: !state.mobileOpen}),
+    {
+        TOGGLE_MOBILE_OPEN: (state) => ({...state, mobileOpen: !state.mobileOpen}),
     SET_PAGE_TO_SHOW:   (state, {payload: pageToShow}) => ({ ...state, pageToShow: pageToShow}),
-    ADD_APP:            (state, {payload: app}) => ({ ...state, apps: {index: { ...state.apps.index, [app.uuid]: app}}}),
+        ADD_APPS: (state, {payload: apps}) => {
+            return {...state, apps: apps};
+        },
     ADD_ANALYSES:       (state, {payload: analyses}) => {
         return {
             ...state,
-            analyses: analyses
+            analyses: analyses,
         };
     },
+        LOGGED_IN: (state, {payload: username}) => {
+            return {
+                ...state,
+                username: username
+            }
+        },
+        SET_HTTP_CODE: (state, {payload: httpCode}) => {
+            const err = httpCode >= 400;
+            return {
+                ...state,
+                httpCode: httpCode,
+            }
+        },
+        TOGGLE_LOADING: (state) => ({...state, loading: !state.loading}),
+
   },
   defaultState
 );

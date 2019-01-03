@@ -3,15 +3,15 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import {
+    fetchAnalyses, fetchApps,
     setPageToShow,
-    ShowRunning,
+    ShowApps,
     ShowCompleted,
     ShowFailed,
-    fetchAnalyses,
-    ShowApps,
+    ShowRunning,
     StatusCompleted,
-    StatusRunning,
     StatusFailed,
+    StatusRunning,
 } from '../actions';
 
 import List from '@material-ui/core/List';
@@ -58,6 +58,12 @@ class AnalysesList extends Component {
     this.setState(state => ({ openAnalyses: !state.openAnalyses }));
   };
 
+  componentDidMount() {
+      if (this.props.username) {
+          this.props.handleClickRunning();
+      }
+  }
+
   render() {
     const {
       classes,
@@ -80,19 +86,28 @@ class AnalysesList extends Component {
           </ListItem>
           <Collapse in={this.state.openAnalyses} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              <ListItem button className={classes.nested} selected={ pageToShow === ShowRunning } onClick={ handleClickRunning }>
+                <ListItem button
+                          className={classes.nested}
+                          selected={pageToShow === ShowRunning}
+                          onClick={handleClickRunning}>
                 <ListItemIcon>
                   <Assessment className={classes.runningAnalysisIcon}/>
                 </ListItemIcon>
                 <ListItemText inset primary="Running" />
               </ListItem>
-              <ListItem button className={classes.nested} selected={ pageToShow === ShowCompleted } onClick={ handleClickCompleted }>
+                <ListItem button
+                          className={classes.nested}
+                          selected={pageToShow === ShowCompleted}
+                          onClick={handleClickCompleted}>
                 <ListItemIcon>
                   <Assessment className={classes.completedAnalysisIcon}/>
                 </ListItemIcon>
                 <ListItemText inset primary="Completed" />
               </ListItem>
-              <ListItem button className={classes.nested} selected={ pageToShow === ShowFailed } onClick={ handleClickFailed }>
+                <ListItem button
+                          className={classes.nested}
+                          selected={pageToShow === ShowFailed}
+                          onClick={handleClickFailed}>
                 <ListItemIcon>
                   <Assessment className={classes.failedAnalysisIcon}/>
                 </ListItemIcon>
@@ -125,13 +140,14 @@ AnalysesList.propTypes = {
 
 const mapStateToProps = state => ({
   pageToShow: state.pageToShow,
+    username: state.username,
 });
 
 const mapDispatchToProps = dispatch => ({
-  handleClickApps:      () => dispatch(setPageToShow(ShowApps)),
+  handleClickApps:      () => {dispatch(setPageToShow(ShowApps)); dispatch(fetchApps())},
   handleClickCompleted: () => {dispatch(setPageToShow(ShowCompleted)); dispatch(fetchAnalyses(StatusCompleted))},
   handleClickFailed:    () => {dispatch(setPageToShow(ShowFailed)); dispatch(fetchAnalyses(StatusFailed))},
-  handleClickRunning:   () => {dispatch(setPageToShow(StatusRunning)); dispatch(fetchAnalyses(StatusRunning))},
+  handleClickRunning:   () => {dispatch(setPageToShow(ShowRunning)); dispatch(fetchAnalyses(StatusRunning))},
 });
 
 const MappedAnalysesList = connect(

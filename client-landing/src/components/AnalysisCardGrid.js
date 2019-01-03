@@ -38,8 +38,7 @@ class AnalysisCardGrid extends Component {
 }
 
 AnalysisCardGrid.propTypes = {
-  analysisKeys:  PropTypes.array.isRequired,
-  analysesIndex: PropTypes.object.isRequired,
+  analyses:  PropTypes.array.isRequired,
 };
 
 const mapStateToProps = state => ({
