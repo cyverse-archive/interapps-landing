@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
+    "add-subtract-date": "^1.0.14",
     "body-parser": "^1.18.3",
     "compression": "^1.7.3",
     "connect-redis": "^3.4.0",
