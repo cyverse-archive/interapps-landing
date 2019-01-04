@@ -15,6 +15,7 @@ import logo from '../images/logo.png';
 import constants from '../constants';
 
 import Button from "@material-ui/core/Button";
+import Divider from "@material-ui/core/Divider";
 
 const styles = theme => ({
   root: {
@@ -42,12 +43,15 @@ function Login(props) {
     if (props.username) {
         return (
             <div>
-                Welcome {props.username},
-                <a
-                    style={{textDecoration: 'underline', cursor: 'pointer', padding: 3}}
+                Welcome {props.username} | 
+                <Button
+                    variant="raised"
+                    style={{margin: 2}}
+                    color="primary"
                     href={constants.LOGOUT_URL}>
                     Logout
-                </a>
+                    <AccountCircle style={{margin: 1}}/>
+                </Button>
             </div>
         )
     } else {

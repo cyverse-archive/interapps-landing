@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
 import AppCard from './AppCard';
+import Typography from "@material-ui/core/es/Typography/Typography";
 
 
 const styles = theme => ({
@@ -17,27 +18,29 @@ class AppCardGrid extends Component {
   render() {
     const {
       classes,
-      appIndex,
       apps
     } = this.props;
-
-    return (
-      <Grid container className={classes.grid} justify="center" spacing={16}>
-        {apps.map(app => (
-          <Grid item>
-            <AppCard
-                uuid={app.uuid}
-                name={app.name}
-                toolName={app.toolName}
-                toolVersion={app.toolVersion}
-                creator={app.creator}
-                description={app.description}
-                link={app.link}
-            />
-          </Grid>
-        ))}
-      </Grid>
-    );
+      if (!apps || apps.length === 0) {
+          return (<Typography variant="body2" color="primary"> No apps to display! </Typography>);
+      } else {
+          return (
+              <Grid container className={classes.grid} justify="center" spacing={16}>
+                  {apps.map(app => (
+                      <Grid item>
+                          <AppCard
+                              uuid={app.uuid}
+                              name={app.name}
+                              toolName={app.toolName}
+                              toolVersion={app.toolVersion}
+                              creator={app.creator}
+                              description={app.description}
+                              link={app.link}
+                          />
+                      </Grid>
+                  ))}
+              </Grid>
+          );
+      }
   }
 }
 

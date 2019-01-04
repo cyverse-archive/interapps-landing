@@ -5,8 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
     root: {
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        padding: theme.spacing.unit * 2,
     },
 });
 
@@ -27,11 +26,11 @@ class ErrorCard extends Component {
                     "An unexpected error has occurred while processing your request. Please try again!";
                 break;
             default:
-                errorContent = "Unable to process your request. Please try again!";
+                errorContent = "Unable to process your request. Please contact support!";
         }
         return (
             <Paper className={classes.root}>
-                <Typography variant="h5" component="h3" color="error">
+                <Typography variant="body2" color="error">
                     {errorContent}
                 </Typography>
             </Paper>

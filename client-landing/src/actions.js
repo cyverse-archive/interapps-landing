@@ -1,6 +1,22 @@
-import {createActions, handleActions} from 'redux-actions';
+import { createActions, handleActions } from 'redux-actions';
 
 import axios from 'axios';
+import constants from "./constants";
+
+
+function errorHandler(error, dispatch) {
+    console.log('error from server: ', error.message);
+    if (error.response && error.response.status) {
+        if (error.response.status === 403) {
+            window.location.assign(constants.LOGIN_URL);
+        }
+        dispatch(setHttpCode(error.response.status));
+    } else {
+        dispatch(setHttpCode(500));
+    }
+    dispatch(setPageToShow(ShowError));
+    dispatch(toggleLoading());
+}
 
 export const StatusRunning = "Running";
 export const StatusFailed = "Failed";
@@ -86,7 +102,7 @@ export class App {
                     creator,
                     link
                 }) {
-        this.uuid = id;
+      this.uuid = id;
       this.name = name;
       this.toolName = toolName;
       this.toolVersion = toolVersion;
@@ -143,10 +159,7 @@ export const fetchAnalyses = (status) => {
             dispatch(toggleLoading());
         }
     ).catch(function(error) {
-      console.log('error from server: ', error.message);
-          dispatch(setHttpCode(error.response.status));
-          dispatch(setPageToShow(ShowError));
-          dispatch(toggleLoading());
+          errorHandler(error, dispatch);
     });
   };
 };
@@ -162,10 +175,7 @@ export const fetchApps = () => {
                 dispatch(toggleLoading());
             }
         ).catch(function (error) {
-            console.log('error from server: ', error.message);
-            dispatch(setHttpCode(error.response.status));
-            dispatch(setPageToShow(ShowError));
-            dispatch(toggleLoading());
+            errorHandler(error, dispatch);
         });
     };
 };
@@ -173,16 +183,16 @@ export const fetchApps = () => {
 export const reducer = handleActions(
     {
         TOGGLE_MOBILE_OPEN: (state) => ({...state, mobileOpen: !state.mobileOpen}),
-    SET_PAGE_TO_SHOW:   (state, {payload: pageToShow}) => ({ ...state, pageToShow: pageToShow}),
+        SET_PAGE_TO_SHOW: (state, {payload: pageToShow}) => ({...state, pageToShow: pageToShow}),
         ADD_APPS: (state, {payload: apps}) => {
             return {...state, apps: apps};
         },
-    ADD_ANALYSES:       (state, {payload: analyses}) => {
-        return {
-            ...state,
-            analyses: analyses,
-        };
-    },
+        ADD_ANALYSES: (state, {payload: analyses}) => {
+            return {
+                ...state,
+                analyses: analyses,
+            };
+        },
         LOGGED_IN: (state, {payload: username}) => {
             return {
                 ...state,
@@ -190,7 +200,6 @@ export const reducer = handleActions(
             }
         },
         SET_HTTP_CODE: (state, {payload: httpCode}) => {
-            const err = httpCode >= 400;
             return {
                 ...state,
                 httpCode: httpCode,

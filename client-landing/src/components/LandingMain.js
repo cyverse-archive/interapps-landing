@@ -1,19 +1,9 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import {
-    loggedIn,
-    ShowApps,
-    ShowCompleted,
-    ShowError,
-    ShowFailed,
-    ShowRunning,
-    StatusCompleted,
-    StatusFailed,
-    StatusRunning
-} from '../actions';
+import {connect} from 'react-redux';
+import {loggedIn, ShowApps, ShowCompleted, ShowError, ShowFailed, ShowRunning} from '../actions';
 
-import { withStyles } from '@material-ui/core/styles';
+import {withStyles} from '@material-ui/core/styles';
 
 import LandingAppBar from './LandingAppBar';
 import LandingResponsiveDrawer from './LandingResponsiveDrawer';
@@ -43,6 +33,12 @@ const styles = theme => ({
 
 class LandingMain extends Component {
 
+    componentDidMount() {
+        const username = queryString.parse(window.location.search);
+        this.props.handleLogin(username.user);
+        console.log("parsed user name is " + username.user);
+    }
+
   render() {
     const {
       pageToShow,
@@ -52,10 +48,6 @@ class LandingMain extends Component {
       httpCode,
       loading,
     } = this.props;
-
-    const username = queryString.parse(window.location.search);
-    handleLogin(username.user);
-    console.log("parsed user name is " + username.user);
 
     let mainContent;
 
