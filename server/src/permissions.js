@@ -12,12 +12,11 @@ export async function getAppsForUser(user) {
         )
         .then(json => {
             const app_ids = json.permissions.map((perm)=> perm.resource.name);
-            debug ("ids ==>" + app_ids);
             return app_ids;
             }
         )
         .catch(e => {
             debug("Error when fetching app permissions!");
-            return []
+            return [];
         });
 }
