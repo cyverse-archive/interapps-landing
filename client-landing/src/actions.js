@@ -23,92 +23,90 @@ export const StatusFailed = "Failed";
 export const StatusCompleted = "Completed";
 
 export class Analysis {
-  constructor({
-    id,
-    job_name,
-    job_description,
-    result_folder_path,
-    username,
-    start_date,
-    end_date,
-    subdomain,
-    status,
-    planned_end_date,
-    user_id,
-    app_id,
-    app_name,
-    app_description,
-    app_edited_date,
-    tool_id,
-    tool_name,
-    tool_description,
-    tool_version,
-    working_directory,
-    entrypoint,
-    uid,
-    min_cpu_cores,
-    max_cpu_cores,
-    pids_limit,
-    skip_tmp_mount,
-    container_port,
-    image_id,
-    image_name,
-    image_tag,
-    image_url,
-    step
-  }) {
-      this.uuid = id;
-      this.name = job_name;
-      this.description = job_description;
-      this.resultFolderPath = result_folder_path;
-      this.subdomain = subdomain;
-      this.userID = user_id;
-      this.appID = app_id;
-      this.appName = app_name;
-      this.appDescription = app_description;
-      this.appEditedDate = app_edited_date;
-      this.toolID = tool_id;
-      this.toolName = tool_name;
-      this.toolDescription = tool_description;
-      this.toolVersion = tool_version;
-      this.workingDirectory = working_directory;
-      this.entrypoint = entrypoint;
-      this.uid = uid;
-      this.minCPUCores = min_cpu_cores;
-      this.maxCPUCores = max_cpu_cores;
-      this.pidsLimit = pids_limit;
-      this.skipTmpMount = skip_tmp_mount;
-      this.containerPort = container_port;
-      this.imageID = image_id;
-      this.imageName = image_name;
-      this.imageTag = image_tag;
-      this.imageURL = image_url;
-      this.step = step;
-      this.owner = username;
-      this.status = status;
-      this.startDate = start_date;
-      this.endDate = end_date;
-      this.plannedEndDate = planned_end_date;
-  }
+    constructor({
+                    id,
+                    job_name,
+                    job_description,
+                    result_folder_path,
+                    username,
+                    start_date,
+                    end_date,
+                    subdomain,
+                    status,
+                    planned_end_date,
+                    user_id,
+                    app_id,
+                    app_name,
+                    app_description,
+                    app_edited_date,
+                    tool_id,
+                    tool_name,
+                    tool_description,
+                    tool_version,
+                    working_directory,
+                    entrypoint,
+                    uid,
+                    min_cpu_cores,
+                    max_cpu_cores,
+                    pids_limit,
+                    skip_tmp_mount,
+                    container_port,
+                    image_id,
+                    image_name,
+                    image_tag,
+                    image_url,
+                    step
+                }) {
+        this.uuid = id;
+        this.name = job_name;
+        this.description = job_description;
+        this.resultFolderPath = result_folder_path;
+        this.subdomain = subdomain;
+        this.userID = user_id;
+        this.appID = app_id;
+        this.appName = app_name;
+        this.appDescription = app_description;
+        this.appEditedDate = app_edited_date;
+        this.toolID = tool_id;
+        this.toolName = tool_name;
+        this.toolDescription = tool_description;
+        this.toolVersion = tool_version;
+        this.workingDirectory = working_directory;
+        this.entrypoint = entrypoint;
+        this.uid = uid;
+        this.minCPUCores = min_cpu_cores;
+        this.maxCPUCores = max_cpu_cores;
+        this.pidsLimit = pids_limit;
+        this.skipTmpMount = skip_tmp_mount;
+        this.containerPort = container_port;
+        this.imageID = image_id;
+        this.imageName = image_name;
+        this.imageTag = image_tag;
+        this.imageURL = image_url;
+        this.step = step;
+        this.owner = username;
+        this.status = status;
+        this.startDate = start_date;
+        this.endDate = end_date;
+        this.plannedEndDate = planned_end_date;
+    }
 }
 
 export class App {
     constructor({
                     id,
                     name,
-                    toolName,
-                    toolVersion,
                     description,
-                    creator,
-                    link
+                    integrator_name,
+                    rating,
+                    app_type
                 }) {
-      this.uuid = id;
-      this.name = name;
-      this.toolName = toolName;
-      this.toolVersion = toolVersion;
-      this.description = description;
-      this.creator = creator;
-      this.link = link;
+        this.uuid = id;
+        this.name = name;
+        this.description = description;
+        this.creator = integrator_name;
+        this.rating = rating;
+        this.type = app_type;
   }
 }
 
@@ -130,16 +128,17 @@ const defaultState = {
 };
 
 export const {
-  toggleMobileOpen,
-  setPageToShow,
+    toggleMobileOpen,
+    setPageToShow,
     addApps,
-  addAnalyses,
+    addAnalyses,
     loggedIn,
     setHttpCode,
     toggleLoading,
 } = createActions({
-  TOGGLE_MOBILE_OPEN: () => {},
-  SET_PAGE_TO_SHOW:   (pageToShow = ShowRunning) => pageToShow,
+    TOGGLE_MOBILE_OPEN: () => {
+    },
+    SET_PAGE_TO_SHOW: (pageToShow = ShowRunning) => pageToShow,
     ADD_APPS: (apps) => apps,
     ADD_ANALYSES: (analyses) => analyses,
     LOGGED_IN: (username) => username,
@@ -153,8 +152,8 @@ export const fetchAnalyses = (status) => {
       dispatch(toggleLoading());
       return axios.get(`/api/analyses?status=` + status, {withCredentials: true}).then(
         response => {
-          const results = response.data.vice_analyses.map(i => (new Analysis(i)));
-          dispatch(addAnalyses(results));
+            const results = response.data.vice_analyses.map(i => (new Analysis(i)));
+            dispatch(addAnalyses(results));
             dispatch(setHttpCode(200));
             dispatch(toggleLoading());
         }

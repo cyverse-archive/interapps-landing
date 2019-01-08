@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import {
-    fetchAnalyses, fetchApps,
+    fetchAnalyses,
+    fetchApps,
     setPageToShow,
     ShowApps,
     ShowCompleted,
@@ -30,129 +31,139 @@ import { palette } from './App';
 // Adapted from examples at https://material-ui.com/demos/lists/#nested-list
 
 const styles = theme => ({
-  root: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
-  },
-  nested: {
-    paddingLeft: theme.spacing.unit * 6,
-  },
-  runningAnalysisIcon: {
-    color: palette.lightGreen,
-  },
-  completedAnalysisIcon: {
-    color: palette.blue,
-  },
-  failedAnalysisIcon: {
-    color: palette.red,
-  },
+    root: {
+        width: '100%',
+        maxWidth: 360,
+        backgroundColor: theme.palette.background.paper,
+    },
+    nested: {
+        paddingLeft: theme.spacing.unit * 6,
+    },
+    runningAnalysisIcon: {
+        color: palette.lightGreen,
+    },
+    completedAnalysisIcon: {
+        color: palette.blue,
+    },
+    failedAnalysisIcon: {
+        color: palette.red,
+    },
 });
 
 class AnalysesList extends Component {
-  state = {
-    openAnalyses: true,
-  };
+    state = {
+        openAnalyses: true,
+    };
 
-  handleAnalysesClick = () => {
-    this.setState(state => ({ openAnalyses: !state.openAnalyses }));
-  };
+    handleAnalysesClick = () => {
+        this.setState(state => ({openAnalyses: !state.openAnalyses}));
+    };
 
-  componentDidMount() {
-      if (this.props.username) {
-          this.props.handleClickRunning();
-      }
-  }
+    componentDidMount() {
+        this.props.handleClickRunning();
+    }
 
-  render() {
-    const {
-      classes,
-      pageToShow,
-      handleClickRunning,
-      handleClickCompleted,
-      handleClickFailed,
-      handleClickApps
-    } = this.props;
+    render() {
+        const {
+            classes,
+            pageToShow,
+            handleClickRunning,
+            handleClickCompleted,
+            handleClickFailed,
+            handleClickApps
+        } = this.props;
 
-    return (
-      <div className={classes.root}>
-        <List component="nav">
-          <ListItem button onClick={this.handleAnalysesClick}>
-            <ListItemIcon>
-              <Assessment />
-            </ListItemIcon>
-            <ListItemText inset primary="Analyses" />
-            {this.state.openAnalyses ? <ExpandLess /> : <ExpandMore />}
-          </ListItem>
-          <Collapse in={this.state.openAnalyses} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-                <ListItem button
-                          className={classes.nested}
-                          selected={pageToShow === ShowRunning}
-                          onClick={handleClickRunning}>
-                <ListItemIcon>
-                  <Assessment className={classes.runningAnalysisIcon}/>
-                </ListItemIcon>
-                <ListItemText inset primary="Running" />
-              </ListItem>
-                <ListItem button
-                          className={classes.nested}
-                          selected={pageToShow === ShowCompleted}
-                          onClick={handleClickCompleted}>
-                <ListItemIcon>
-                  <Assessment className={classes.completedAnalysisIcon}/>
-                </ListItemIcon>
-                <ListItemText inset primary="Completed" />
-              </ListItem>
-                <ListItem button
-                          className={classes.nested}
-                          selected={pageToShow === ShowFailed}
-                          onClick={handleClickFailed}>
-                <ListItemIcon>
-                  <Assessment className={classes.failedAnalysisIcon}/>
-                </ListItemIcon>
-                <ListItemText inset primary="Failed" />
-              </ListItem>
-            </List>
-          </Collapse>
+        return (
+            <div className={classes.root}>
+                <List component="nav">
+                    <ListItem button onClick={this.handleAnalysesClick}>
+                        <ListItemIcon>
+                            <Assessment/>
+                        </ListItemIcon>
+                        <ListItemText inset primary="Analyses"/>
+                        {this.state.openAnalyses ? <ExpandLess/> : <ExpandMore/>}
+                    </ListItem>
+                    <Collapse in={this.state.openAnalyses} timeout="auto" unmountOnExit>
+                        <List component="div" disablePadding>
+                            <ListItem button
+                                      className={classes.nested}
+                                      selected={pageToShow === ShowRunning}
+                                      onClick={handleClickRunning}>
+                                <ListItemIcon>
+                                    <Assessment className={classes.runningAnalysisIcon}/>
+                                </ListItemIcon>
+                                <ListItemText inset primary="Running"/>
+                            </ListItem>
+                            <ListItem button
+                                      className={classes.nested}
+                                      selected={pageToShow === ShowCompleted}
+                                      onClick={handleClickCompleted}>
+                                <ListItemIcon>
+                                    <Assessment className={classes.completedAnalysisIcon}/>
+                                </ListItemIcon>
+                                <ListItemText inset primary="Completed"/>
+                            </ListItem>
+                            <ListItem button
+                                      className={classes.nested}
+                                      selected={pageToShow === ShowFailed}
+                                      onClick={handleClickFailed}>
+                                <ListItemIcon>
+                                    <Assessment className={classes.failedAnalysisIcon}/>
+                                </ListItemIcon>
+                                <ListItemText inset primary="Failed"/>
+                            </ListItem>
+                        </List>
+                    </Collapse>
 
-          <Divider light inset/>
+                    <Divider light inset/>
 
-          <ListItem button selected={ pageToShow === ShowApps } onClick={ handleClickApps }>
-            <ListItemIcon>
-              <Computer />
-            </ListItemIcon>
-            <ListItemText inset primary="Apps" />
-          </ListItem>
-        </List>
+                    <ListItem button selected={pageToShow === ShowApps} onClick={handleClickApps}>
+                        <ListItemIcon>
+                            <Computer/>
+                        </ListItemIcon>
+                        <ListItemText inset primary="Apps"/>
+                    </ListItem>
+                </List>
 
-      </div>
-    );
-  };
+            </div>
+        );
+    };
 }
 
 AnalysesList.propTypes = {
-  classes:             PropTypes.object.isRequired,
-  handleClickRunning:  PropTypes.func,
-  handleClickFinished: PropTypes.func,
-  handleClickApps:     PropTypes.func,
+    classes: PropTypes.object.isRequired,
+    handleClickRunning: PropTypes.func,
+    handleClickFinished: PropTypes.func,
+    handleClickApps: PropTypes.func,
 };
 
 const mapStateToProps = state => ({
-  pageToShow: state.pageToShow,
+    pageToShow: state.pageToShow,
     username: state.username,
 });
 
 const mapDispatchToProps = dispatch => ({
-  handleClickApps:      () => {dispatch(setPageToShow(ShowApps)); dispatch(fetchApps())},
-  handleClickCompleted: () => {dispatch(setPageToShow(ShowCompleted)); dispatch(fetchAnalyses(StatusCompleted))},
-  handleClickFailed:    () => {dispatch(setPageToShow(ShowFailed)); dispatch(fetchAnalyses(StatusFailed))},
-  handleClickRunning:   () => {dispatch(setPageToShow(ShowRunning)); dispatch(fetchAnalyses(StatusRunning))},
+    handleClickApps: () => {
+        dispatch(setPageToShow(ShowApps));
+        dispatch(fetchApps())
+    },
+    handleClickCompleted: () => {
+        dispatch(setPageToShow(ShowCompleted));
+        dispatch(fetchAnalyses(StatusCompleted))
+    },
+    handleClickFailed: () => {
+        dispatch(setPageToShow(ShowFailed));
+        dispatch(fetchAnalyses(StatusFailed))
+    },
+    handleClickRunning: () => {
+        dispatch(setPageToShow(ShowRunning));
+        dispatch(fetchAnalyses(StatusRunning))
+    },
 });
 
 const MappedAnalysesList = connect(
-  mapStateToProps,
-  mapDispatchToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(AnalysesList);
 
 export default withStyles(styles)(MappedAnalysesList);

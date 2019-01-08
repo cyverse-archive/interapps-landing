@@ -21,7 +21,10 @@ class AppCardGrid extends Component {
       apps
     } = this.props;
       if (!apps || apps.length === 0) {
-          return (<Typography variant="body2" color="primary"> No apps to display! </Typography>);
+          return (<Typography variant="body2" color="primary"
+                              style={{position: 'relative', top: 300, left: 200}}>
+              No apps to display!
+          </Typography>);
       } else {
           return (
               <Grid container className={classes.grid} justify="center" spacing={16}>
@@ -30,11 +33,11 @@ class AppCardGrid extends Component {
                           <AppCard
                               uuid={app.uuid}
                               name={app.name}
-                              toolName={app.toolName}
                               toolVersion={app.toolVersion}
                               creator={app.creator}
                               description={app.description}
-                              link={app.link}
+                              rating={app.rating}
+                              type={app.type}
                           />
                       </Grid>
                   ))}

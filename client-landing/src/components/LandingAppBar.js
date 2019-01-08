@@ -107,7 +107,6 @@ const mapStateToProps = state => ({...state});
 
 const mapDispatchToProps = dispatch => ({
   handleDrawerToggle: () => dispatch(toggleMobileOpen()),
-  handleLogin: (username) => dispatch(loggedIn(username)),
 });
 
 const MappedLandingAppBar = connect(

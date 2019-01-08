@@ -20,34 +20,34 @@ import Divider from '@material-ui/core/Divider';
 import { palette } from './App';
 
 const styles = theme => ({
-  expand: {
-    transform: 'rotate(0deg)',
-    transition: theme.transitions.create('transform', {
-      duration: theme.transitions.duration.shortest,
-    }),
-    marginLeft: 'auto',
-    [theme.breakpoints.up('sm')]: {
-      marginRight: -8,
+    expand: {
+        transform: 'rotate(0deg)',
+        transition: theme.transitions.create('transform', {
+            duration: theme.transitions.duration.shortest,
+        }),
+        marginLeft: 'auto',
+        [theme.breakpoints.up('sm')]: {
+            marginRight: -8,
+        },
     },
-  },
-  card: {
-    width: 300,
-  },
-  runningAnalysisAvatar: {
-    backgroundColor: palette.lightGreen,
-  },
-  completedAnalysisAvatar: {
-    backgroundColor: palette.blue,
-  },
-  failedAnalysisAvatar: {
-    backgroundColor: palette.red,
-  },
-  field: {
-    marginBottom: "1em",
-  },
-  descField: {
-    width: "100%",
-  },
+    card: {
+        width: 300,
+    },
+    runningAnalysisAvatar: {
+        backgroundColor: palette.lightGreen,
+    },
+    completedAnalysisAvatar: {
+        backgroundColor: palette.blue,
+    },
+    failedAnalysisAvatar: {
+        backgroundColor: palette.red,
+    },
+    field: {
+        marginBottom: "1em",
+    },
+    descField: {
+        width: "100%",
+    },
     overflow: {
         textOverflow: 'ellipsis',
         overflow: 'hidden',
@@ -58,135 +58,135 @@ const styles = theme => ({
 });
 
 class AnalysisCard extends Component {
-  state = { expanded: false };
+    state = { expanded: false };
 
-  handleExpandClick = () => {
-    this.setState(state => ({ expanded: !state.expanded }));
-  };
+    handleExpandClick = () => {
+        this.setState(state => ({ expanded: !state.expanded }));
+    };
 
-  handleClickAnalysisLink = () => {
-    window.open(this.props.analysisLink);
-  };
+    handleClickAnalysisLink = () => {
+        window.open("https://" + this.props.analysisLink + ".cyverse.run", "_blank");
+    };
 
-  render() {
-    const {
-      classes,
-      appName,
-      analysisName,
-      owner,
-      description,
-      startDate,
-      plannedEndDate,
-      status
-    } = this.props;
+    render() {
+        const {
+            classes,
+            appName,
+            analysisName,
+            owner,
+            description,
+            startDate,
+            plannedEndDate,
+            status
+        } = this.props;
 
 
-    let avatarClass;
+        let avatarClass;
 
-    switch (status) {
-      case StatusRunning:
-        avatarClass = classes.runningAnalysisAvatar;
-        break;
-      case StatusCompleted:
-        avatarClass = classes.completedAnalysisAvatar;
-        break;
-      default:
-        avatarClass = classes.failedAnalysisAvatar;
+        switch (status) {
+            case StatusRunning:
+                avatarClass = classes.runningAnalysisAvatar;
+                break;
+            case StatusCompleted:
+                avatarClass = classes.completedAnalysisAvatar;
+                break;
+            default:
+                avatarClass = classes.failedAnalysisAvatar;
+        }
+
+        return (
+            <div className={classes.card}>
+                <Card>
+                    <CardHeader
+                        avatar={
+                            <Avatar aria-label="Running analysis" className={avatarClass}>
+                                <Assessment />
+                            </Avatar>
+                        }
+                        title={<span title={analysisName} className={classes.overflow}>{analysisName}</span>}
+                        subheader={<span title={appName} className={classes.overflow}>{appName}</span>}
+                    />
+
+                    <Divider light />
+
+                    <CardContent>
+                        <Typography color="textSecondary" gutterBottom>
+                            Status
+                        </Typography>
+                        <Typography className={classes.field} gutterBottom>
+                            {status}
+                        </Typography>
+
+                        <Typography color="textSecondary" gutterBottom>
+                            Submitted By
+                        </Typography>
+                        <Typography className={classes.field} gutterBottom>
+                            {owner}
+                        </Typography>
+
+                        <Typography color="textSecondary" gutterBottom>
+                            Launch Date
+                        </Typography>
+                        <Typography className={classes.field} gutterBottom noWrap>
+                            {startDate}
+                        </Typography>
+
+                        <Typography color="textSecondary" gutterBottom>
+                            Scheduled End Date
+                        </Typography>
+                        <Typography className={classes.field} gutterBottom noWrap>
+                            {plannedEndDate}
+                        </Typography>
+                    </CardContent>
+
+                    <Divider light />
+
+                    <CardActions disableActionSpacing>
+                        <IconButton onClick={this.handleClickAnalysisLink}>
+                            <OpenInBrowser />
+                        </IconButton>
+
+                        <IconButton
+                            className={classnames(classes.expand, {
+                                [classes.expandOpen]: this.state.expanded,
+                            })}
+                            onClick={this.handleExpandClick}
+                            aria-expanded={this.state.expanded}
+                            aria-label="Show more"
+                        >
+                            <ExpandMoreIcon />
+                        </IconButton>
+                    </CardActions>
+
+                    <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                Description
+                            </Typography>
+                            <Typography className={classes.descField}>
+                                {description}
+                            </Typography>
+                        </CardContent>
+                    </Collapse>
+                </Card>
+            </div>
+        );
     }
-
-    return (
-      <div className={classes.card}>
-        <Card>
-          <CardHeader
-              avatar={
-              <Avatar aria-label="Running analysis" className={avatarClass}>
-                <Assessment />
-              </Avatar>
-            }
-              title={<span title={analysisName} className={classes.overflow}>{analysisName}</span>}
-              subheader={<span title={appName} className={classes.overflow}>{appName}</span>}
-          />
-
-          <Divider light />
-
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Status
-            </Typography>
-            <Typography className={classes.field} gutterBottom>
-              {status}
-            </Typography>
-
-            <Typography color="textSecondary" gutterBottom>
-              Submitted By
-            </Typography>
-            <Typography className={classes.field} gutterBottom>
-              {owner}
-            </Typography>
-
-            <Typography color="textSecondary" gutterBottom>
-              Launch Date
-            </Typography>
-            <Typography className={classes.field} gutterBottom noWrap>
-              {startDate}
-            </Typography>
-
-            <Typography color="textSecondary" gutterBottom>
-              Scheduled End Date
-            </Typography>
-            <Typography className={classes.field} gutterBottom noWrap>
-              {plannedEndDate}
-            </Typography>
-          </CardContent>
-
-          <Divider light />
-
-          <CardActions disableActionSpacing>
-            <IconButton onClick={this.handleClickAnalysisLink}>
-              <OpenInBrowser />
-            </IconButton>
-
-            <IconButton
-              className={classnames(classes.expand, {
-                [classes.expandOpen]: this.state.expanded,
-              })}
-              onClick={this.handleExpandClick}
-              aria-expanded={this.state.expanded}
-              aria-label="Show more"
-            >
-              <ExpandMoreIcon />
-            </IconButton>
-          </CardActions>
-
-          <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
-            <CardContent>
-              <Typography color="textSecondary" gutterBottom>
-                Description
-              </Typography>
-              <Typography className={classes.descField}>
-                {description}
-              </Typography>
-            </CardContent>
-          </Collapse>
-        </Card>
-      </div>
-    );
-  }
 }
 
 AnalysisCard.propTypes = {
-  classes:        PropTypes.object.isRequired,
-  analysisName:   PropTypes.string.isRequired,
-  appName:        PropTypes.string.isRequired,
-  owner:          PropTypes.string.isRequired,
-  description:    PropTypes.string,
-  startDate:      PropTypes.number.isRequired,
-  plannedEndDate: PropTypes.number.isRequired,
-  analysisLink:   PropTypes.string.isRequired,
-  status:         PropTypes.string.isRequired,
+    classes:        PropTypes.object.isRequired,
+    analysisName:   PropTypes.string.isRequired,
+    appName:        PropTypes.string.isRequired,
+    owner:          PropTypes.string.isRequired,
+    description:    PropTypes.string,
+    startDate:      PropTypes.number.isRequired,
+    plannedEndDate: PropTypes.number.isRequired,
+    analysisLink:   PropTypes.string.isRequired,
+    status:         PropTypes.string.isRequired,
 };
 
 export default withStyles(
-  styles,
-  { withTheme: true }
+    styles,
+    { withTheme: true }
 )(AnalysisCard);

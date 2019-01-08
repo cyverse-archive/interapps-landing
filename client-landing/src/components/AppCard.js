@@ -13,11 +13,51 @@ import md5 from "md5";
 import constants from '../constants';
 
 const styles = theme => ({
-  card: {
-      width: 265,
-      margin: 15,
-      height: 100,
-  },
+    card: {
+        width: 265,
+        margin: 15,
+        height: 100,
+    },
+    type: {
+        textAlign: 'center',
+        fontSize: 10,
+    },
+    name: {
+        position: "relative",
+        top: -5,
+        fontSize: 12,
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        display: 'inline-block',
+        maxWidth: 100,
+    },
+    more: {
+        position: 'relative',
+        float: 'right',
+        top: -18,
+    },
+    creator: {
+        position: "relative",
+        top: 20,
+        fontSize: 12,
+        fontStyle: "italic",
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap',
+        display: 'inline-block',
+        maxWidth: 100,
+    },
+    rating: {
+        position: "relative",
+        top: 20,
+        fontSize: 11
+    },
+    stars: {
+        position: "relative",
+        top: 23,
+        fontSize: 11
+    },
 });
 
 class AppCard extends Component {
@@ -37,6 +77,8 @@ class AppCard extends Component {
           uuid,
           name,
           creator,
+          rating,
+          type
       } = this.props;
 
       const open = this.state.expanded;
@@ -48,26 +90,15 @@ class AppCard extends Component {
                   <CardContent style={{paddingLeft: 10, paddingRight: 0}}>
                       <div style={{float: "left", marginRight: 5}}>
                           <div><img src={avatarImgSrc} alt="avatar image"/></div>
-                          <div style={{
-                              textAlign: 'center'
-                          }}>
-                              de
+                          <div className={classes.type}>
+                              {type.toLowerCase()}
                           </div>
                       </div>
                       <div>
-                          <div title={name} style={{
-                              position: "relative",
-                              top: -5,
-                              fontSize: 12,
-                              textOverflow: 'ellipsis',
-                              overflow: 'hidden',
-                              whiteSpace: 'nowrap',
-                              display: 'inline-block',
-                              maxWidth: 100,
-                          }}>
+                          <div title={name} className={classes.name}>
                               {name}
                           </div>
-                           <div style={{position: 'relative', float: 'right', top: -18,}}>
+                          <div className={classes.more}>
                               <IconButton
                                   aria-label="More"
                                   aria-owns={open ? 'long-menu' : null}
@@ -76,28 +107,23 @@ class AppCard extends Component {
                               </IconButton>
                           </div>
                       </div>
-                      <div style={{
-                          position: "relative",
-                          top: 20,
-                          fontSize: 12,
-                          fontStyle: "italic",
-                          textOverflow: 'ellipsis',
-                          overflow: 'hidden',
-                          whiteSpace: 'nowrap',
-                          display: 'inline-block',
-                          maxWidth: 100,
-                      }}>
+                      <div className={classes.creator}>
                           {creator}
                       </div>
-                      <div style={{position: "relative", top: 25}}>
-                          <Rating
-                              placeholderRating={3.5}
-                              emptySymbol={<img src={whitestar} className="icon" alt="white star"/>}
-                              fullSymbol={<img src={goldstar} className="icon" alt="gold star"/>}
-                              placeholderSymbol={<img src={redstar} className="icon" alt="red star"/>}
-                              fractions={2}
-                          />
-                          (3)
+                      <div>
+                          <span className={classes.stars}>
+                              <Rating
+                                  placeholderRating={rating.average}
+                                  emptySymbol={<img src={whitestar} className="icon" alt="white star"/>}
+                                  fullSymbol={<img src={goldstar} className="icon" alt="gold star"/>}
+                                  placeholderSymbol={<img src={redstar} className="icon"
+                                                          alt="red star"/>}
+                                  fractions={2}
+                              />
+                          </span>
+                          <span className={classes.rating}>
+                              ({rating.total})
+                          </span>
                       </div>
                   </CardContent>
               </Card>

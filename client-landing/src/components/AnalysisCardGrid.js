@@ -18,7 +18,10 @@ class AnalysisCardGrid extends Component {
     const { classes, analyses } = this.props;
 
       if (!analyses || analyses.length === 0) {
-          return (<Typography variant="body2" color="primary"> No analyses to display! </Typography> );
+          return (<Typography variant="body2" color="primary"
+                              style={{position: 'relative', top: 300, left: 300}}>
+              No analyses to display!
+          </Typography>);
       } else {
           return (
              <Grid container className={classes.grid} justify="center" spacing={16}>
@@ -28,7 +31,7 @@ class AnalysisCardGrid extends Component {
                               appName={analysis.appName}
                               analysisName={analysis.name}
                               description={analysis.description}
-                              analysisLink={analysis.link}
+                              analysisLink={analysis.subdomain}
                               owner={analysis.owner}
                               startDate={analysis.startDate}
                               plannedEndDate={analysis.plannedEndDate}

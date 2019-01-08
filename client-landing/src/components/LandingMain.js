@@ -1,9 +1,9 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
-import {loggedIn, ShowApps, ShowCompleted, ShowError, ShowFailed, ShowRunning} from '../actions';
+import { connect } from 'react-redux';
+import { loggedIn, ShowApps, ShowCompleted, ShowError, ShowFailed, ShowRunning } from '../actions';
 
-import {withStyles} from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 import LandingAppBar from './LandingAppBar';
 import LandingResponsiveDrawer from './LandingResponsiveDrawer';
@@ -15,20 +15,7 @@ import queryString from "query-string";
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = theme => ({
-  root: {
-    flexGrow: 1,
-    height: 440,
-    zIndex: 1,
-    overflow: 'hidden',
-    position: 'relative',
-    display: 'flex',
-  },
-  content: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.default,
-    padding: theme.spacing.unit * 3,
-    minWidth: 0, // So the Typography noWrap works
-  },
+    progress: {position: 'relative', top: 300, left: 200}
 });
 
 class LandingMain extends Component {
@@ -39,74 +26,75 @@ class LandingMain extends Component {
         console.log("parsed user name is " + username.user);
     }
 
-  render() {
-    const {
-      pageToShow,
-      analyses,
-      apps,
-      handleLogin,
-      httpCode,
-      loading,
-    } = this.props;
+    render() {
+        const {
+            pageToShow,
+            analyses,
+            apps,
+            handleLogin,
+            httpCode,
+            loading,
+            classes
+        } = this.props;
 
-    let mainContent;
+        let mainContent;
 
-    switch (pageToShow) {
-      case ShowRunning:
-        mainContent = (
-          <AnalysisCardGrid/>
-        );
-        break;
-      case ShowCompleted:
-        mainContent = (
-          <AnalysisCardGrid/>
-        );
-        break;
-      case ShowFailed:
-        mainContent = (
-          <AnalysisCardGrid/>
-        );
-        break;
-      case ShowApps:
-        mainContent = (
-          <AppCardGrid/>
-        );
-        break;
-      case ShowError:
-          mainContent = (
-              <ErrorCard httpCode={httpCode}/>
-          );
-          break;
-      default:
-        console.log('unknown value for pageToShow');
+        switch (pageToShow) {
+            case ShowRunning:
+                mainContent = (
+                    <AnalysisCardGrid/>
+                );
+                break;
+            case ShowCompleted:
+                mainContent = (
+                    <AnalysisCardGrid/>
+                );
+                break;
+            case ShowFailed:
+                mainContent = (
+                    <AnalysisCardGrid/>
+                );
+                break;
+            case ShowApps:
+                mainContent = (
+                    <AppCardGrid/>
+                );
+                break;
+            case ShowError:
+                mainContent = (
+                    <ErrorCard httpCode={httpCode}/>
+                );
+                break;
+            default:
+                console.log('unknown value for pageToShow');
+        }
+
+        return (
+            <div>
+                <LandingAppBar/>
+                <LandingResponsiveDrawer>
+                    {loading &&
+                    <CircularProgress color="primary" className={classes.progress}/>
+                    }
+                    {mainContent}
+                </LandingResponsiveDrawer>
+            </div>
+        )
     }
-
-    return (
-      <div>
-        <LandingAppBar />
-        <LandingResponsiveDrawer>
-            {loading &&
-            <CircularProgress color="primary" style={{position: 'relative', top: 300, left: 200}}/>
-            }
-          {mainContent}
-        </LandingResponsiveDrawer>
-      </div>
-    )
-  }
 }
 
 LandingMain.propTypes = {
-  classes:  PropTypes.object.isRequired,
-  analyses: PropTypes.object.isRequired,
-  apps:     PropTypes.object.isRequired,
+    classes: PropTypes.object.isRequired,
+    analyses: PropTypes.object.isRequired,
+    apps: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = state => ({
-  pageToShow: state.pageToShow,
-  analyses:   state.analyses,
-  apps:       state.apps,
-  httpCode:   state.httpCode,
-  loading:    state.loading,
+    pageToShow: state.pageToShow,
+    analyses: state.analyses,
+    apps: state.apps,
+    httpCode: state.httpCode,
+    loading: state.loading,
 });
 
 
@@ -120,6 +108,6 @@ const MappedLandingMain = connect(
 )(LandingMain);
 
 export default withStyles(
-  styles,
-  { withTheme: true }
+    styles,
+    {withTheme: true}
 )(MappedLandingMain);
