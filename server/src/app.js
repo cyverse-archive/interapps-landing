@@ -1,8 +1,8 @@
 import express from 'express';
-import { viceAnalyses, viceApps } from './db';
+import { viceAnalyses } from './db';
 import hasValidSubdomain, { extractSubdomain } from './subdomain';
 import { endpointConfig, ingressExists } from './ingress';
-import { getAppsForUser } from './permissions';
+import { getAppsForUser } from './apps';
 import compression from 'compression';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -209,15 +209,9 @@ apirouter.get("/analyses", async (req, res) => {
 apirouter.get("/apps", async (req, res) => {
     debug("calling get apps for " + req.session.username);
     const username = req.session.username;
-    let app_ids = await getAppsForUser(username);
-    if (app_ids && app_ids.length > 0) {
-        viceApps(app_ids, (data) => {
-            debug("apps=>" + JSON.stringify(data));
-            res.send(JSON.stringify({"apps": data}));
-        });
-    } else {
-        res.send(JSON.stringify({"apps": []}));
-    }
+    let apps = await getAppsForUser(username);
+    res.send(JSON.stringify(apps));
+
 });
 
 

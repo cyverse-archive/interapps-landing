@@ -5,18 +5,18 @@ const debug = require('debug')('permissions');
 
 
 export async function getAppsForUser(user) {
-    debug ("fetching app permissions for user " + user);
-    return fetch(process.env.PERMISSIONS +  user + "/app?lookup=true")
+    debug ("fetching apps for user " + user);
+    return fetch(process.env.APPS + user)
         .then(response =>
             response.json()
         )
         .then(json => {
-            const app_ids = json.permissions.map((perm)=> perm.resource.name);
-            return app_ids;
+            debug("Apps ==>" + json);
+            return json;
             }
         )
         .catch(e => {
-            debug("Error when fetching app permissions!");
+            debug("Error when fetching apps!");
             return [];
         });
 }
