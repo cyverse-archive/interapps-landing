@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
 import AppCard from './AppCard';
+import Typography from "@material-ui/core/es/Typography/Typography";
 
 
 const styles = theme => ({
@@ -17,38 +18,42 @@ class AppCardGrid extends Component {
   render() {
     const {
       classes,
-      appIndex,
-      appKeys
+      apps
     } = this.props;
-
-    return (
-      <Grid container className={classes.grid} justify="center" spacing={16}>
-        {appKeys.map(key => (
-          <Grid item>
-            <AppCard
-                uuid={appIndex[key].uuid}
-                name={appIndex[key].name}
-                toolName={appIndex[key].toolName}
-                toolVersion={appIndex[key].toolVersion}
-                creator={appIndex[key].creator}
-                description={appIndex[key].description}
-                link={appIndex[key].link}
-            />
-          </Grid>
-        ))}
-      </Grid>
-    );
+      if (!apps || apps.length === 0) {
+          return (<Typography variant="body2" color="primary"
+                              style={{position: 'relative', top: 300, left: 200}}>
+              No apps to display!
+          </Typography>);
+      } else {
+          return (
+              <Grid container className={classes.grid} justify="center" spacing={16}>
+                  {apps.map(app => (
+                      <Grid item>
+                          <AppCard
+                              uuid={app.uuid}
+                              name={app.name}
+                              toolVersion={app.toolVersion}
+                              creator={app.creator}
+                              description={app.description}
+                              rating={app.rating}
+                              type={app.type}
+                          />
+                      </Grid>
+                  ))}
+              </Grid>
+          );
+      }
   }
 }
 
 AppCardGrid.propTypes = {
   classes:  PropTypes.object.isRequired,
-  appKeys:  PropTypes.array.isRequired,
-  appIndex: PropTypes.object.isRequired,
+  apps:  PropTypes.array.isRequired,
 };
 
 const mapStateToProps = state => ({
-  appIndex: state.apps.index
+  apps: state.apps
 });
 
 const MappedAppCardGrid = connect(

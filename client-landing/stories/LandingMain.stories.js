@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { newStore } from "../src/store/configure";
 import LandingMain from "../src/components/LandingMain";
-import { addAnalysis, addApp, Analysis, App } from "../src/actions";
+import { addAnalyses, addApp, Analysis, App } from "../src/actions";
 import { Provider } from "react-redux";
 
 class LandingMainTest extends Component {
@@ -51,7 +51,8 @@ class LandingMainTest extends Component {
             status: "Failed",
         }));
 
-        [...running, ...failed, ...completed].forEach(a => store.dispatch(addAnalysis(a)));
+     //   [...running, ...failed, ...completed].forEach(a => store.dispatch(addAnalysis(a)));
+        store.dispatch(addAnalyses([...running, ...failed, ...completed]));
 
         let appnums = [...Array(30).keys()];
         let apps = appnums.map(n => new App(

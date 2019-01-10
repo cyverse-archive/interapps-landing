@@ -12,6 +12,7 @@ import LandingMainTest from "./LandingMain.stories";
 import LandingResponsiveDrawerTest from "./LandingResponsiveDrawer.stories";
 
 import NavListTest from "./NavList.stories";
+import ErrorCardTest from "./ErrorCard.Stories";
 
 storiesOf("apps/AppCard", module).add("with app", () => <AppCardTest/>);
 storiesOf("apps/AppCardGrid", module).add("with app grid", () => <AppCardGridTest/>);
@@ -25,6 +26,8 @@ storiesOf("landing/LandingResponsiveDrawer", module)
     .add("with landing Responsive drawer", () => <LandingResponsiveDrawerTest/>);
 
 storiesOf("nav/NavList", module).add("with Nav List", () => <NavListTest/>);
+
+storiesOf("error/ErrorCard", module).add("with error", () => <ErrorCardTest/>);
 
 
 

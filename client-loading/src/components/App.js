@@ -38,7 +38,7 @@ class App extends Component {
 
   componentDidMount(){
     // Set a title on the page
-    document.title = "Sugar and VICE are very nice";
+    document.title = "CyVerse VICE Apps";
   }
 }
 
