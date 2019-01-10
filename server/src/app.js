@@ -102,8 +102,16 @@ app.get('/auth/provider/callback', function (req, res) {
 
                     // redirect user to app
                     return res.redirect(process.env.SERVER_NAME + "/?user=" + username);
+                })
+                .catch((e) => {
+                    debug("Error getting user profile: " + e);
+                    res.send(500).send("");
                 });
         })
+        .catch((e) => {
+            debug("Error getting token: " + e);
+            res.status(500).send("");
+        });
 });
 
 app.get('/logout', function (req, res) {
