@@ -55,7 +55,8 @@ export class Analysis {
                     image_name,
                     image_tag,
                     image_url,
-                    step
+                    step,
+                    url,
                 }) {
         this.uuid = id;
         this.name = job_name;
@@ -89,6 +90,7 @@ export class Analysis {
         this.startDate = start_date;
         this.endDate = end_date;
         this.plannedEndDate = planned_end_date;
+        this.url = url;
     }
 }
 

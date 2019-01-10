@@ -65,7 +65,7 @@ class AnalysisCard extends Component {
     };
 
     handleClickAnalysisLink = () => {
-        window.open("https://" + this.props.analysisLink + ".cyverse.run", "_blank");
+        window.open(this.props.analysisLink, "_blank");
     };
 
     render() {

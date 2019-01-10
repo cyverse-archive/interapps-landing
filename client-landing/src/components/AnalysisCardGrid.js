@@ -31,7 +31,7 @@ class AnalysisCardGrid extends Component {
                               appName={analysis.appName}
                               analysisName={analysis.name}
                               description={analysis.description}
-                              analysisLink={analysis.subdomain}
+                              analysisLink={analysis.url}
                               owner={analysis.owner}
                               startDate={analysis.startDate}
                               plannedEndDate={analysis.plannedEndDate}
