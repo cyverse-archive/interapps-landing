@@ -24,7 +24,11 @@ app.use(helmet());
 app.use(morgan('combined'));
 
 let sess = {
-    store: new RedisStore({host: process.env.REDIS_HOST, port: process.env.REDIS_PORT}),
+    store: new RedisStore({
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
+      pass: process.env.REDIS_PASSWORD || ""
+    }),
     secret: 'interapps',
     resave: false,
     saveUninitialized: false,
