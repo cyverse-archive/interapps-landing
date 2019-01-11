@@ -12,7 +12,6 @@ import path from 'path';
 const fetch = require('node-fetch');
 const debug = require('debug')('app');
 
-
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
 
@@ -32,6 +31,7 @@ let sess = {
     secret: 'interapps',
     resave: false,
     saveUninitialized: false,
+    cookie: {}
 };
 
 if (app.get('env') === 'production') {
