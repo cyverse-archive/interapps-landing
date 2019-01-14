@@ -8,11 +8,11 @@
     "server": "node start-server.js",
     "port-forward": "concurrently \"node port-forward-redis.js\" \"node port-forward-apps.js\"",
     "dev": "run-s build-all dev-server",
-    "dev-server" : "concurrently \"npm run port-forward\" \"node start-server.js\"",
-    "build-server" : "node build-server.js",
-    "build-landing" : "node build-landing-ui.js",
-    "build-loading" : "node build-loading-ui.js",
-    "build-all" : "run-s clean build-server build-landing build-loading",
+    "dev-server": "concurrently \"npm run port-forward\" \"node start-server.js\"",
+    "build-server": "node build-server.js",
+    "build-landing": "node build-landing-ui.js",
+    "build-loading": "node build-loading-ui.js",
+    "build-all": "run-s clean build-server build-landing build-loading",
     "clean": "concurrently \"rimraf server/build\" \"rimraf client-loading/build\" \"rimraf client-landing/build\"",
     "test": "concurrently \"node test-server.js\""
   },
@@ -22,6 +22,7 @@
     "concurrently": "^4.0.1",
     "dotenv": "^6.1.0",
     "nodemon": "^1.18.9",
+    "npm-run-all": "^4.1.5",
     "rimraf": "^2.6.2"
   },
   "dependencies": {}
