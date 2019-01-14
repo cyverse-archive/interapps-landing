@@ -40,27 +40,21 @@ You should start off by running `npm install` in the top-level directory. Then d
 
 Each of the projects (`client-landing`, `client-loading`, `server`) can be built individually by running `npm run build` while inside their corresponding project directories.
 
-You can build everything at once by running the `build.sh` script from the top-level directory.
+You can build everything at once by running 'npm run build-all` script from the top-level directory.
 
 The result will be a `build` directory created in each of the project directories. Directories named `build` are ignored by Git.
 
 ### Cleaning
 
-The top-level package.json has `clean` and `clean-all` scripts defined. The `clean` script will clear out each project's `build` directory, while the `clean-all` script will clear out the `build` and `node_modules` directories.
-
-You can run them with:
-* `npm run clean`
-* `npm run clean-all`
+The top-level package.json has `clean` and `clean-all` scripts defined. The `clean` script will clear out each project's `build` directory. You can run it with: `npm run clean`.
 
 ### Running everything during development
 
-You can fire up everything (minus storybook instances) by executing `npm start` from the top-level directory. This should open up a couple of browser tabs with the landing and loading pages.
+First, make sure everything is built. You only really need to build the UIs up front, but it's easiest and pretty quick to just build everything: `npm run build-all`.
 
-Each of the UI projects is configured to reverse proxy requests to the server instance that gets started up. Make sure you have your `.env` file created at `server/.env`.
+You can fire up everything (minus storybook instances) by executing `npm run dev` from the top-level directory. The built UIs will be served up by the server instance that's started. You can access the UI at: http://localhost:60000. Make sure you have your `.env` file created at `server/.env`.
 
-You can also just fire up the dev version of the landing page with `npm run landing` in the top-level directory. Similarly, you can fire up the loading page with `npm run loading` in the same location.
-
-The code for the server and the UIs should auto-reload if a change is detected in their respective source files. That should only occur during development and not in the container created for deployment.
+The code for the server should auto-reload if a change is detected in its source files. That should only occur during development and not in the container created for deployment. If you make a change to a UI, you will need to rebuild it to see the change. Alternatively, you can dynamically preview changes to the UI with Storybook.
 
 ### Storybook
 
