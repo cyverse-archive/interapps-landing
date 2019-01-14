@@ -3,12 +3,14 @@ import { createActions, handleActions } from 'redux-actions';
 import axios from 'axios';
 import constants from "./constants";
 
-
 function errorHandler(error, dispatch) {
     console.log('error from server: ', error.message);
     if (error.response && error.response.status) {
         if (error.response.status === 403) {
-            window.location.assign(constants.LOGIN_URL);
+            var parser = document.createElement('a');
+            parser.href = window.location.href;
+            parser.pathname = constants.LOGIN_URL;
+            window.location.assign(parser.href);
         }
         dispatch(setHttpCode(error.response.status));
     } else {

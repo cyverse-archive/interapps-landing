@@ -1,7 +1,7 @@
 const args = [
   "port-forward",
-  "service/graphql-de",
-  `${process.env.NPM_CONFIG_GRAPHQL_PORT}:80`
+  "service/redis",
+  '6379:6379'
 ];
 
 const opts = {
