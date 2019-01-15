@@ -1,5 +1,5 @@
 import express from 'express';
-import { viceAnalyses } from './db';
+import { viceAnalyses, getDB } from './db';
 import hasValidSubdomain, { extractSubdomain } from './subdomain';
 import { endpointConfig, ingressExists } from './ingress';
 import { getAppsForUser } from './apps';
@@ -8,25 +8,22 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
 
-
 const fetch = require('node-fetch');
 const debug = require('debug')('app');
-
-var session = require('express-session');
-var RedisStore = require('connect-redis')(session);
-
-var dateFunc = require("add-subtract-date");
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const dateFunc = require("add-subtract-date");
 
 const app = express();
 app.use(compression());
 app.use(helmet());
 app.use(morgan('combined'));
 
+const db = getDB();
+
 let sess = {
-    store: new RedisStore({
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
-      pass: process.env.REDIS_PASSWORD || ""
+    store: new pgSession({
+      pgPromise: db
     }),
     secret: 'interapps',
     resave: false,
