@@ -5,7 +5,8 @@ WORKDIR /usr/src/app
 COPY . .
 
 RUN npm install
-RUN ./build.sh
+RUN npm run install-all
+RUN npm run build-all
 
 ENV NODE_ENV production
 EXPOSE 60000
