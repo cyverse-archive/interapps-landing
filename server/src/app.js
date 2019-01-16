@@ -128,26 +128,6 @@ const apirouter = express.Router();
 // Caching the UI is fine, API responses not yet.
 apirouter.use(noCache());
 
-apirouter.use(function (req, res, next) {
-    debug("Validating session!");
-    if (!req.session.accessToken || isSessionExpired(req.session.expiry)) {
-        res.status(403).send("");
-    } else {
-        next();
-    }
-});
-
-apirouter.get('/', function (req, res) {
-    debug("**** handle request for / *****");
-    if(!req.session.accessToken || req.session.expired) {
-        res.redirect(cyverseAuth.code.getUri());
-    } else {
-        // redirect user to app
-        res.redirect(process.env.SERVER_NAME + "/?user=" + req.session.username);
-    }
-
-});
-
 apirouter.get("/url-ready", async (req, res) => {
   const urlToCheck = req.query.url;
 
