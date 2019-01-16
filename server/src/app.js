@@ -231,10 +231,14 @@ apirouter.get("/analyses", async (req, res) => {
 apirouter.get("/apps", async (req, res) => {
     debug("calling get apps for " + req.session.username);
     const username = req.session.username;
-    let apps = await getAppsForUser(username)
-      .then(appsResponse => appsResponse);
-
-    res.status(apps.status).send(apps.arrayBuffer());
+    var retval = {};
+    await getAppsForUser(username)
+      .then(appsResp => {
+          res.status(appsResp.status);
+          return appsResp;
+      })
+      .then(appsResp => appsResp.buffer())
+      .then(data => res.send(data));
 });
 
 
