@@ -231,9 +231,10 @@ apirouter.get("/analyses", async (req, res) => {
 apirouter.get("/apps", async (req, res) => {
     debug("calling get apps for " + req.session.username);
     const username = req.session.username;
-    let apps = await getAppsForUser(username);
-    res.send(JSON.stringify(apps));
+    let apps = await getAppsForUser(username)
+      .then(appsResponse => appsResponse);
 
+    res.status(apps.status).send(apps.arrayBuffer());
 });
 
 
