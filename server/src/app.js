@@ -125,6 +125,7 @@ app.get('/logout', function (req, res) {
 
 const apirouter = express.Router();
 
+// Caching the UI is fine, API responses not yet.
 apirouter.use(noCache());
 
 apirouter.use(function (req, res, next) {
@@ -244,6 +245,25 @@ apirouter.get("/apps", async (req, res) => {
 
 app.use('/api', apirouter);
 
+function authy(whitelist) {
+ return (req, res, next) => {
+    debug("validating session in authy middleware");
+    if ((!req.session.accessToken || isSessionExpired(req.session.expiry)) && !whitelist.includes(req.path)) {
+        res.redirect(cyverseAuth.code.getUri());
+    } else {
+        next();
+    }
+  };
+}
+
+app.use(authy(
+  [
+    '/auth/provider',
+    '/auth/provider/callback',
+    '/heathz',
+    '/test'
+  ]
+));
 
 const uiDir = process.env.UI || '../../client-landing/build';
 const uiPath = path.join(__dirname, uiDir);
