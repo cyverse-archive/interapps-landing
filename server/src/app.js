@@ -5,6 +5,7 @@ import { endpointConfig, ingressExists } from './ingress';
 import { getAppsForUser } from './apps';
 import compression from 'compression';
 import helmet from 'helmet';
+import noCache from 'nocache';
 import morgan from 'morgan';
 import path from 'path';
 
@@ -123,6 +124,8 @@ app.get('/logout', function (req, res) {
 });
 
 const apirouter = express.Router();
+
+apirouter.use(noCache());
 
 apirouter.use(function (req, res, next) {
     debug("Validating session!");
