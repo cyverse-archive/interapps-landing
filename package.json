@@ -16,7 +16,7 @@
     "install-server": "node install-server.js",
     "install-landing": "node install-landing.js",
     "install-loading": "node install-loading.js",
-    "install-all" : "run-p install-server install-landing install-loading",
+    "install-all": "run-p install-server install-landing install-loading",
     "clean": "concurrently \"rimraf server/build\" \"rimraf client-loading/build\" \"rimraf client-landing/build\"",
     "test": "concurrently \"node test-server.js\""
   },
@@ -29,5 +29,7 @@
     "npm-run-all": "^4.1.5",
     "rimraf": "^2.6.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "npm": "^6.5.0"
+  }
 }

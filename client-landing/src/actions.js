@@ -183,6 +183,21 @@ export const fetchApps = () => {
     };
 };
 
+export const fetchProfile = () => {
+    return dispatch => {
+        dispatch(toggleLoading());
+        return axios.get("/api/profile", {withCredentials: true}).then(
+            response => {
+                dispatch(loggedIn(response.data.username));
+                dispatch(setHttpCode(200));
+                dispatch(toggleLoading());
+            }
+        ).catch(function (error) {
+            errorHandler(error, dispatch);
+        });
+    }
+};
+
 export const reducer = handleActions(
     {
         TOGGLE_MOBILE_OPEN: (state) => ({...state, mobileOpen: !state.mobileOpen}),

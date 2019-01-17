@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { loggedIn, ShowApps, ShowCompleted, ShowError, ShowFailed, ShowRunning } from '../actions';
+import { fetchProfile, ShowApps, ShowCompleted, ShowError, ShowFailed, ShowRunning } from '../actions';
 
 import { withStyles } from '@material-ui/core/styles';
 
@@ -10,7 +10,6 @@ import LandingResponsiveDrawer from './LandingResponsiveDrawer';
 import AnalysisCardGrid from './AnalysisCardGrid';
 import AppCardGrid from './AppCardGrid';
 import ErrorCard from './ErrorCard';
-import queryString from "query-string";
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 
@@ -21,17 +20,12 @@ const styles = theme => ({
 class LandingMain extends Component {
 
     componentDidMount() {
-        const username = queryString.parse(window.location.search);
-        this.props.handleLogin(username.user);
-        console.log("parsed user name is " + username.user);
+        this.props.handleLogin();
     }
 
     render() {
         const {
             pageToShow,
-            analyses,
-            apps,
-            handleLogin,
             httpCode,
             loading,
             classes
@@ -99,7 +93,7 @@ const mapStateToProps = state => ({
 
 
 const mapDispatchToProps = dispatch => ({
-    handleLogin: (username) => dispatch(loggedIn(username)),
+    handleLogin: (username) => dispatch(fetchProfile()),
 });
 
 const MappedLandingMain = connect(
