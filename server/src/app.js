@@ -103,7 +103,7 @@ app.get('/auth/provider/callback', function (req, res) {
                         dateFunc.add(current, user.data.expires_in, "seconds").getTime();
 
                     // redirect user to app
-                    return res.redirect(process.env.SERVER_NAME + "/?user=" + username);
+                    return res.redirect(process.env.SERVER_NAME);
                 })
                 .catch((e) => {
                     debug("Error getting user profile: " + e);
@@ -188,6 +188,15 @@ apirouter.get("/url-ready", async (req, res) => {
 
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify({ready: ready}));
+});
+
+apirouter.get("/profile", async (req,res)=>{
+    debug("calling get profile for " + req.session.username);
+    if(req.session.username) {
+        res.send(JSON.stringify({"username": req.session.username}));
+    } else {
+        res.send(500).send("Unable to fetch user profile from session.");
+    }
 });
 
 apirouter.get("/analyses", async (req, res) => {
