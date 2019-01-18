@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import { newStore } from "../src/store/configure";
-import { addAnalyses, Analysis } from "../src/actions";
+import { addAnalyses, Analysis, loggedIn, StatusCompleted } from "../src/actions";
 import AnalysisCardGrid from "../src/components/AnalysisCardGrid";
+import AppCardGrid from "./AppCardGrid.stories";
 
 
 class AnalysisCardGridTest extends Component {
     render() {
         const store = newStore();
-        
+        const host = "https://qa.cyverse.org";
         let start = Date.now();
         let end = start + (86400000 * 2);
         let startDate = new Date(start);
@@ -22,13 +23,13 @@ class AnalysisCardGridTest extends Component {
             start_date: startDate.toLocaleString(),
             end_date: endDate.toLocaleString(),
             subdomain: "http://localhost",
-            status: "Running",
+            status: StatusCompleted,
+            result_folder_path: "/iplant/home/sriram",
         }));
-
         store.dispatch(addAnalyses(analyses));
-
+        store.dispatch(loggedIn({"de_host": host}));
         return (
-            <AnalysisCardGrid analyses={analyses} store={store}/>
+            <AnalysisCardGrid analyses={analyses} store={store}  deHost={host}/>
         )
     }
 }

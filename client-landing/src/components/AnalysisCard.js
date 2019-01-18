@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import classnames from 'classnames';
-import { StatusCompleted, StatusRunning } from '../actions';
+import { StatusCompleted, StatusFailed, StatusRunning } from '../actions';
 
 import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
@@ -12,12 +12,34 @@ import CardContent from '@material-ui/core/CardContent';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import OpenInBrowser from '@material-ui/icons/OpenInBrowser';
+import LaunchIcon from "@material-ui/icons/Launch";
 import Assessment from '@material-ui/icons/Assessment';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Divider from '@material-ui/core/Divider';
 
 import { palette } from './App';
+
+
+function AnalysisName(props) {
+    const name = props.name;
+    const onClick = props.onClick;
+    const classes = props.classes;
+    const status = props.status;
+    if (status === StatusCompleted || status === StatusFailed) {
+        return (
+            <span
+                onClick={onClick}
+                title={name}
+                className={classnames(classes.name,classes.overflow)}>
+                {name}
+            </span>
+        )
+    } else {
+        return (
+            <span title={name} className={classes.overflow}>{name}</span>
+        )
+    }
+}
 
 const styles = theme => ({
     expand: {
@@ -54,7 +76,14 @@ const styles = theme => ({
         whiteSpace: 'nowrap',
         display: 'inline-block',
         maxWidth: 100,
+    },
+    name: {
+        '&:hover': {
+            textDecoration: 'underline',
+            cursor: 'pointer',
+        },
     }
+
 });
 
 class AnalysisCard extends Component {
@@ -68,6 +97,10 @@ class AnalysisCard extends Component {
         window.open(this.props.analysisLink, "_blank");
     };
 
+    handleClickAnalysisName = () => {
+        window.open(this.props.resultFolderLink, "_blank");
+    };
+
     render() {
         const {
             classes,
@@ -77,7 +110,7 @@ class AnalysisCard extends Component {
             description,
             startDate,
             plannedEndDate,
-            status
+            status,
         } = this.props;
 
 
@@ -103,7 +136,10 @@ class AnalysisCard extends Component {
                                 <Assessment />
                             </Avatar>
                         }
-                        title={<span title={analysisName} className={classes.overflow}>{analysisName}</span>}
+                        title={<AnalysisName name={analysisName}
+                                             classes={classes}
+                                             status={status}
+                                             onClick={this.handleClickAnalysisName}/>}
                         subheader={<span title={appName} className={classes.overflow}>{appName}</span>}
                     />
 
@@ -143,7 +179,7 @@ class AnalysisCard extends Component {
 
                     <CardActions disableActionSpacing>
                         <IconButton onClick={this.handleClickAnalysisLink}>
-                            <OpenInBrowser />
+                            <LaunchIcon />
                         </IconButton>
 
                         <IconButton

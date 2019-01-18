@@ -71,8 +71,8 @@ class AppCard extends Component {
     this.setState(state => ({ expanded: !state.expanded }));
   };
 
-  handleClickAppLink = () => {
-    window.open(this.props.link);
+  handleClickAppLink = (link) => {
+    window.open(link, "_blank");
   };
 
   render() {
@@ -82,7 +82,8 @@ class AppCard extends Component {
           name,
           creator,
           rating,
-          type
+          type,
+          link
       } = this.props;
 
       const open = this.state.expanded;
@@ -99,7 +100,8 @@ class AppCard extends Component {
                           </div>
                       </div>
                       <div>
-                          <div title={name} className={classes.name}>
+                          <div title={name} className={classes.name}
+                               onClick={() => this.handleClickAppLink(link)}>
                               {name}
                           </div>
                           <div className={classes.more}>

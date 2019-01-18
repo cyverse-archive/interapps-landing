@@ -18,7 +18,8 @@ class AppCardGrid extends Component {
   render() {
     const {
       classes,
-      apps
+      apps,
+      deHost
     } = this.props;
       if (!apps || apps.length === 0) {
           return (<Typography variant="body2" color="primary"
@@ -38,6 +39,7 @@ class AppCardGrid extends Component {
                               description={app.description}
                               rating={app.rating}
                               type={app.type}
+                              link={deHost + "/de?type=apps&system=de&app-id=" + app.uuid}
                           />
                       </Grid>
                   ))}
@@ -53,7 +55,8 @@ AppCardGrid.propTypes = {
 };
 
 const mapStateToProps = state => ({
-  apps: state.apps
+  apps: state.apps,
+  deHost: state.deHost,
 });
 
 const MappedAppCardGrid = connect(

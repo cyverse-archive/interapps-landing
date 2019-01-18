@@ -15,7 +15,7 @@ const styles = theme => ({
 
 class AnalysisCardGrid extends Component {
   render() {
-    const { classes, analyses } = this.props;
+    const { classes, analyses, deHost } = this.props;
 
       if (!analyses || analyses.length === 0) {
           return (<Typography variant="body2" color="primary"
@@ -36,6 +36,7 @@ class AnalysisCardGrid extends Component {
                               startDate={analysis.startDate}
                               plannedEndDate={analysis.plannedEndDate}
                               status={analysis.status}
+                              resultFolderLink={deHost + "/de?type=data&folder=" + analysis.resultFolderPath}
                           />
                       </Grid>
                   ))}
@@ -50,7 +51,8 @@ AnalysisCardGrid.propTypes = {
 };
 
 const mapStateToProps = state => ({
-  analyses: state.analyses
+  analyses: state.analyses,
+  deHost: state.deHost,
 });
 
 const MappedAnalysisCardGrid = connect(

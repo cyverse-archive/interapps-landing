@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import AnalysisCard from "../src/components/AnalysisCard";
+import { StatusCompleted } from "../src/actions";
 
 class AnalysisCardTest extends Component {
     render() {
@@ -16,7 +17,8 @@ class AnalysisCardTest extends Component {
                   startDate={startDate.toLocaleString()}
                   plannedEndDate={endDate.toLocaleString()}
                   owner="Owner Name"
-                  status="Running"
+                  status={StatusCompleted}
+                  analysisLink="https://qa.cyverse.org/de/?type=data&folder=/iplant/home/sriram/analyses"
               />
         );
     }

@@ -15,13 +15,12 @@ import logo from '../images/logo.png';
 import constants from '../constants';
 
 import Button from "@material-ui/core/Button";
-import Divider from "@material-ui/core/Divider";
 
 const styles = theme => ({
   root: {
     flexGrow: 1,
   },
-  appBar: {
+    appBar: {
     zIndex: theme.zIndex.drawer + 1,
   },
   grow: {

@@ -12,6 +12,7 @@ import AppCardGrid from './AppCardGrid';
 import ErrorCard from './ErrorCard';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { palette } from "./App";
 
 const styles = theme => ({
     progress: {position: 'relative', top: 300, left: 200}
@@ -71,6 +72,19 @@ class LandingMain extends Component {
                     <CircularProgress color="primary" className={classes.progress}/>
                     }
                     {mainContent}
+                    <div style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        width: '100%',
+                        height: 30,
+                        display: 'block',
+                        color: palette.blue,
+                        fontSize: 10,
+                        margin: 10,
+                    }}>
+                        CyVerse is funded by a grant from the National Science Foundation Plant Science
+                        Cyberinfrastructure Collaborative (#DBI-0735191, #DBI-1265383).
+                    </div>
                 </LandingResponsiveDrawer>
             </div>
         )

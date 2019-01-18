@@ -12,7 +12,10 @@ class AppCardTest extends Component {
                 description="Test description for an app card."
                 toolName="Tool Name"
                 toolVersion="0.0.1"
-            />
+                type="DE"
+                rating={{"average": 3.5, "total": 3}}
+                link="https://qa.cyverse.org/de/?type=apps&app-id=676846d4-854a-11e4-980d-7f0fcca75dbb&system-id=de"
+           />
         );
     }
 }
