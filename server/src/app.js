@@ -22,7 +22,6 @@ app.use(helmet());
 app.use(morgan('combined'));
 
 const db = getDB();
-const domainURL = new url.URL(process.env.VICE_DOMAIN);
 
 let sess = {
     store: new pgSession({
@@ -31,9 +30,7 @@ let sess = {
     secret: 'interapps',
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      domain: domainURL.hostname
-    }
+    cookie: {}
 };
 
 if (app.get('env') === 'production') {
