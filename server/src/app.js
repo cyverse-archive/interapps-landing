@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import noCache from 'nocache';
 import morgan from 'morgan';
 import path from 'path';
+import url from 'url';
 
 const fetch = require('node-fetch');
 const debug = require('debug')('app');
@@ -21,6 +22,7 @@ app.use(helmet());
 app.use(morgan('combined'));
 
 const db = getDB();
+const domainURL = new url.URL(process.env.VICE_DOMAIN);
 
 let sess = {
     store: new pgSession({
@@ -29,11 +31,16 @@ let sess = {
     secret: 'interapps',
     resave: false,
     saveUninitialized: false,
-    cookie: {}
+    cookie: {
+      domain: domainURL.hostname
+    }
 };
 
 if (app.get('env') === 'production') {
-    app.set('trust proxy', true); // trust first proxy
+    app.set('trust proxy', (ip) => {
+      debug(`ip: ${ip}`);
+      return true;
+    }); // trust first proxy
     sess.cookie.secure = true; // serve secure cookies
 }
 app.use(session(sess));
@@ -236,7 +243,9 @@ app.use('/api', apirouter);
 function authy(whitelist) {
  return (req, res, next) => {
     debug("validating session in authy middleware");
-    debug(req);
+    debug(`accessToken: ${req.session.accessToken}`);
+    debug(`session expired: ${isSessionExpired(req.session.expiry)}`);
+    debug(`whitelist includes ${req.path}: ${whitelist.includes(req.path)}`);
 
     if ((req.session.accessToken && !isSessionExpired(req.session.expiry)) || whitelist.includes(req.path)) {
       next();
