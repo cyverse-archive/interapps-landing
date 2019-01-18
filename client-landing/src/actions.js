@@ -121,14 +121,15 @@ export const ShowApps = 3;
 export const ShowError = 4;
 
 const defaultState = {
-  mobileOpen: false,
-  pageToShow: ShowRunning,
-  username: "",
-  email: "",
+    mobileOpen: false,
+    pageToShow: ShowRunning,
+    username: "",
+    email: "",
     apps: [],
     analyses: [],
     httpCode: 200,
     loading: false,
+    deHost: "",
 };
 
 export const {
@@ -188,7 +189,7 @@ export const fetchProfile = () => {
         dispatch(toggleLoading());
         return axios.get("/api/profile", {withCredentials: true}).then(
             response => {
-                dispatch(loggedIn(response.data.username));
+                dispatch(loggedIn(response.data));
                 dispatch(setHttpCode(200));
                 dispatch(toggleLoading());
             }
@@ -211,10 +212,11 @@ export const reducer = handleActions(
                 analyses: analyses,
             };
         },
-        LOGGED_IN: (state, {payload: username}) => {
+        LOGGED_IN: (state, {payload: data}) => {
             return {
                 ...state,
-                username: username
+                username: data.username,
+                deHost:data.de_host,
             }
         },
         SET_HTTP_CODE: (state, {payload: httpCode}) => {

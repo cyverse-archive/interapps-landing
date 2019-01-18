@@ -197,7 +197,7 @@ apirouter.get("/url-ready", async (req, res) => {
 apirouter.get("/profile", async (req,res)=>{
     debug("calling get profile for " + req.session.username);
     if(req.session.username) {
-        res.send(JSON.stringify({"username": req.session.username}));
+        res.send(JSON.stringify({"username": req.session.username, "de_host": process.env.DE_HOST}));
     } else {
         res.send(500).send("Unable to fetch user profile from session.");
     }
@@ -233,7 +233,6 @@ apirouter.get("/apps", async (req, res) => {
       .then(appsResp => appsResp.buffer())
       .then(data => res.send(data));
 });
-
 
 app.use('/api', apirouter);
 

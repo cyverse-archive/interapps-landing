@@ -31,6 +31,10 @@ const styles = theme => ({
         whiteSpace: 'nowrap',
         display: 'inline-block',
         maxWidth: 100,
+        '&:hover': {
+            textDecoration: 'underline',
+            cursor: 'pointer',
+        },
     },
     more: {
         position: 'relative',
@@ -119,6 +123,7 @@ class AppCard extends Component {
                                   placeholderSymbol={<img src={redstar} className="icon"
                                                           alt="red star"/>}
                                   fractions={2}
+                                  readonly={true}
                               />
                           </span>
                           <span className={classes.rating}>
