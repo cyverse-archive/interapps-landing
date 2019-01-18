@@ -10,4 +10,4 @@ RUN npm run build-all
 
 ENV NODE_ENV production
 EXPOSE 60000
-CMD ["node", "-r", "dotenv/config", "server/build/index.js"]
+CMD ["npm", "start"]
