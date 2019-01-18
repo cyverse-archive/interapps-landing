@@ -236,10 +236,12 @@ app.use('/api', apirouter);
 function authy(whitelist) {
  return (req, res, next) => {
     debug("validating session in authy middleware");
-    if ((!req.session.accessToken || isSessionExpired(req.session.expiry)) && !whitelist.includes(req.path)) {
-        res.redirect(cyverseAuth.code.getUri());
+    debug(req);
+
+    if ((req.session.accessToken && !isSessionExpired(req.session.expiry)) || whitelist.includes(req.path)) {
+      next();
     } else {
-        next();
+      res.redirect(cyverseAuth.code.getUri());
     }
   };
 }
