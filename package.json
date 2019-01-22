@@ -1,22 +1,35 @@
 {
-  "name": "interapps-landing-server",
+  "name": "vice-ui-server",
   "version": "0.0.1",
+  "license": "BSD-3-Clause",
   "private": true,
-  "dependencies": {
-    "axios": "^0.18.0",
-    "babel-core": "6.26.3",
-    "redux-actions": "^2.6.1",
-    "redux-logger": "^3.0.6",
-    "redux-thunk": "^2.3.0"
-  },
   "scripts": {
-    "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "concurrently \"node port-forward.js\" \"node start-server.js\"",
-    "client": "node start-client.js"
+    "start": "npm run server",
+    "server": "node start-server.js",
+    "port-forward": "concurrently \"node port-forward-redis.js\" \"node port-forward-apps.js\"",
+    "dev": "run-s build-all dev-server",
+    "dev-server": "concurrently \"npm run port-forward\" \"node start-server.js\"",
+    "build-server": "node build-server.js",
+    "build-landing": "node build-landing-ui.js",
+    "build-loading": "node build-loading-ui.js",
+    "build-all": "run-s clean build-server build-landing build-loading",
+    "install-server": "node install-server.js",
+    "install-landing": "node install-landing.js",
+    "install-loading": "node install-loading.js",
+    "install-all": "run-p install-server install-landing install-loading",
+    "clean": "concurrently \"rimraf server/build\" \"rimraf client-loading/build\" \"rimraf client-landing/build\"",
+    "test": "concurrently \"node test-server.js\""
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-runtime": "^6.26.0",
-    "concurrently": "^4.0.1"
+    "concurrently": "^4.0.1",
+    "dotenv": "^6.1.0",
+    "nodemon": "^1.18.9",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^2.6.2"
+  },
+  "dependencies": {
+    "npm": "^6.5.0"
   }
 }

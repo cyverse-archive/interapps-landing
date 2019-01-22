@@ -1,25 +1,13 @@
-FROM golang:1.10.2
+FROM node:11-alpine
 
-COPY . /go/src/github.com/cyverse-de/interapps-landing
+WORKDIR /usr/src/app
 
-RUN go install github.com/cyverse-de/interapps-landing
-RUN apt-get update && apt-get install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get install -y nodejs build-essential
-RUN cd /go/src/github.com/cyverse-de/interapps-landing && ./build-ui.sh
+COPY . .
 
-ENTRYPOINT ["interapps-landing"]
-CMD ["--help"]
+RUN npm install
+RUN npm run install-all
+RUN npm run build-all
 
-WORKDIR /go/src/github.com/cyverse-de/interapps-landing
-
-ARG git_commit=unknown
-ARG version="2.9.0"
-ARG descriptive_version=unknown
-
-LABEL org.cyverse.git-ref="$git_commit"
-LABEL org.cyverse.version="$version"
-LABEL org.cyverse.descriptive-version="$descriptive_version"
-LABEL org.label-schema.vcs-ref="$git_commit"
-LABEL org.label-schema.vcs-url="https://github.com/cyverse-de/interapps-landing"
-LABEL org.label-schema.version="$descriptive_version"
+ENV NODE_ENV production
+EXPOSE 60000
+CMD ["npm", "start"]

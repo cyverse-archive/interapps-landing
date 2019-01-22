@@ -1,6 +1,5 @@
 const args = [
-  'run',
-  'start'
+  'install'
 ];
 
 const opts = {

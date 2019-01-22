@@ -1,6 +1,6 @@
 const args = [
   'run',
-  'start'
+  'test'
 ];
 
 const opts = {

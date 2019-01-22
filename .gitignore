@@ -1,13 +1,19 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.cas-server
 
-ui/build
+client-loading/build
+client-landing/build
+build/client-loading/
+build/client-landing/
 cas-server
 interapps-landing
 *.crt
 *.key
+**/.env
+**/dist
+**/build
 
 # dependencies
-/node_modules
+**/node_modules
 
 # testing
 /coverage
@@ -27,3 +33,7 @@ yarn-debug.log*
 yarn-error.log*
 
 test-report.xml
+
+/client-landing/storybook-static
+
+

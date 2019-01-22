@@ -1,11 +1,11 @@
 const args = [
   'run',
-  'start'
+  'build',
 ];
 
 const opts = {
   stdio: 'inherit',
-  cwd: 'server',
+  cwd: 'client-landing',
   shell: true
 };
 

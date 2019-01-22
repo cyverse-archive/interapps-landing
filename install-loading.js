@@ -1,11 +1,10 @@
 const args = [
-  'run',
-  'start'
+  'install'
 ];
 
 const opts = {
   stdio: 'inherit',
-  cwd: 'server',
+  cwd: 'client-loading',
   shell: true
 };
 
