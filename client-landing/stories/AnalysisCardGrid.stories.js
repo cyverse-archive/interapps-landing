@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { newStore } from "../src/store/configure";
 import { addAnalyses, Analysis, loggedIn, StatusCompleted } from "../src/actions";
 import AnalysisCardGrid from "../src/components/AnalysisCardGrid";
-import AppCardGrid from "./AppCardGrid.stories";
+import AppCardGrid from "./AppsCardGrid.stories";
 
 
 class AnalysisCardGridTest extends Component {

@@ -6,11 +6,16 @@ import CardContent from '@material-ui/core/CardContent';
 import goldstar from "../../src/images/star-gold.gif";
 import whitestar from "../../src/images/star-white.gif";
 import redstar from "../../src/images/star-red.gif";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
 import Rating from "react-rating";
-import IconButton from "@material-ui/core/IconButton";
 import md5 from "md5";
 import constants from '../constants';
+import AppsMenu from "./AppsMenu";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
+import DialogActions from "@material-ui/core/DialogActions";
 
 const styles = theme => ({
     card: {
@@ -64,15 +69,15 @@ const styles = theme => ({
     },
 });
 
-class AppCard extends Component {
-  state = { expanded: false };
-
-  handleExpandClick = () => {
-    this.setState(state => ({ expanded: !state.expanded }));
-  };
+class AppsCard extends Component {
+  state = { dialogOpen: false };
 
   handleClickAppLink = (link) => {
     window.open(link, "_blank");
+  };
+
+  handleInfoDialogClose = () => {
+    this.setState({dialogOpen: false});
   };
 
   render() {
@@ -83,40 +88,37 @@ class AppCard extends Component {
           creator,
           rating,
           type,
-          link
+          link,
+          description,
       } = this.props;
 
       const open = this.state.expanded;
 
       let avatarImgSrc = constants.GRAVATAR_URL + md5(uuid) + "?" + constants.GRAVATAR_OPTIONS;
       return (
-          <div className={classes.card}>
-              <Card>
-                  <CardContent style={{paddingLeft: 10, paddingRight: 0}}>
-                      <div style={{float: "left", marginRight: 5}}>
-                          <div><img src={avatarImgSrc} alt="avatar image"/></div>
-                          <div className={classes.type}>
-                              {type.toLowerCase()}
+          <React.Fragment>
+              <div className={classes.card}>
+                  <Card>
+                      <CardContent style={{paddingLeft: 10, paddingRight: 0}}>
+                          <div style={{float: "left", marginRight: 5}}>
+                              <div><img src={avatarImgSrc} alt="avatar image"/></div>
+                              <div className={classes.type}>
+                                  {type.toLowerCase()}
+                              </div>
                           </div>
-                      </div>
-                      <div>
-                          <div title={name} className={classes.name}
-                               onClick={() => this.handleClickAppLink(link)}>
-                              {name}
+                          <div>
+                              <div title={name} className={classes.name}
+                                   onClick={() => this.handleClickAppLink(link)}>
+                                  {name}
+                              </div>
+                              <div className={classes.more}>
+                                  <AppsMenu onInfoClick={()=> this.setState({dialogOpen: true})}/>
+                              </div>
                           </div>
-                          <div className={classes.more}>
-                              <IconButton
-                                  aria-label="More"
-                                  aria-owns={open ? 'long-menu' : null}
-                                  aria-haspopup="true">
-                                  <MoreVertIcon/>
-                              </IconButton>
+                          <div className={classes.creator}>
+                              {creator}
                           </div>
-                      </div>
-                      <div className={classes.creator}>
-                          {creator}
-                      </div>
-                      <div>
+                          <div>
                           <span className={classes.stars}>
                               <Rating
                                   placeholderRating={rating.average}
@@ -128,18 +130,37 @@ class AppCard extends Component {
                                   readonly={true}
                               />
                           </span>
-                          <span className={classes.rating}>
+                              <span className={classes.rating}>
                               ({rating.total})
                           </span>
-                      </div>
-                  </CardContent>
-              </Card>
-          </div>
+                          </div>
+                      </CardContent>
+                  </Card>
+              </div>
+              <Dialog
+                  onClose={this.handleInfoDialogClose}
+                  aria-labelledby="customized-dialog-title"
+                  open={this.state.dialogOpen}>
+                  <DialogTitle onClose={this.handleInfoDialogClose}>
+                      {name}
+                  </DialogTitle>
+                  <DialogContent>
+                      <Typography gutterBottom>
+                          {description}
+                      </Typography>
+                  </DialogContent>
+                  <DialogActions>
+                      <Button onClick={this.handleInfoDialogClose} color="primary">
+                          OK
+                      </Button>
+                  </DialogActions>
+              </Dialog>
+          </React.Fragment>
       );
   }
 }
 
-AppCard.propTypes = {
+AppsCard.propTypes = {
     classes: PropTypes.object.isRequired,
     uuid: PropTypes.object.isRequired,
     name: PropTypes.string.isRequired,
@@ -153,4 +174,4 @@ AppCard.propTypes = {
 export default withStyles(
   styles,
   { withTheme: true }
-)(AppCard);
+)(AppsCard);

@@ -8,7 +8,7 @@ import { withStyles } from '@material-ui/core/styles';
 import LandingAppBar from './LandingAppBar';
 import LandingResponsiveDrawer from './LandingResponsiveDrawer';
 import AnalysisCardGrid from './AnalysisCardGrid';
-import AppCardGrid from './AppCardGrid';
+import AppCardGrid from './AppsCardGrid';
 import ErrorCard from './ErrorCard';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -78,16 +78,18 @@ class LandingMain extends Component {
                         width: '100%',
                         height: 30,
                         display: 'block',
-                        color: palette.blue,
+                        color: palette.white,
                         fontSize: 10,
-                        margin: 10,
+                        margin: '0px 50px 0px 0px',
+                        padding: 5,
+                        backgroundColor: palette.blue,
                     }}>
                         CyVerse is funded by a grant from the National Science Foundation Plant Science
                         Cyberinfrastructure Collaborative (#DBI-0735191, #DBI-1265383).
                     </div>
                 </LandingResponsiveDrawer>
             </div>
-        )
+        );
     }
 }
 

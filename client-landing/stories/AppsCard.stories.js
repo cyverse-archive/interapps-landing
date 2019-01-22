@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import AppCard from "../src/components/AppCard";
+import AppsCard from "../src/components/AppsCard";
 
 class AppCardTest extends Component {
     render() {
         return (
-            <AppCard
+            <AppsCard
                 uuid="1"
                 name="App Name App NameApp NameApp NameApp NameApp NameApp Name"
                 creator="Creator Name"

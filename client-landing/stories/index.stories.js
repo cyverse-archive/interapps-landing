@@ -1,8 +1,8 @@
 import React from "react";
 import { storiesOf } from "@storybook/react";
 
-import AppCardTest from "./AppCard.stories";
-import AppCardGridTest from "./AppCardGrid.stories";
+import AppCardTest from "./AppsCard.stories";
+import AppCardGridTest from "./AppsCardGrid.stories";
 
 import AnalysisCardTest from "./AnalysisCard.stories";
 import AnalysisCardGridTest from "./AnalysisCardGrid.stories";

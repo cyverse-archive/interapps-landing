@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
-import AppCard from './AppCard';
+import AppCard from './AppsCard';
 import Typography from "@material-ui/core/es/Typography/Typography";
 
 
@@ -14,7 +14,7 @@ const styles = theme => ({
   },
 });
 
-class AppCardGrid extends Component {
+class AppsCardGrid extends Component {
   render() {
     const {
       classes,
@@ -49,7 +49,7 @@ class AppCardGrid extends Component {
   }
 }
 
-AppCardGrid.propTypes = {
+AppsCardGrid.propTypes = {
   classes:  PropTypes.object.isRequired,
   apps:  PropTypes.array.isRequired,
 };
@@ -61,7 +61,7 @@ const mapStateToProps = state => ({
 
 const MappedAppCardGrid = connect(
   mapStateToProps
-)(AppCardGrid);
+)(AppsCardGrid);
 
 
 export default withStyles(

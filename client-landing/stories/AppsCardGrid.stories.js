@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { newStore } from "../src/store/configure";
 import { addApps, App, loggedIn } from "../src/actions";
-import AppCardGrid from "../src/components/AppCardGrid";
-import AppCard from "./AppCard.stories";
+import AppsCardGrid from "../src/components/AppsCardGrid";
 
 class AppCardGridTest extends Component {
     render() {
@@ -20,7 +19,7 @@ class AppCardGridTest extends Component {
         store.dispatch(addApps(apps));
         store.dispatch(loggedIn({"de_host": host}));
         return (
-            <AppCardGrid apps={apps} store={store} deHost={host}/>
+            <AppsCardGrid apps={apps} store={store} deHost={host}/>
         );
     }
 }
