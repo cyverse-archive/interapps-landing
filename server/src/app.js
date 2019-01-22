@@ -33,13 +33,13 @@ let sess = {
     cookie: {}
 };
 
-if (app.get('env') === 'production') {
-    app.set('trust proxy', (ip) => {
-      debug(`ip: ${ip}`);
-      return true;
-    }); // trust first proxy
-    sess.cookie.secure = true; // serve secure cookies
-}
+// if (app.get('env') === 'production') {
+//     app.set('trust proxy', (ip) => {
+//       debug(`ip: ${ip}`);
+//       return true;
+//     }); // trust first proxy
+//     sess.cookie.secure = true; // serve secure cookies
+// }
 app.use(session(sess));
 
 app.use(function (req, res, next) {
