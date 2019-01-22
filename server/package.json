@@ -6,7 +6,6 @@
   "repository": "https://github.com/cyverse-de/interapps-landing",
   "main": "src/index.js",
   "scripts": {
-    "prestart": "npm run build",
     "start": "node -r dotenv/config build/index.js",
     "dev": "nodemon ./src/index.js --exec \"node -r dotenv/config -r @babel/register\"",
     "clean": "rimraf build",
