@@ -63,7 +63,10 @@ let cyverseAuth = new ClientOAuth2({
 let isSessionExpired = (expirationTime) => new Date().getTime() > expirationTime;
 
 
-app.get('/healthz', (req, res) => res.send("I'm healthy."));
+app.use('/healthz', noCache());
+app.get('/healthz', async (req, res) => await db.one(`select version from version order by applied desc limit 1;`, [])
+    .then(version => res.status(200).send(version))
+    .catch(e => res.status(500).send(`error fetching version from database: ${e}`)));
 
 // test session with redis
 app.get('/test', function (req, res) {
