@@ -72,22 +72,24 @@ class LandingMain extends Component {
                     <CircularProgress color="primary" className={classes.progress}/>
                     }
                     {mainContent}
-                    <div style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        width: '100%',
-                        height: 30,
-                        display: 'block',
-                        color: palette.white,
-                        fontSize: 10,
-                        margin: '0px 50px 0px 0px',
-                        padding: 5,
-                        backgroundColor: palette.blue,
-                    }}>
-                        CyVerse is funded by a grant from the National Science Foundation Plant Science
-                        Cyberinfrastructure Collaborative (#DBI-0735191, #DBI-1265383).
-                    </div>
                 </LandingResponsiveDrawer>
+                <div style={{
+                    position: 'fixed',
+                    diplay: 'block',
+                    bottom: '0',
+                    color: palette.white,
+                    width: '100%',
+                    height: 30,
+                    fontSize: 10,
+                    textAlign: "center",
+                    margin: '0px 50px 0px 0px',
+                    padding: 5,
+                    backgroundColor: palette.blue,
+                    zIndex: 9999,
+                }}>
+                    CyVerse is funded by a grant from the National Science Foundation Plant Science
+                    Cyberinfrastructure Collaborative (#DBI-0735191, #DBI-1265383).
+                </div>
             </div>
         );
     }
