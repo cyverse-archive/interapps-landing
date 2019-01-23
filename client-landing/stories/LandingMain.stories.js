@@ -54,7 +54,7 @@ class LandingMainTest extends Component {
      //   [...running, ...failed, ...completed].forEach(a => store.dispatch(addAnalysis(a)));
         store.dispatch(addAnalyses([...running, ...failed, ...completed]));
 
-        let appnums = [...Array(30).keys()];
+        let appnums = new Array(30);
         let apps = appnums.map(n => new App(
             `${n}`,
             `test-app-name-${n}`,
@@ -63,7 +63,7 @@ class LandingMainTest extends Component {
             `this is a test of the app card grid ${n}`,
             `test-creator-name ${n}`,
             "http://localhost"
-        )).forEach(a => store.dispatch(addApp(a)));
+          )).forEach(a => store.dispatch(addApp(a)));
         return (
             <Provider store={store}>
                 <LandingMain/>
