@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { toggleMobileOpen, loggedIn } from '../actions';
+import { toggleDrawerOpen } from '../actions';
 
 
 import AppBar from '@material-ui/core/AppBar';
@@ -38,27 +38,60 @@ const styles = theme => ({
 },
 });
 
+function LoginButton(props) {
+    if (!props.mobileOpen) {
+        return (
+            <Button variant="raised" color="primary" href={constants.LOGIN_URL} style={{margin: 1}}>
+                Login
+                <AccountCircle style={{margin: 1}}/>
+            </Button>
+        );
+    } else {
+        return (
+            <Button variant="raised" color="primary" href={constants.LOGIN_URL} style={{margin: 1}}>
+                <AccountCircle style={{margin: 1}}/>
+            </Button>
+        );
+    }
+}
+
+
+function LogoutButton(props) {
+    if (!props.mobileOpen) {
+        return (
+            <Button
+                variant="raised"
+                style={{margin: 2}}
+                color="primary"
+                href={constants.LOGOUT_URL}>
+                Logout
+                <AccountCircle style={{margin: 1}}/>
+            </Button>
+        );
+    } else {
+        return (
+            <Button
+                variant="raised"
+                style={{margin: 2}}
+                color="primary"
+                href={constants.LOGOUT_URL}>
+                <AccountCircle style={{margin: 1}}/>
+            </Button>
+        );
+    }
+}
+
 function Login(props) {
     if (props.username) {
         return (
             <div>
-                Welcome {props.username} | 
-                <Button
-                    variant="raised"
-                    style={{margin: 2}}
-                    color="primary"
-                    href={constants.LOGOUT_URL}>
-                    Logout
-                    <AccountCircle style={{margin: 1}}/>
-                </Button>
+                Welcome {props.username} |
+                <LogoutButton mobileOpen={props.mobileOpen}/>
             </div>
         )
     } else {
         return (
-            <Button variant="raised" color="primary" href={constants.LOGIN_URL} style={{margin:1}}>
-                Login
-                <AccountCircle style={{margin: 1}}/>
-            </Button>
+            <LoginButton mobileOpen={props.mobileOpen}/>
         )
     }
 }
@@ -69,7 +102,7 @@ class LandingAppBar extends Component {
   };
 
   render() {
-    const { classes, handleDrawerToggle, username} = this.props;
+    const { classes, handleDrawerToggle, username, mobileOpen} = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
     return (
@@ -89,7 +122,7 @@ class LandingAppBar extends Component {
                 <img src={logo} height={32} alt="logo"/>
               </div>
               <div>
-                  <Login username={username}/>
+                  <Login username={username} classes={classes} mobileOpen={mobileOpen}/>
               </div>
           </Toolbar>
         </AppBar>
@@ -105,7 +138,7 @@ LandingAppBar.propTypes = {
 const mapStateToProps = state => ({...state});
 
 const mapDispatchToProps = dispatch => ({
-  handleDrawerToggle: () => dispatch(toggleMobileOpen()),
+  handleDrawerToggle: () => dispatch(toggleDrawerOpen()),
 });
 
 const MappedLandingAppBar = connect(
