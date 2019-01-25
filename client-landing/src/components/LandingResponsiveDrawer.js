@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { toggleMobileOpen } from '../actions';
+import { toggleDrawerOpen } from '../actions';
 
 // Material UI Imports
 import { withStyles } from '@material-ui/core/styles';
@@ -54,7 +54,7 @@ class LandingResponsiveDrawer extends Component {
       classes,
       theme,
       children,
-      mobileOpen,
+      drawerOpen,
       handleDrawerToggle,
     } = this.props;
 
@@ -70,7 +70,7 @@ class LandingResponsiveDrawer extends Component {
          <Drawer
            variant="temporary"
            anchor={theme.direction === 'rtl' ? 'right' : 'left'}
-           open={mobileOpen}
+           open={drawerOpen}
            onClose={handleDrawerToggle}
            classes={{
              paper: classes.drawerPaper,
@@ -105,10 +105,10 @@ class LandingResponsiveDrawer extends Component {
   }
 }
 
-const mapStateToProps = state => ({ mobileOpen: state.mobileOpen });
+const mapStateToProps = state => ({ mobileOpen: state.drawerOpen });
 
 const mapDispatchToProps = dispatch => ({
-  handleDrawerToggle:   () => dispatch(toggleMobileOpen()),
+  handleDrawerToggle:   () => dispatch(toggleDrawerOpen()),
 });
 
 LandingResponsiveDrawer.propTypes = {

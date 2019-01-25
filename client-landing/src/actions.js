@@ -130,18 +130,20 @@ const defaultState = {
     httpCode: 200,
     loading: false,
     deHost: "",
+    drawerOpen: false,
 };
 
 export const {
-    toggleMobileOpen,
+    toggleDrawerOpen,
     setPageToShow,
     addApps,
     addAnalyses,
     loggedIn,
     setHttpCode,
     toggleLoading,
+    toggleMobileOpen,
 } = createActions({
-    TOGGLE_MOBILE_OPEN: () => {
+    TOGGLE_DRAWER_OPEN: () => {
     },
     SET_PAGE_TO_SHOW: (pageToShow = ShowRunning) => pageToShow,
     ADD_APPS: (apps) => apps,
@@ -150,6 +152,7 @@ export const {
     SET_HTTP_CODE: (httpCode) => httpCode,
     TOGGLE_LOADING: () => {
     },
+    TOGGLE_MOBILE_OPEN: (mobileOpen) => mobileOpen,
 });
 
 export const fetchAnalyses = (status) => {
@@ -201,7 +204,7 @@ export const fetchProfile = () => {
 
 export const reducer = handleActions(
     {
-        TOGGLE_MOBILE_OPEN: (state) => ({...state, mobileOpen: !state.mobileOpen}),
+        TOGGLE_DRAWER_OPEN: (state) => ({...state, drawerOpen: !state.drawerOpen}),
         SET_PAGE_TO_SHOW: (state, {payload: pageToShow}) => ({...state, pageToShow: pageToShow}),
         ADD_APPS: (state, {payload: apps}) => {
             return {...state, apps: apps};
@@ -226,7 +229,8 @@ export const reducer = handleActions(
             }
         },
         TOGGLE_LOADING: (state) => ({...state, loading: !state.loading}),
-
+        TOGGLE_MOBILE_OPEN: (state ,{payload: mobileOpen}) => ({...state, mobileOpen: mobileOpen}),
   },
   defaultState
 );
+

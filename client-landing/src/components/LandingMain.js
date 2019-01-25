@@ -13,15 +13,17 @@ import ErrorCard from './ErrorCard';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { palette } from "./App";
+import {mediaQueryList, handleDeviceChange} from "../mediaQuery";
 
 const styles = theme => ({
-    progress: {position: 'relative', top: 300, left: 200}
+    progress: {position: 'absolute', top: '50%', left: '50%'}
 });
 
 class LandingMain extends Component {
 
     componentDidMount() {
         this.props.handleLogin();
+        handleDeviceChange(mediaQueryList);
     }
 
     render() {

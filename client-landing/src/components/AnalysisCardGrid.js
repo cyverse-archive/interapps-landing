@@ -19,7 +19,7 @@ class AnalysisCardGrid extends Component {
 
       if (!analyses || analyses.length === 0) {
           return (<Typography variant="body2" color="primary"
-                              style={{position: 'relative', top: 300, left: 300}}>
+                              style={{position: 'absolute', top: '50%', left: '50%'}}>
               No analyses to display!
           </Typography>);
       } else {

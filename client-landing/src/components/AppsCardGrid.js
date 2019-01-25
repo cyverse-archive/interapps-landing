@@ -23,7 +23,7 @@ class AppsCardGrid extends Component {
     } = this.props;
       if (!apps || apps.length === 0) {
           return (<Typography variant="body2" color="primary"
-                              style={{position: 'relative', top: 300, left: 200}}>
+                              style={{position: 'absolute', top: '50%', left: '50%'}}>
               No apps to display!
           </Typography>);
       } else {
