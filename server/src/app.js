@@ -256,7 +256,8 @@ function authy(whitelist) {
 
 const uiDir = process.env.UI || '../../client-landing/build';
 
-if (uiDir === '../../client-landing/build') {
+// bad hack to deal with a prod issue
+if (uiDir.endsWith('client-landing/build/') || uiDir.endsWith('client-landing/build')) {
   app.use(authy(
     [
       '/auth/provider',
