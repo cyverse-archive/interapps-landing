@@ -254,16 +254,19 @@ function authy(whitelist) {
   };
 }
 
-app.use(authy(
-  [
-    '/auth/provider',
-    '/auth/provider/callback',
-    '/heathz',
-    '/test'
-  ]
-));
-
 const uiDir = process.env.UI || '../../client-landing/build';
+
+if (uiDir === '../../client-landing/build') {
+  app.use(authy(
+    [
+      '/auth/provider',
+      '/auth/provider/callback',
+      '/heathz',
+      '/test'
+    ]
+  ));
+}
+
 const uiPath = path.join(__dirname, uiDir);
 debug(uiPath);
 app.use(express.static(uiPath));
