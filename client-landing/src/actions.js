@@ -151,6 +151,7 @@ const defaultState = {
     loading: false,
     deHost: "",
     drawerOpen: false,
+    errorDialogOpen: false,
     errors: {}, // See [Error] comment  for more info.
 };
 
@@ -181,8 +182,9 @@ export const {
     setHttpCode,
     toggleLoading,
     toggleMobileOpen,
+    setErrorDialogOpen,
     addError,
-    clearErrorByStatus,
+    clearErrorsByStatus,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
     },
@@ -194,8 +196,9 @@ export const {
     TOGGLE_LOADING: () => {
     },
     TOGGLE_MOBILE_OPEN: (mobileOpen) => mobileOpen,
+    SET_ERROR_DIALOG_OPEN: (errorDialogOpen) => errorDialogOpen,
     ADD_ERROR: (error) => error,
-    CLEAR_ERROR_BY_STATUS: (errorStatus) => errorStatus,
+    CLEAR_ERRORS_BY_STATUS: (errorStatus) => errorStatus,
 });
 
 export const fetchAnalyses = (status) => {
@@ -273,6 +276,7 @@ export const reducer = handleActions(
         },
         TOGGLE_LOADING: (state) => ({...state, loading: !state.loading}),
         TOGGLE_MOBILE_OPEN: (state ,{payload: mobileOpen}) => ({...state, mobileOpen: mobileOpen}),
+        SET_ERROR_DIALOG_OPEN: (state, {payload: dialogOpen}) => ({...state, errorDialogOpen: dialogOpen}),
         ADD_ERROR: (state, {payload: error}) => {
           let newErrorObject = {...state.errors};
           if (!state.errors[error.status]) {
@@ -290,7 +294,7 @@ export const reducer = handleActions(
           }
           return {...state, errors: newErrorObject};
         },
-        CLEAR_ERROR_BY_STATUS: (state, {payload: errorStatus}) => {
+        CLEAR_ERRORS_BY_STATUS: (state, {payload: errorStatus}) => {
           let newErrorObject = {...state.errors};
           if (state.errors[errorStatus]) {
             delete newErrorObject[errorStatus];
