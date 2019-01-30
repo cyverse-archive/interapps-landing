@@ -5,19 +5,39 @@ import constants from "./constants";
 
 function errorHandler(error, dispatch) {
     console.log('error from server: ', error.message);
-    if (error.response && error.response.status) {
-        if (error.response.status === 403) {
-            var parser = document.createElement('a');
-            parser.href = window.location.href;
-            parser.pathname = constants.LOGIN_URL;
-            window.location.assign(parser.href);
-        }
-        dispatch(setHttpCode(error.response.status));
+    // Normalize the error objects a bit before dumping them into the redux
+    // state.
+    if (!error.response || !error.response.status) {
+      error.status = 500;
     } else {
-        dispatch(setHttpCode(500));
+      error.status = error.response.status;
     }
-    dispatch(setPageToShow(ShowError));
-    dispatch(toggleLoading());
+
+    // Every error needs to have a message.
+    if (!error.message || error.message === "") {
+      error.message = "Unknown error";
+    }
+
+    // We should probably track the times that the errors are received for
+    // support purposes.
+    if (!error.dateCreated) {
+      error.dateCreated = new Date.now();
+    }
+
+    // Send the users to the login page if we get a FORBIDDEN error.
+    if (error.status === 403) {
+        var parser = document.createElement('a');
+        parser.href = window.location.href;
+        parser.pathname = constants.LOGIN_URL;
+        window.location.assign(parser.href);
+    }
+
+    // We shouldn't need this in the near future, kept around to avoid
+    // breakages.
+    dispatch(setHttpCode(error.status));
+
+    // Add the error to the redux store.
+    dispatch(addError(error))
 }
 
 export const StatusRunning = "Running";
@@ -131,7 +151,26 @@ const defaultState = {
     loading: false,
     deHost: "",
     drawerOpen: false,
+    errors: {}, // See [Error] comment  for more info.
 };
+
+// [Error]
+// The layout for error tracking in the redux will be:
+//
+// {
+//   "<status code>" : {
+//     "dateFirstSeen": "<timestamp>",
+//     "dateLastSeen" : "<timestamp>",
+//     "instances" : [],
+//   }
+// }
+//
+// The goal with this layout is allow for many instances of the same error to be
+// tracked, but also efficiently summarized so the user isn't spammed with
+// dialogss or snackbars or whichever element we choose to display them.
+// Stuffing the errors into a top-level list would require us to iterate too
+// many times to provide a summary and would complicate the overall code, while
+// this layout should isolate most of the complexity in the reducers.
 
 export const {
     toggleDrawerOpen,
@@ -142,6 +181,8 @@ export const {
     setHttpCode,
     toggleLoading,
     toggleMobileOpen,
+    addError,
+    clearErrorByStatus,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
     },
@@ -153,6 +194,8 @@ export const {
     TOGGLE_LOADING: () => {
     },
     TOGGLE_MOBILE_OPEN: (mobileOpen) => mobileOpen,
+    ADD_ERROR: (error) => error,
+    CLEAR_ERROR_BY_STATUS: (errorStatus) => errorStatus,
 });
 
 export const fetchAnalyses = (status) => {
@@ -230,7 +273,30 @@ export const reducer = handleActions(
         },
         TOGGLE_LOADING: (state) => ({...state, loading: !state.loading}),
         TOGGLE_MOBILE_OPEN: (state ,{payload: mobileOpen}) => ({...state, mobileOpen: mobileOpen}),
+        ADD_ERROR: (state, {payload: error}) => {
+          let newErrorObject = {...state.errors};
+          if (!state.errors[error.status]) {
+            newErrorObject[error.status] = {
+                dateFirstSeen: error.dateCreated,
+                dateLastSeen: error.dateCreated,
+                instances: [error],
+            }
+          } else {
+            newErrorObject[error.status] = {
+              ...state.errors[error.status],
+              dateLastSeen: error.dateCreated,
+              instances: [...state.errors[error.status].instances, error],
+            }
+          }
+          return {...state, errors: newErrorObject};
+        },
+        CLEAR_ERROR_BY_STATUS: (state, {payload: errorStatus}) => {
+          let newErrorObject = {...state.errors};
+          if (state.errors[errorStatus]) {
+            delete newErrorObject[errorStatus];
+          }
+          return {...state, errors: newErrorObject};
+        }
   },
   defaultState
 );
-
