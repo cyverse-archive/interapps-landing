@@ -16,6 +16,10 @@ import DialogContent from "@material-ui/core/DialogContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import DialogActions from "@material-ui/core/DialogActions";
+import Lock from "@material-ui/icons/Lock";
+import Cancel from "@material-ui/icons/Cancel";
+import { palette } from "./App";
+import Beta from "../../src/images/betaSymbol.png";
 
 const styles = theme => ({
     card: {
@@ -62,12 +66,33 @@ const styles = theme => ({
         top: 20,
         fontSize: 11
     },
+    status: {
+        position: "relative",
+        top: 23,
+        left: 60,
+        fontSize: 11
+    },
     stars: {
         position: "relative",
         top: 23,
         fontSize: 11
     },
 });
+
+
+function AppStatus(props) {
+    const {isPublic, isBeta, isDisabled} = props;
+    if (!isPublic) {
+        return <Lock style={{color: palette.blue}}/>
+    }
+    if (isBeta) {
+        return <img src={Beta} height={16} alt="beta"/>
+    }
+    if (isDisabled) {
+        return <Cancel style={{color: palette.red}}/>
+    }
+    return null;
+}
 
 class AppsCard extends Component {
   state = { dialogOpen: false };
@@ -90,6 +115,9 @@ class AppsCard extends Component {
           type,
           link,
           description,
+          isPublic,
+          isBeta,
+          isDisabled,
       } = this.props;
 
       const open = this.state.expanded;
@@ -133,6 +161,11 @@ class AppsCard extends Component {
                               <span className={classes.rating}>
                               ({rating.total})
                           </span>
+                              <span className={classes.status}>
+                                  <AppStatus isPublic={isPublic}
+                                             isBeta={isBeta}
+                                             isDisabled={isDisabled}/>
+                              </span>
                           </div>
                       </CardContent>
                   </Card>
