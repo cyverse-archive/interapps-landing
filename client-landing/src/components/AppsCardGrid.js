@@ -40,6 +40,9 @@ class AppsCardGrid extends Component {
                               rating={app.rating}
                               type={app.type}
                               link={deHost + "/de?type=apps&system=de&app-id=" + app.uuid}
+                              isPublic={app.isPublic}
+                              isBeta={app.isBeta}
+                              isDisabled={app.isDisabled}
                           />
                       </Grid>
                   ))}

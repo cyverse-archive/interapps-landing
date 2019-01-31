@@ -103,7 +103,10 @@ export class App {
                     description,
                     integrator_name,
                     rating,
-                    app_type
+                    app_type,
+                    is_public,
+                    beta,
+                    disabled,
                 }) {
         this.uuid = id;
         this.name = name;
@@ -111,6 +114,9 @@ export class App {
         this.creator = integrator_name;
         this.rating = rating;
         this.type = app_type;
+        this.isPublic = is_public;
+        this.isBeta = beta;
+        this.isDisabled = disabled;
   }
 }
 
