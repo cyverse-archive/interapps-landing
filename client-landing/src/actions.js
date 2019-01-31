@@ -5,19 +5,41 @@ import constants from "./constants";
 
 function errorHandler(error, dispatch) {
     console.log('error from server: ', error.message);
-    if (error.response && error.response.status) {
-        if (error.response.status === 403) {
-            var parser = document.createElement('a');
-            parser.href = window.location.href;
-            parser.pathname = constants.LOGIN_URL;
-            window.location.assign(parser.href);
-        }
-        dispatch(setHttpCode(error.response.status));
+    // Normalize the error objects a bit before dumping them into the redux
+    // state.
+    if (!error.response || !error.response.status) {
+      error.status = 500;
     } else {
-        dispatch(setHttpCode(500));
+      error.status = error.response.status;
     }
-    dispatch(setPageToShow(ShowError));
-    dispatch(toggleLoading());
+
+    // Every error needs to have a message.
+    if (!error.message || error.message === "") {
+      error.message = "Unknown error";
+    }
+
+    // We should probably track the times that the errors are received for
+    // support purposes.
+    if (!error.dateCreated) {
+      error.dateCreated = Date.now();
+    }
+
+    // Send the users to the login page if we get a FORBIDDEN error.
+    if (error.status === 403) {
+        var parser = document.createElement('a');
+        parser.href = window.location.href;
+        parser.pathname = constants.LOGIN_URL;
+        window.location.assign(parser.href);
+    }
+
+    // We shouldn't need this in the near future, kept around to avoid
+    // breakages.
+    dispatch(setHttpCode(error.status));
+
+    // Add the error to the redux store.
+    dispatch(addError(error));
+
+    dispatch(setErrorDialogOpen(true));
 }
 
 export const StatusRunning = "Running";
@@ -137,7 +159,9 @@ const defaultState = {
     loading: false,
     deHost: "",
     drawerOpen: false,
-};
+    errorDialogOpen: false,
+    errors: [],
+}
 
 export const {
     toggleDrawerOpen,
@@ -148,6 +172,10 @@ export const {
     setHttpCode,
     toggleLoading,
     toggleMobileOpen,
+    setErrorDialogOpen,
+    addError,
+    rmError,
+    clearErrors,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
     },
@@ -159,6 +187,10 @@ export const {
     TOGGLE_LOADING: () => {
     },
     TOGGLE_MOBILE_OPEN: (mobileOpen) => mobileOpen,
+    SET_ERROR_DIALOG_OPEN: (errorDialogOpen) => errorDialogOpen,
+    ADD_ERROR: (error) => error,
+    RM_ERROR: (dateCreated) => dateCreated,
+    CLEAR_ERRORS: () => {},
 });
 
 export const fetchAnalyses = (status) => {
@@ -236,7 +268,18 @@ export const reducer = handleActions(
         },
         TOGGLE_LOADING: (state) => ({...state, loading: !state.loading}),
         TOGGLE_MOBILE_OPEN: (state ,{payload: mobileOpen}) => ({...state, mobileOpen: mobileOpen}),
+        SET_ERROR_DIALOG_OPEN: (state, {payload: dialogOpen}) => ({...state, errorDialogOpen: dialogOpen}),
+        ADD_ERROR: (state, {payload: error}) => {
+          let copy = [...state.errors];
+          copy.unshift(error);
+          return {...state, errors: copy};
+        },
+        RM_ERROR: (state, {payload: index}) => {
+          let newstate = [...state.errors];
+          newstate.splice(index, 1);
+          return {...state, errors: newstate};
+        },
+        CLEAR_ERRORS: (state) => ({...state, errors: []}),
   },
   defaultState
 );
-

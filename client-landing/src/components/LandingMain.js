@@ -10,6 +10,7 @@ import LandingResponsiveDrawer from './LandingResponsiveDrawer';
 import AnalysisCardGrid from './AnalysisCardGrid';
 import AppCardGrid from './AppsCardGrid';
 import ErrorCard from './ErrorCard';
+import ErrorDialog from './ErrorDialog';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { palette } from "./App";
@@ -74,6 +75,7 @@ class LandingMain extends Component {
                     <CircularProgress color="primary" className={classes.progress}/>
                     }
                     {mainContent}
+                    <ErrorDialog />
                 </LandingResponsiveDrawer>
                 <div style={{
                     position: 'fixed',
