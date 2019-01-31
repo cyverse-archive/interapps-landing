@@ -21,7 +21,7 @@ function errorHandler(error, dispatch) {
     // We should probably track the times that the errors are received for
     // support purposes.
     if (!error.dateCreated) {
-      error.dateCreated = new Date.now();
+      error.dateCreated = Date.now();
     }
 
     // Send the users to the login page if we get a FORBIDDEN error.
@@ -152,26 +152,8 @@ const defaultState = {
     deHost: "",
     drawerOpen: false,
     errorDialogOpen: false,
-    errors: {}, // See [Error] comment  for more info.
-};
-
-// [Error]
-// The layout for error tracking in the redux will be:
-//
-// {
-//   "<status code>" : {
-//     "dateFirstSeen": "<timestamp>",
-//     "dateLastSeen" : "<timestamp>",
-//     "instances" : [],
-//   }
-// }
-//
-// The goal with this layout is allow for many instances of the same error to be
-// tracked, but also efficiently summarized so the user isn't spammed with
-// dialogss or snackbars or whichever element we choose to display them.
-// Stuffing the errors into a top-level list would require us to iterate too
-// many times to provide a summary and would complicate the overall code, while
-// this layout should isolate most of the complexity in the reducers.
+    errors: [],
+}
 
 export const {
     toggleDrawerOpen,
@@ -184,7 +166,8 @@ export const {
     toggleMobileOpen,
     setErrorDialogOpen,
     addError,
-    clearErrorsByStatus,
+    rmError,
+    clearErrors,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
     },
@@ -198,7 +181,8 @@ export const {
     TOGGLE_MOBILE_OPEN: (mobileOpen) => mobileOpen,
     SET_ERROR_DIALOG_OPEN: (errorDialogOpen) => errorDialogOpen,
     ADD_ERROR: (error) => error,
-    CLEAR_ERRORS_BY_STATUS: (errorStatus) => errorStatus,
+    RM_ERROR: (dateCreated) => dateCreated,
+    CLEAR_ERRORS: () => {},
 });
 
 export const fetchAnalyses = (status) => {
@@ -278,29 +262,16 @@ export const reducer = handleActions(
         TOGGLE_MOBILE_OPEN: (state ,{payload: mobileOpen}) => ({...state, mobileOpen: mobileOpen}),
         SET_ERROR_DIALOG_OPEN: (state, {payload: dialogOpen}) => ({...state, errorDialogOpen: dialogOpen}),
         ADD_ERROR: (state, {payload: error}) => {
-          let newErrorObject = {...state.errors};
-          if (!state.errors[error.status]) {
-            newErrorObject[error.status] = {
-                dateFirstSeen: error.dateCreated,
-                dateLastSeen: error.dateCreated,
-                instances: [error],
-            }
-          } else {
-            newErrorObject[error.status] = {
-              ...state.errors[error.status],
-              dateLastSeen: error.dateCreated,
-              instances: [...state.errors[error.status].instances, error],
-            }
-          }
-          return {...state, errors: newErrorObject};
+          let copy = [...state.errors];
+          copy.unshift(error);
+          return {...state, errors: copy};
         },
-        CLEAR_ERRORS_BY_STATUS: (state, {payload: errorStatus}) => {
-          let newErrorObject = {...state.errors};
-          if (state.errors[errorStatus]) {
-            delete newErrorObject[errorStatus];
-          }
-          return {...state, errors: newErrorObject};
-        }
+        RM_ERROR: (state, {payload: index}) => {
+          let newstate = [...state.errors];
+          newstate.splice(index, 1);
+          return {...state, errors: newstate};
+        },
+        CLEAR_ERRORS: (state) => ({...state, errors: []}),
   },
   defaultState
 );
