@@ -207,34 +207,42 @@ apirouter.get("/profile", async (req,res)=>{
 });
 
 apirouter.get("/analyses", async (req, res) => {
-    debug("calling get analyses for " + req.session.username + " with query=" + req.query.status);
-    const username = req.session.username + process.env.UUID_DOMAIN;
-    const status = req.query.status;
-    viceAnalyses(username, status, (data) => {
-        if (data && data.length > 0) {
-            let analyses = data.map((a) => {
-               let urlParts = process.env.VICE_DOMAIN.split("//");
-                a.url = urlParts[0] + "//" + a.subdomain +"." + urlParts[1];
-                debug("Interactive url==>" + a.url);
-                return a;
-            });
-            res.send(JSON.stringify({"vice_analyses": analyses}));
-        } else {
-            res.send(JSON.stringify({"vice_analyses": []}));
-        }
+  debug("calling get analyses for " + req.session.username + " with query=" + req.query.status);
+  const username = req.session.username + process.env.UUID_DOMAIN;
+  const status = req.query.status;
+  await viceAnalyses(username, status)
+    .then(data => {
+      if (data && data.length > 0) {
+        let analyses = data.map((a) => {
+          let urlParts = process.env.VICE_DOMAIN.split("//");
+          a.url = urlParts[0] + "//" + a.subdomain +"." + urlParts[1];
+          debug("Interactive url==>" + a.url);
+          return a;
+        });
+        res.send(JSON.stringify({"vice_analyses": analyses}));
+      } else {
+        res.send(JSON.stringify({"vice_analyses": []}));
+      }
+    })
+    .catch(e => {
+      res.status(500).send(e);
     });
 });
 
 apirouter.get("/apps", async (req, res) => {
-    debug("calling get apps for " + req.session.username);
-    const username = req.session.username;
-    await getAppsForUser(username)
-      .then(appsResp => {
-          res.status(appsResp.status);
-          return appsResp;
-      })
-      .then(appsResp => appsResp.buffer())
-      .then(data => res.send(data));
+  debug("calling get apps for " + req.session.username);
+  const username = req.session.username;
+  await getAppsForUser(username)
+    .then(appsResp => {
+        res.status(appsResp.status);
+        return appsResp;
+    })
+    .then(appsResp => appsResp.buffer())
+    .then(data => res.send(data))
+    .catch(e => {
+      debug("sending error");
+      res.status(500).send(e);
+    });
 });
 
 app.use('/api', apirouter);

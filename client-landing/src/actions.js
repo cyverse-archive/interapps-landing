@@ -37,7 +37,9 @@ function errorHandler(error, dispatch) {
     dispatch(setHttpCode(error.status));
 
     // Add the error to the redux store.
-    dispatch(addError(error))
+    dispatch(addError(error));
+
+    dispatch(setErrorDialogOpen(true));
 }
 
 export const StatusRunning = "Running";

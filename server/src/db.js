@@ -24,6 +24,6 @@ SELECT *
  STATUS = $2
 `;
 
-export function viceAnalyses(username,status, dataCallback) {
-  getDB().any(analysesQuery, [username, status]).then(dataCallback);
+export function viceAnalyses(username,status) {
+  return getDB().any(analysesQuery, [username, status]);
 }
