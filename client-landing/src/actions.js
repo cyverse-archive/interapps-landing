@@ -161,6 +161,19 @@ const defaultState = {
     drawerOpen: false,
     errorDialogOpen: false,
     errors: [],
+    dataResources: {
+      requesting: false,
+      currentDirectory: "",
+      collection: {}, // id is the key, value is an object containing the fields returned.
+      sorted: [], //  contains the id's of the resources in sorted order.
+      sortField: "Name",
+      sortDirection: "Asc",
+      selected: {}, // use it like a set. key is the id
+      pageSize: 10,
+      currentPage: 1, //one based
+      numberOfPages: 1,
+      total: 0
+    }
 }
 
 export const {
@@ -176,6 +189,12 @@ export const {
     addError,
     rmError,
     clearErrors,
+    setCurrentDirectory,
+    addDataResource,
+    rmDataResource,
+    setPageSize,
+    setCurrentPage,
+    toggleRequestingDataResources,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
     },
@@ -191,6 +210,12 @@ export const {
     ADD_ERROR: (error) => error,
     RM_ERROR: (dateCreated) => dateCreated,
     CLEAR_ERRORS: () => {},
+    SET_CURRENT_DIRECTORY: (dir) => dir,
+    ADD_DATA_RESOURCE: (resource) => resource,
+    RM_DATA_RESOURCE: (id) => id,
+    SET_PAGE_SIZE: (size) => size,
+    SET_CURRENT_PAGE: (page) => page,
+    TOGGLE_REQUESTING_DATA_RESOURCES: () => {},
 });
 
 export const fetchAnalyses = (status) => {
@@ -280,6 +305,71 @@ export const reducer = handleActions(
           return {...state, errors: newstate};
         },
         CLEAR_ERRORS: (state) => ({...state, errors: []}),
+        SET_CURRENT_DIRECTORY: (state, {payload: currentDirectory}) => (
+          {
+            ...state,
+            dataResources: {
+              ...state.dataResources,
+              currentDirectory: currentDirectory,
+            }
+          }
+        ),
+        ADD_DATA_RESOURCE: (state, {payload: resource}) => {
+          const total = state.dataResources.total + 1;
+          const numberOfPages = Math.ceil(total / state.dataResources.pageSize);
+          let copy = [...state.dataResources.sorted];
+          copy.unshift(resource);
+
+          return {
+            ...state,
+            dataResources: {
+              ...state.dataResources,
+              total: total,
+              numberOfPages: numberOfPages,
+              sorted: copy,
+              collection: {
+                ...state.dataResources.collection,
+                [resource.id]: resource
+              }
+            }
+          };
+        },
+        RM_DATA_RESOURCE: (state, {payload: id}) => {
+          const total = state.dataResources.total + 1;
+          const numberOfPages = Math.ceil(total / state.dataResources.pageSize);
+          let newcollection = [...state.errors];
+          delete newcollection[id];
+          return {
+            ...state,
+            dataResources: {
+              ...state.dataResources,
+              total: total,
+              numberOfPages: numberOfPages,
+              collection: newcollection,
+            }
+          };
+        },
+        SET_PAGE_SIZE: (state, {payload: size}) => ({
+          ...state,
+          dataResources: {
+            ...state.dataResources,
+            pageSize: size
+          }
+        }),
+        SET_CURRENT_PAGE: (state, {payload: currentPage}) => ({
+          ...state,
+          dataResources: {
+            ...state.dataResources,
+            currentPage: currentPage
+          }
+        }),
+        TOGGLE_REQUESTING_DATA_RESOURCES: (state) => ({
+          ...state,
+          dataResources: {
+            ...state.dataResources,
+            requesting: !state.dataResources.requesting
+          }
+        })
   },
   defaultState
 );
