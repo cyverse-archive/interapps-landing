@@ -169,7 +169,7 @@ const defaultState = {
       sortField: "name",
       sortDirection: "asc",
       selected: {}, // use it like a set. key is the id
-      pageSize: 10,
+      pageSize: 500,
       currentPage: 1, //one based
       numberOfPages: 1,
       total: 0

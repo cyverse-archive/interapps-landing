@@ -63,9 +63,21 @@ class DataBrowser extends Component {
     searchTimer: null,
   };
 
-
   render() {
-    const { sorted } = this.props;
+    const {
+      sorted,
+      pageSize,
+      currentPage,
+      total,
+      currentDirectory
+    } = this.props;
+
+    let options = {
+      ...this.state.options,
+      rowsPerPage: pageSize,
+      page:        currentPage,
+      count:       total,
+    }
 
     const data = sorted.map((resource) => {
       const modified = new Date(resource.dateModified);
@@ -81,7 +93,7 @@ class DataBrowser extends Component {
 
     return (
       <MUIDataTable
-        title={"Files and Folders"}
+        title={currentDirectory}
         columns={columns}
         data={data}
         options={this.state.options}
@@ -91,20 +103,22 @@ class DataBrowser extends Component {
 }
 
 DataBrowser.propTypes = {
-  classes:        PropTypes.object.isRequired,
-  collection:     PropTypes.object.isRequired,
-  sorted:         PropTypes.array.isRequired,
-  currentPage:    PropTypes.number.isRequired,
-  numberOfPages:  PropTypes.number.isRequired,
-  pageSize:       PropTypes.number.isRequired,
+  classes:          PropTypes.object.isRequired,
+  sorted:           PropTypes.array.isRequired,
+  currentDirectory: PropTypes.string.isRequired,
+  currentPage:      PropTypes.number.isRequired,
+  numberOfPages:    PropTypes.number.isRequired,
+  pageSize:         PropTypes.number.isRequired,
+  total:            PropTypes.number.isRequired,
 };
 
 const mapStateToProps = state => ({
-  collection:    state.dataResources.collection,
-  sorted:        state.dataResources.sorted,
-  currentPage:   state.dataResources.currentPage,
-  numberOfPages: state.dataResources.numberOfPages,
-  pageSize:      state.dataResources.pageSize,
+  currentPage:      state.dataResources.currentPage,
+  currentDirectory: state.dataResources.currentDirectory,
+  sorted:           state.dataResources.sorted,
+  numberOfPages:    state.dataResources.numberOfPages,
+  pageSize:         state.dataResources.pageSize,
+  total:            state.dataResources.total,
 });
 
 const mapDispatchToProps = dispatch => ({});
