@@ -47,17 +47,20 @@ const columns = [
 
 const options = {
   serverSide: true,
+  filter:     false, // filter requires knowing all values for each column up front.
+  search:     true,
+  print:      false,
+  download:   false, 
   onTableChange: (action, tableState) => {
     console.log(action);
-    //console.log(tableState);
-  }
+    console.log(tableState);
+  },
 };
 
 class DataBrowser extends Component {
   render() {
     const { sorted } = this.props;
 
-    console.log(sorted)
     const data = sorted.map((resource) => {
       const modified = new Date(resource.dateModified);
       const created = new Date(resource.dateCreated);

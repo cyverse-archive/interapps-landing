@@ -166,8 +166,8 @@ const defaultState = {
       currentDirectory: "",
       collection: {}, // id is the key, value is an object containing the fields returned.
       sorted: [], //  contains the id's of the resources in sorted order.
-      sortField: "Name",
-      sortDirection: "Asc",
+      sortField: "name",
+      sortDirection: "asc",
       selected: {}, // use it like a set. key is the id
       pageSize: 10,
       currentPage: 1, //one based
