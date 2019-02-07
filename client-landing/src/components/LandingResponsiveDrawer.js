@@ -105,7 +105,7 @@ class LandingResponsiveDrawer extends Component {
   }
 }
 
-const mapStateToProps = state => ({ mobileOpen: state.drawerOpen });
+const mapStateToProps = state => ({ drawerOpen: state.drawerOpen });
 
 const mapDispatchToProps = dispatch => ({
   handleDrawerToggle:   () => dispatch(toggleDrawerOpen()),
