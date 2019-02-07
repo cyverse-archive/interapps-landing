@@ -45,19 +45,23 @@ const columns = [
   }
 ];
 
-const options = {
-  serverSide: true,
-  filter:     false, // filter requires knowing all values for each column up front.
-  search:     true,
-  print:      false,
-  download:   false, 
-  onTableChange: (action, tableState) => {
-    console.log(action);
-    console.log(tableState);
-  },
-};
+
 
 class DataBrowser extends Component {
+  state = {
+    options: {
+      serverSide: true,
+      filter:     false, // filter requires knowing all values for each column up front.
+      search:     true,
+      print:      false,
+      download:   false,
+      onTableChange: (action, tableState) => {
+        console.log(action);
+        console.log(tableState);
+      },
+    },
+    searchTimer: null,
+  }
   render() {
     const { sorted } = this.props;
 
@@ -78,7 +82,7 @@ class DataBrowser extends Component {
         title={"Files and Folders"}
         columns={columns}
         data={data}
-        options={options}
+        options={this.state.options}
       />
     );
   }
