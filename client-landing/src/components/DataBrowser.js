@@ -61,7 +61,9 @@ class DataBrowser extends Component {
       },
     },
     searchTimer: null,
-  }
+  };
+
+
   render() {
     const { sorted } = this.props;
 
