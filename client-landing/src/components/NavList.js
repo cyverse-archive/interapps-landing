@@ -5,11 +5,13 @@ import { withStyles } from '@material-ui/core/styles';
 import {
     fetchAnalyses,
     fetchApps,
+    fetchDataResources,
     setPageToShow,
     ShowApps,
     ShowCompleted,
     ShowFailed,
     ShowRunning,
+    ShowData,
     StatusCompleted,
     StatusFailed,
     StatusRunning,
@@ -21,6 +23,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
 import Computer from '@material-ui/icons/Computer';
+import Folder from '@material-ui/icons/Folder';
 import Assessment from '@material-ui/icons/Assessment';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
@@ -70,7 +73,8 @@ class AnalysesList extends Component {
             handleClickRunning,
             handleClickCompleted,
             handleClickFailed,
-            handleClickApps
+            handleClickApps,
+            handleClickData
         } = this.props;
 
         return (
@@ -123,6 +127,13 @@ class AnalysesList extends Component {
                         </ListItemIcon>
                         <ListItemText inset primary="Apps"/>
                     </ListItem>
+
+                    <ListItem button selected={pageToShow === ShowData} onClick={() => handleClickData(this.props.username)}>
+                        <ListItemIcon>
+                            <Folder/>
+                        </ListItemIcon>
+                        <ListItemText inset primary="Folder"/>
+                    </ListItem>
                 </List>
 
             </div>
@@ -159,6 +170,10 @@ const mapDispatchToProps = dispatch => ({
         dispatch(setPageToShow(ShowRunning));
         dispatch(fetchAnalyses(StatusRunning))
     },
+    handleClickData: (user) => {
+        dispatch(setPageToShow(ShowData));
+        dispatch(fetchDataResources(`/iplant/home/${user}`));
+    }
 });
 
 const MappedAnalysesList = connect(

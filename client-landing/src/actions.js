@@ -148,6 +148,7 @@ export const ShowCompleted = 1;
 export const ShowFailed = 2;
 export const ShowApps = 3;
 export const ShowError = 4;
+export const ShowData = 5;
 
 const defaultState = {
     mobileOpen: false,

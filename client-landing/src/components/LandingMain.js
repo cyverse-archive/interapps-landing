@@ -1,7 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { fetchProfile, ShowApps, ShowCompleted, ShowError, ShowFailed, ShowRunning } from '../actions';
+import {
+  fetchProfile,
+  ShowApps,
+  ShowCompleted,
+  ShowError,
+  ShowFailed,
+  ShowRunning,
+  ShowData
+} from '../actions';
 
 import { withStyles } from '@material-ui/core/styles';
 
@@ -11,6 +19,7 @@ import AnalysisCardGrid from './AnalysisCardGrid';
 import AppCardGrid from './AppsCardGrid';
 import ErrorCard from './ErrorCard';
 import ErrorDialog from './ErrorDialog';
+import DataBrowser from './DataBrowser';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { palette } from "./App";
@@ -63,6 +72,10 @@ class LandingMain extends Component {
                     <ErrorCard httpCode={httpCode}/>
                 );
                 break;
+            case ShowData:
+                mainContent = (
+                    <DataBrowser />
+                )
             default:
                 console.log('unknown value for pageToShow');
         }
