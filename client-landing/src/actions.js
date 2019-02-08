@@ -1,5 +1,4 @@
 import { createActions, handleActions } from 'redux-actions';
-
 import axios from 'axios';
 import constants from "./constants";
 import url from 'url';
@@ -167,9 +166,9 @@ const defaultState = {
       requesting: false,
       currentDirectory: "",
       collection: {}, // id is the key, value is an object containing the fields returned.
-      sorted: [], //  contains the id's of the resources in sorted order.
-      sortField: "name",
-      sortDirection: "asc",
+      resources: [], //  contains the id's of the resources in sorted order.
+      sortField: "",
+      sortDirection: "",
       selected: {}, // use it like a set. key is the id
       pageSize: 500,
       currentPage: 1, //one based
@@ -196,6 +195,8 @@ export const {
     rmDataResource,
     setPageSize,
     setCurrentPage,
+    setSortField,
+    setSortDirection,
     toggleRequestingDataResources,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
@@ -214,9 +215,10 @@ export const {
     CLEAR_ERRORS: () => {},
     SET_CURRENT_DIRECTORY: (dir) => dir,
     ADD_DATA_RESOURCE: (resource) => resource,
-    RM_DATA_RESOURCE: (id) => id,
     SET_PAGE_SIZE: (size) => size,
     SET_CURRENT_PAGE: (page) => page,
+    SET_SORT_FIELD: (field) => field,
+    SET_SORT_DIRECTION: (direction) => direction,
     TOGGLE_REQUESTING_DATA_RESOURCES: () => {},
 });
 
@@ -266,6 +268,7 @@ export const fetchDataResources = (path, offset=0, limit=500, sortField="", sort
 
     return axios.get(`/api/data?${p.toString()}`, {withCredentials: true})
       .then(resp => {
+          console.log(resp.data);
           dispatch(setCurrentDirectory(resp.data.path));
           resp.data.resources.forEach(r => dispatch(addDataResource(r)));
           dispatch(toggleRequestingDataResources());
@@ -362,7 +365,7 @@ export const reducer = handleActions(
         ADD_DATA_RESOURCE: (state, {payload: resource}) => {
           const total = state.dataResources.total + 1;
           const numberOfPages = Math.ceil(total / state.dataResources.pageSize);
-          let copy = [...state.dataResources.sorted];
+          let copy = [...state.dataResources.resources];
           copy.unshift(resource);
 
           return {
@@ -371,26 +374,7 @@ export const reducer = handleActions(
               ...state.dataResources,
               total: total,
               numberOfPages: numberOfPages,
-              sorted: copy,
-              collection: {
-                ...state.dataResources.collection,
-                [resource.id]: resource
-              }
-            }
-          };
-        },
-        RM_DATA_RESOURCE: (state, {payload: id}) => {
-          const total = state.dataResources.total + 1;
-          const numberOfPages = Math.ceil(total / state.dataResources.pageSize);
-          let newcollection = [...state.errors];
-          delete newcollection[id];
-          return {
-            ...state,
-            dataResources: {
-              ...state.dataResources,
-              total: total,
-              numberOfPages: numberOfPages,
-              collection: newcollection,
+              resources: copy,
             }
           };
         },
@@ -406,6 +390,20 @@ export const reducer = handleActions(
           dataResources: {
             ...state.dataResources,
             currentPage: currentPage
+          }
+        }),
+        SET_SORT_FIELD: (state, {payload: sortField}) => ({
+          ...state,
+          dataResources: {
+            ...state.dataResources,
+            sortField: sortField
+          }
+        }),
+        SET_SORT_DIRECTION: (state, {payload: sortDirection}) => ({
+          ...state,
+          dataResources: {
+            ...state.dataResources,
+            sortDir: sortDirection
           }
         }),
         TOGGLE_REQUESTING_DATA_RESOURCES: (state) => ({

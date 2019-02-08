@@ -132,7 +132,7 @@ class AnalysesList extends Component {
                         <ListItemIcon>
                             <Folder/>
                         </ListItemIcon>
-                        <ListItemText inset primary="Folder"/>
+                        <ListItemText inset primary="Data"/>
                     </ListItem>
                 </List>
 
@@ -172,7 +172,6 @@ const mapDispatchToProps = dispatch => ({
     },
     handleClickData: (user) => {
         dispatch(setPageToShow(ShowData));
-        dispatch(fetchDataResources(`/iplant/home/${user}`));
     }
 });
 

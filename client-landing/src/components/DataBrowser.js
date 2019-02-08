@@ -2,10 +2,15 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
+import { fetchDataResources } from '../actions';
 
 import MUIDataTable from 'mui-datatables';
 
-const styles = theme => ({});
+const styles = theme => ({
+  datatable: {
+    paddingBottom: '35px',
+  }
+});
 
 const columns = [
   {
@@ -63,9 +68,24 @@ class DataBrowser extends Component {
     searchTimer: null,
   };
 
+  componentDidMount() {
+    const offset = this.props.pageSize * (this.props.currentPage - 1);
+    const limit = this.props.pageSize;
+    let dir = this.props.currentDirectory;
+    const sortField = this.props.sortField;
+    const sortDirection = this.props.sortDirection;
+    const username = this.props.username;
+
+    if (dir === "") {
+      dir = `/iplant/home/${username}`;
+    }
+    this.props.fetch(dir, offset, limit, sortField, sortDirection);
+  }
+
   render() {
     const {
-      sorted,
+      classes,
+      resources,
       pageSize,
       currentPage,
       total,
@@ -79,7 +99,7 @@ class DataBrowser extends Component {
       count:       total,
     }
 
-    const data = sorted.map((resource) => {
+    const data = resources.map((resource) => {
       const modified = new Date(resource.dateModified);
       const created = new Date(resource.dateCreated);
       return [
@@ -92,36 +112,48 @@ class DataBrowser extends Component {
     });
 
     return (
-      <MUIDataTable
-        title={currentDirectory}
-        columns={columns}
-        data={data}
-        options={this.state.options}
-      />
+      <div className={classes.datatable}>
+        <MUIDataTable
+          title={currentDirectory}
+          columns={columns}
+          data={data}
+          options={this.state.options}
+        />
+      </div>
     );
   }
 }
 
 DataBrowser.propTypes = {
   classes:          PropTypes.object.isRequired,
-  sorted:           PropTypes.array.isRequired,
+  resources:        PropTypes.array.isRequired,
   currentDirectory: PropTypes.string.isRequired,
   currentPage:      PropTypes.number.isRequired,
   numberOfPages:    PropTypes.number.isRequired,
   pageSize:         PropTypes.number.isRequired,
   total:            PropTypes.number.isRequired,
+  sortField:        PropTypes.string.isRequired,
+  sortDirection:    PropTypes.string.isRequired,
+  username:         PropTypes.string.isRequired,
 };
 
 const mapStateToProps = state => ({
   currentPage:      state.dataResources.currentPage,
   currentDirectory: state.dataResources.currentDirectory,
-  sorted:           state.dataResources.sorted,
+  resources:        state.dataResources.resources,
   numberOfPages:    state.dataResources.numberOfPages,
   pageSize:         state.dataResources.pageSize,
   total:            state.dataResources.total,
+  sortField:        state.dataResources.sortField,
+  sortDirection:    state.dataResources.sortDirection,
+  username:         state.username,
 });
 
-const mapDispatchToProps = dispatch => ({});
+const mapDispatchToProps = dispatch => ({
+  fetch: (path, offset=0, limit=500, sortField="", sortDir="", zone="iplant") => {
+    dispatch(fetchDataResources(path, offset, limit, sortField, sortDir, zone));
+  },
+});
 
 const MappedDataBrowser = connect(
   mapStateToProps,
