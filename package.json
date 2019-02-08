@@ -8,7 +8,7 @@
     "server": "node start-server.js",
     "port-forward": "concurrently \"node port-forward-redis.js\" \"node port-forward-apps.js\"",
     "dev": "run-s build-all dev-server",
-    "dev-server": "concurrently \"npm run port-forward\" \"node start-server.js\"",
+    "dev-server": "concurrently \"npm run port-forward\" \"node start-dev-server.js\"",
     "build-server": "node build-server.js",
     "build-landing": "node build-landing-ui.js",
     "build-all": "run-s clean build-server build-landing",
