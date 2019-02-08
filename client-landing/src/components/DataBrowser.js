@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
-import { fetchDataResources } from '../actions';
+import {
+  fetchDataResources,
+  setPageSize,
+  setCurrentPage
+} from '../actions';
 
 import MUIDataTable from 'mui-datatables';
 
@@ -51,7 +55,6 @@ const columns = [
 ];
 
 
-
 class DataBrowser extends Component {
   state = {
     options: {
@@ -60,26 +63,26 @@ class DataBrowser extends Component {
       search:     true,
       print:      false,
       download:   false,
-      onTableChange: (action, tableState) => {
-        console.log(action);
-        console.log(tableState);
-      },
     },
     searchTimer: null,
   };
 
-  componentDidMount() {
-    const offset = this.props.pageSize * (this.props.currentPage - 1);
+  getDataResources(pageSize, currentPage) {
+    const offset = pageSize * currentPage;
     const limit = this.props.pageSize;
-    let dir = this.props.currentDirectory;
     const sortField = this.props.sortField;
     const sortDirection = this.props.sortDirection;
     const username = this.props.username;
 
+    let dir = this.props.currentDirectory;
     if (dir === "") {
       dir = `/iplant/home/${username}`;
     }
     this.props.fetch(dir, offset, limit, sortField, sortDirection);
+  }
+
+  componentDidMount() {
+    this.getDataResources(this.props.pageSize, this.props.currentPage);
   }
 
   render() {
@@ -89,14 +92,24 @@ class DataBrowser extends Component {
       pageSize,
       currentPage,
       total,
-      currentDirectory
+      currentDirectory,
+      setPageSize,
+      setPage
     } = this.props;
 
     let options = {
       ...this.state.options,
-      rowsPerPage: pageSize,
-      page:        currentPage,
-      count:       total,
+      rowsPerPage:         pageSize,
+      page:                currentPage,
+      count:               total,
+      onChangePage:        (newPageNumber) => {
+        setPage(newPageNumber);
+        this.getDataResources(pageSize, newPageNumber);
+      },
+      onChangeRowsPerPage: (newPageSize) => {
+        setPageSize(newPageSize);
+        this.getDataResources(newPageSize, currentPage);
+      },
     }
 
     const data = resources.map((resource) => {
@@ -117,7 +130,7 @@ class DataBrowser extends Component {
           title={currentDirectory}
           columns={columns}
           data={data}
-          options={this.state.options}
+          options={options}
         />
       </div>
     );
@@ -153,6 +166,8 @@ const mapDispatchToProps = dispatch => ({
   fetch: (path, offset=0, limit=500, sortField="", sortDir="", zone="iplant") => {
     dispatch(fetchDataResources(path, offset, limit, sortField, sortDir, zone));
   },
+  setPageSize: (pageSize) => dispatch(setPageSize(pageSize)),
+  setPage: (page,) => dispatch(setCurrentPage(page)),
 });
 
 const MappedDataBrowser = connect(
