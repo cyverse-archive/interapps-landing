@@ -2,6 +2,7 @@ import express from 'express';
 import { viceAnalyses, getDB } from './db';
 import { endpointConfig, ingressExists } from './ingress';
 import { getAppsForUser } from './apps';
+import { getDataResources } from './data';
 import compression from 'compression';
 import helmet from 'helmet';
 import noCache from 'nocache';
@@ -163,6 +164,33 @@ apirouter.get("/analyses", async (req, res) => {
     })
     .catch(e => {
       res.status(500).send(e);
+    });
+});
+
+apirouter.get("/data", async (req, res) => {
+  debug(`calling get data for ${req.session.username} with query=${req.query}`);
+  const username = req.session.username;
+  const resourcePath = req.query.path;
+
+  await getDataResources(username, resourcePath, req.query)
+    .then(response => response.json())
+    .then(data => {
+      debug(data);
+      if (data) {
+        let retval = {
+          ...data,
+          resources: []
+        };
+        retval.resources = data.files.concat(data.folders);
+        delete retval.files;
+        delete retval.folders;
+        res.send(JSON.stringify(retval));
+      } else {
+        res.send(JSON.stringify({"data_resources":[]}));
+      }
+    })
+    .catch(e => {
+      res.status(500).send(`error getting data: ${e.message}`);
     });
 });
 
