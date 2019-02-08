@@ -2,6 +2,7 @@ import { createActions, handleActions } from 'redux-actions';
 
 import axios from 'axios';
 import constants from "./constants";
+import url from 'url';
 
 function errorHandler(error, dispatch) {
     console.log('error from server: ', error.message);
@@ -233,6 +234,49 @@ export const fetchAnalyses = (status) => {
     });
   };
 };
+
+export const fetchDataResources = (path, offset=0, limit=500, sortField="", sortDir="", zone="iplant") => {
+  return dispatch => {
+    dispatch(toggleRequestingDataResources());
+    dispatch(toggleLoading());
+
+    let p = new URLSearchParams();
+    p.set('offset', offset);
+    p.set('limit', limit);
+
+    if (sortField !== "") {
+      p.set('sortField', sortField);
+    }
+
+    if (sortDir !== "") {
+      p.set('sortDir', sortDir);
+    }
+
+    const pathPrefix = `/${zone}`;
+    if (path.startsWith(pathPrefix)) {
+      path = path.slice(pathPrefix.length);
+    }
+
+    if (path.startsWith('/')) {
+      path = path.slice(1);
+    }
+
+    p.set('path', path);
+
+    return axios.get(`/api/data?${p.toString()}`, {withCredentials: true})
+      .then(resp => {
+          dispatch(setCurrentDirectory(resp.data.path));
+          resp.data.resources.forEach(r => dispatch(addDataResource(r)));
+          dispatch(toggleRequestingDataResources());
+          dispatch(toggleLoading());
+      })
+      .catch(e => {
+        errorHandler(e, dispatch);
+        dispatch(toggleRequestingDataResources());
+        dispatch(toggleLoading());
+      });
+  }
+}
 
 export const fetchApps = () => {
     return dispatch => {
