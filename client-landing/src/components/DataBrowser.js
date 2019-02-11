@@ -5,7 +5,9 @@ import { withStyles } from '@material-ui/core/styles';
 import {
   fetchDataResources,
   setPageSize,
-  setCurrentPage
+  setCurrentPage,
+  setSortField,
+  setSortDirection
 } from '../actions';
 
 import MUIDataTable from 'mui-datatables';
@@ -76,7 +78,9 @@ class DataBrowser extends Component {
       total,
       currentDirectory,
       setPageSize,
-      setPage
+      setPage,
+      resetSortField,
+      resetSortDirection
     } = this.props;
 
     let options = {
@@ -84,11 +88,11 @@ class DataBrowser extends Component {
       rowsPerPage:         pageSize,
       page:                currentPage,
       count:               total,
-      onChangePage:        (newPageNumber) => {
-        setPage(newPageNumber);
-      },
-      onChangeRowsPerPage: (newPageSize) => {
-        setPageSize(newPageSize);
+      onChangePage:        (newPageNumber) => setPage(newPageNumber),
+      onChangeRowsPerPage: (newPageSize) => setPageSize(newPageSize),
+      onColumnSortChange:  (col, dir) => {
+        resetSortField(col);
+        resetSortDirection(dir);
       },
     }
 
@@ -133,8 +137,45 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  setPageSize: (pageSize) => dispatch(setPageSize(pageSize)),
-  setPage:     (page) => dispatch(setCurrentPage(page)),
+  setPageSize:  (pageSize) => dispatch(setPageSize(pageSize)),
+  setPage:      (page) => dispatch(setCurrentPage(page)),
+  resetSortField: (sortField) => {
+    let realField = '';
+    switch(sortField) {
+      case 'Name':
+        realField = 'name';
+        break;
+      case 'Path':
+        realField = 'path';
+        break;
+      case 'Last Modified':
+        realField = 'datemodified';
+        break;
+      case 'Date Submitted':
+        realField = 'datecreated';
+        break;
+      case 'Size':
+        realField = 'size';
+        break;
+      default:
+        realField = 'name';
+    }
+    dispatch(setSortField(realField));
+  },
+  resetSortDirection: (sortDirection) => {
+    let dir = '';
+    switch(sortDirection) {
+      case 'ascending':
+        dir = 'ASC';
+        break;
+      case 'descending':
+        dir = 'DESC';
+        break;
+      default:
+        dir = 'ASC';
+    }
+    dispatch(setSortDirection(dir));
+  },
 });
 
 const MappedDataBrowser = connect(

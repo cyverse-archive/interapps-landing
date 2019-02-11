@@ -254,14 +254,8 @@ export const fetchDataResources = (path, offset=0, limit=500, sortField="", sort
     let p = new URLSearchParams();
     p.set('offset', offset);
     p.set('limit', limit);
-
-    if (sortField !== "") {
-      p.set('sortField', sortField);
-    }
-
-    if (sortDir !== "") {
-      p.set('sortDir', sortDir);
-    }
+    p.set('sortField', sortField);
+    p.set('sortDir', sortDir);
 
     const pathPrefix = `/${zone}`;
     if (path.startsWith(pathPrefix)) {
@@ -424,7 +418,7 @@ export const reducer = handleActions(
           ...state,
           dataResources: {
             ...state.dataResources,
-            sortDir: sortDirection
+            sortDirection: sortDirection
           }
         }),
         SET_TOTAL: (state, {payload: total}) => ({
