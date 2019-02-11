@@ -92,7 +92,7 @@ class DataBrowser extends Component {
       },
     }
 
-    const data = resources.reverse().map((resource) => {
+    const data = resources.map((resource) => {
       const modified = new Date(resource.dateModified);
       const created = new Date(resource.dateCreated);
       return [

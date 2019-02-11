@@ -167,11 +167,11 @@ const defaultState = {
       currentDirectory: "",
       collection: {}, // id is the key, value is an object containing the fields returned.
       resources: [], //  contains the id's of the resources in sorted order.
-      sortField: "",
-      sortDirection: "",
+      sortField: "name",
+      sortDirection: "ASC",
       selected: {}, // use it like a set. key is the id
       pageSize: 10,
-      currentPage: 1, //one based
+      currentPage: 0,
       zone: "iplant",
       total: 0
     }
