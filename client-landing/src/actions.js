@@ -192,6 +192,7 @@ export const {
     clearErrors,
     setCurrentDirectory,
     addDataResource,
+    setDataResources,
     clearResources,
     rmDataResource,
     setPageSize,
@@ -218,6 +219,7 @@ export const {
     CLEAR_ERRORS: () => {},
     SET_CURRENT_DIRECTORY: (dir) => dir,
     ADD_DATA_RESOURCE: (resource) => resource,
+    SET_DATA_RESOURCES: (resources) => resources,
     CLEAR_RESOURCES: () => {},
     SET_PAGE_SIZE: (size) => size,
     SET_CURRENT_PAGE: (page) => page,
@@ -276,8 +278,8 @@ export const fetchDataResources = (path, offset=0, limit=500, sortField="", sort
       .then(resp => {
           dispatch(setCurrentDirectory(resp.data.path));
           dispatch(setTotal(resp.data.total));
-          dispatch(clearResources());
-          resp.data.resources.forEach(r => dispatch(addDataResource(r)));
+          //dispatch(clearResources());
+          dispatch(setDataResources(resp.data.resources));
           dispatch(toggleRequestingDataResources());
           dispatch(toggleLoading());
       })
@@ -378,6 +380,15 @@ export const reducer = handleActions(
             dataResources: {
               ...state.dataResources,
               resources: copy,
+            }
+          };
+        },
+        SET_DATA_RESOURCES: (state, {payload: resources}) => {
+          return {
+            ...state,
+            dataResources: {
+              ...state.dataResources,
+              resources: resources,
             }
           };
         },

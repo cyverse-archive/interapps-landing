@@ -134,7 +134,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   setPageSize: (pageSize) => dispatch(setPageSize(pageSize)),
-  setPage: (page,) => dispatch(setCurrentPage(page)),
+  setPage:     (page) => dispatch(setCurrentPage(page)),
 });
 
 const MappedDataBrowser = connect(
