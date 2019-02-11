@@ -172,6 +172,7 @@ const defaultState = {
       selected: {}, // use it like a set. key is the id
       pageSize: 10,
       currentPage: 1, //one based
+      zone: "iplant",
       total: 0
     }
 }
@@ -198,6 +199,7 @@ export const {
     setSortField,
     setSortDirection,
     setTotal,
+    setZone,
     toggleRequestingDataResources,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
@@ -222,6 +224,7 @@ export const {
     SET_SORT_FIELD: (field) => field,
     SET_SORT_DIRECTION: (direction) => direction,
     SET_TOTAL: (total) => total,
+    SET_ZONE: (zone) => zone,
     TOGGLE_REQUESTING_DATA_RESOURCES: () => {},
 });
 
@@ -271,7 +274,6 @@ export const fetchDataResources = (path, offset=0, limit=500, sortField="", sort
 
     return axios.get(`/api/data?${p.toString()}`, {withCredentials: true})
       .then(resp => {
-          console.log(resp.data);
           dispatch(setCurrentDirectory(resp.data.path));
           dispatch(setTotal(resp.data.total));
           dispatch(clearResources());
@@ -419,6 +421,13 @@ export const reducer = handleActions(
           dataResources: {
             ...state.dataResources,
             total: total
+          }
+        }),
+        SET_ZONE: (state, {payload: zone}) => ({
+          ...state,
+          dataResources: {
+            ...state.dataResources,
+            zone: zone
           }
         }),
         TOGGLE_REQUESTING_DATA_RESOURCES: (state) => ({

@@ -9,6 +9,7 @@ import {
 } from '../actions';
 
 import MUIDataTable from 'mui-datatables';
+import DataPumper from './DataPumper';
 
 const styles = theme => ({
   datatable: {
@@ -54,7 +55,6 @@ const columns = [
   }
 ];
 
-
 class DataBrowser extends Component {
   state = {
     options: {
@@ -66,24 +66,6 @@ class DataBrowser extends Component {
     },
     searchTimer: null,
   };
-
-  getDataResources(pageSize, currentPage) {
-    const offset = pageSize * currentPage;
-    const limit = this.props.pageSize;
-    const sortField = this.props.sortField;
-    const sortDirection = this.props.sortDirection;
-    const username = this.props.username;
-
-    let dir = this.props.currentDirectory;
-    if (dir === "") {
-      dir = `/iplant/home/${username}`;
-    }
-    this.props.fetch(dir, offset, limit, sortField, sortDirection);
-  }
-
-  componentDidMount() {
-    this.getDataResources(this.props.pageSize, this.props.currentPage);
-  }
 
   render() {
     const {
@@ -104,15 +86,13 @@ class DataBrowser extends Component {
       count:               total,
       onChangePage:        (newPageNumber) => {
         setPage(newPageNumber);
-        this.getDataResources(pageSize, newPageNumber);
       },
       onChangeRowsPerPage: (newPageSize) => {
         setPageSize(newPageSize);
-        this.getDataResources(newPageSize, currentPage);
       },
     }
 
-    const data = resources.map((resource) => {
+    const data = resources.reverse().map((resource) => {
       const modified = new Date(resource.dateModified);
       const created = new Date(resource.dateCreated);
       return [
@@ -126,6 +106,7 @@ class DataBrowser extends Component {
 
     return (
       <div className={classes.datatable}>
+        <DataPumper />
         <MUIDataTable
           title={currentDirectory}
           columns={columns}
@@ -140,32 +121,18 @@ class DataBrowser extends Component {
 DataBrowser.propTypes = {
   classes:          PropTypes.object.isRequired,
   resources:        PropTypes.array.isRequired,
-  currentDirectory: PropTypes.string.isRequired,
-  currentPage:      PropTypes.number.isRequired,
-  numberOfPages:    PropTypes.number.isRequired,
-  pageSize:         PropTypes.number.isRequired,
   total:            PropTypes.number.isRequired,
-  sortField:        PropTypes.string.isRequired,
-  sortDirection:    PropTypes.string.isRequired,
-  username:         PropTypes.string.isRequired,
 };
 
 const mapStateToProps = state => ({
+  resources:        state.dataResources.resources,
+  total:            state.dataResources.total,
+  pageSize:         state.dataResources.pageSize,
   currentPage:      state.dataResources.currentPage,
   currentDirectory: state.dataResources.currentDirectory,
-  resources:        state.dataResources.resources,
-  numberOfPages:    state.dataResources.numberOfPages,
-  pageSize:         state.dataResources.pageSize,
-  total:            state.dataResources.total,
-  sortField:        state.dataResources.sortField,
-  sortDirection:    state.dataResources.sortDirection,
-  username:         state.username,
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetch: (path, offset=0, limit=500, sortField="", sortDir="", zone="iplant") => {
-    dispatch(fetchDataResources(path, offset, limit, sortField, sortDir, zone));
-  },
   setPageSize: (pageSize) => dispatch(setPageSize(pageSize)),
   setPage: (page,) => dispatch(setCurrentPage(page)),
 });
