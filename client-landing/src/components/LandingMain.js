@@ -20,6 +20,7 @@ import AppCardGrid from './AppsCardGrid';
 import ErrorCard from './ErrorCard';
 import ErrorDialog from './ErrorDialog';
 import DataBrowser from './DataBrowser';
+import DataPumper from './DataPumper';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { palette } from "./App";
@@ -74,7 +75,10 @@ class LandingMain extends Component {
                 break;
             case ShowData:
                 mainContent = (
-                    <DataBrowser />
+                    <div>
+                      <DataPumper />
+                      <DataBrowser />
+                    </div>
                 )
             default:
                 console.log('unknown value for pageToShow');

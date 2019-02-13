@@ -21,7 +21,7 @@ class DataPumper extends Component {
       dir = `/iplant/home/${username}`;
     }
 
-    this.props.fetch(dir, offset, limit, sortField, sortDirection, zone);
+    this.props.fetch(dir, offset, limit, sortField, sortDirection.toUpperCase(), zone);
   }
 
   render() {
