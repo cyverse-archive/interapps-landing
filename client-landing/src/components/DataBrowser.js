@@ -10,8 +10,7 @@ import {
   setSortDirection
 } from '../actions';
 
-import MUIDataTable from 'mui-datatables';
-import DataPumper from './DataPumper';
+import filesize from 'filesize';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -176,6 +175,12 @@ const styles = theme => ({
 });
 
 class DataBrowser extends Component {
+
+  formatDate(millis) {
+    let d = new Date(millis);
+    return d.toLocaleString();
+  }
+
   render() {
     const {
       classes,
@@ -234,21 +239,21 @@ class DataBrowser extends Component {
                       align={columns[2].align}
                       padding={columns[2].disablePadding ? "none" : "default"}
                     >
-                      {r.dateModified}
+                      {this.formatDate(r.dateModified)}
                     </TableCell>
 
                     <TableCell
                       align={columns[3].align}
                       padding={columns[3].disablePadding ? "none" : "default"}
                     >
-                      {r.dateCreated}
+                      {this.formatDate(r.dateCreated)}
                     </TableCell>
 
                     <TableCell
                       align={columns[4].align}
                       padding={columns[4].disablePadding ? "none" : "default"}
                     >
-                      {r.size}
+                      {filesize(r.size)}
                     </TableCell>
                   </TableRow>
                 )

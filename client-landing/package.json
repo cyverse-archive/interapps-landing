@@ -16,6 +16,7 @@
     "eslint-plugin-import": "2.14.0",
     "eslint-plugin-jsx-a11y": "6.1.1",
     "eslint-plugin-react": "7.11.1",
+    "filesize": "^4.1.1",
     "md5": "^2.2.1",
     "mui-datatables": "^2.0.0-beta-53",
     "prop-types": "^15.6.2",
