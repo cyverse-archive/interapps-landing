@@ -27,6 +27,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
+import DataBrowserBreadcrumbs from './DataBrowserBreadcrumbs';
 
 const columns = [
   {
@@ -105,62 +106,6 @@ class DataBrowserHead extends Component {
   }
 }
 
-const dataBrowserToolbarStyles = theme => ({
-  root: {
-    paddingRight: theme.spacing.unit,
-  },
-  highlight:
-    theme.palette.type === 'light'
-      ? {
-          color: theme.palette.secondary.main,
-          backgroundColor: lighten(theme.palette.secondary.light, 0.85),
-        }
-      : {
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.secondary.dark,
-        },
-  spacer: {
-    flex: '1 1 100%',
-  },
-  actions: {
-    color: theme.palette.text.secondary,
-  },
-  title: {
-    flex: '0 0 auto',
-  },
-});
-
-class DataBrowserToolbar extends Component {
-  render() {
-    const { classes, currentDirectory } = this.props;
-
-    return (
-      <Toolbar className={classes.root}>
-        <div className={classes.title}>
-          <Typography variant="h6" id="tableTitle">
-            {currentDirectory}
-          </Typography>
-        </div>
-        <div className={classes.spacer} />
-        <div className={classes.actions}>
-          <Tooltip title="Filter list">
-            <IconButton aria-label="Filter list">
-              <FilterListIcon />
-            </IconButton>
-          </Tooltip>
-        </div>
-      </Toolbar>
-    );
-  }
-};
-
-DataBrowserToolbar.propTypes = {
-  classes:          PropTypes.object.isRequired,
-  currentDirectory: PropTypes.string.isRequired,
-}
-
-DataBrowserToolbar = withStyles(dataBrowserToolbarStyles)(DataBrowserToolbar);
-
 const styles = theme => ({
   root: {
     width: '100%',
@@ -171,6 +116,24 @@ const styles = theme => ({
   },
   tableWrapper: {
     overflowX: 'auto',
+  },
+  toolbar: {
+    width: '100%',
+    display: 'inline-block',
+  },
+  breadcrumbs: {
+    width: '75%',
+    display: 'flex',
+    float: 'left',
+  },
+  actions: {
+    color: theme.palette.text.secondary,
+    width: '25%',
+    float: 'left',
+  },
+  filterButton: {
+    float: 'right',
+    marginRight: '20px',
   },
 });
 
@@ -200,7 +163,19 @@ class DataBrowser extends Component {
     return (
       <div className={classes.datatable}>
         <Paper className={classes.root}>
-          <DataBrowserToolbar currentDirectory={currentDirectory} />
+          <div className={classes.toolbar}>
+            <div className={classes.breadcrumbs}>
+              <DataBrowserBreadcrumbs currentDirectory={currentDirectory} />
+            </div>
+
+            <div className={classes.actions}>
+              <Tooltip title="Filter list">
+                <IconButton className={classes.filterButton} aria-label="Filter list">
+                  <FilterListIcon />
+                </IconButton>
+              </Tooltip>
+            </div>
+          </div>
 
           <Table className={classes.table} aria-labelledby="tableTitle">
             <DataBrowserHead

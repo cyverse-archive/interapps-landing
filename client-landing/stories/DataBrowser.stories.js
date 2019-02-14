@@ -8,6 +8,7 @@ import DataBrowser from '../src/components/DataBrowser';
 storiesOf('DataBrowser', module)
   .add('basic test', () => {
     const store = newStore();
+    store.dispatch(setCurrentDirectory("/iplant/home"))
     return (
       <DataBrowser store={store} />
     );
@@ -32,7 +33,7 @@ storiesOf('DataBrowser', module)
   })
   .add('100 dirs', () => {
     const store = newStore();
-    store.dispatch(setCurrentDirectory("/iplant/home/ipcdev/analyses"));
+    store.dispatch(setCurrentDirectory("/iplant/home/ipcdev/analyses/test/more/dirs/omg/this/is/too/many/do/not/add/more/one/two/three/four/five/six/seven/eight/nine/ten/eleven"));
     let items = [...Array(100).keys()].map(
       i => (
         {

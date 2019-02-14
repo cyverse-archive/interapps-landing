@@ -10,10 +10,12 @@ import Link from '@material-ui/core/Link';
 const styles = theme => ({
   root: {
     justifyContent: 'center',
-    flexWrap: 'wrap',
   },
   paper: {
     padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+    borderRadius: '0',
+    overflowWrap: 'anywhere',
+    boxShadow: '0 0 0 0'
   },
 });
 
@@ -58,12 +60,4 @@ DataBrowserBreadcrumbs.propTypes = {
   currentDirectory : PropTypes.string.isRequired,
 };
 
-const mapStateToProps = state => ({
-  currentDirectory: state.dataResources.currentDirectory,
-});
-
-const dataBrowserBreadcrumbs = connect(
-  mapStateToProps
-)(DataBrowserBreadcrumbs);
-
-export default withStyles(styles)(dataBrowserBreadcrumbs);
+export default withStyles(styles)(DataBrowserBreadcrumbs);

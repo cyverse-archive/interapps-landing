@@ -7,10 +7,12 @@ import DataBrowserBreadcrumbs from '../src/components/DataBrowserBreadcrumbs';
 
 storiesOf('DataBrowserBreadcrumbs', module)
   .add('basic test', () => {
-    const store = newStore();
-    store.dispatch(setCurrentDirectory("/foo/bar/baz"));
-
     return (
-      <DataBrowserBreadcrumbs store={store} />
+      <DataBrowserBreadcrumbs currentDirectory={"/foo/bar/baz"} />
+    );
+  })
+  .add('longer path', () => {
+    return (
+      <DataBrowserBreadcrumbs currentDirectory={"/foo/bar/baz/blippy/one/two/three/four/five/six/seven/eight/nine/ten/eleven"} />
     );
   });
