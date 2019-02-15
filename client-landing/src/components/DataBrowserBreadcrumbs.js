@@ -39,7 +39,7 @@ class DataBrowserBreadcrumbs extends React.Component {
         <Breadcrumbs
           maxItems={2}
           itemsAfterCollapse={2}
-          itemsBeforeCollapse={0}
+          itemsBeforeCollapse={3}
           arial-label="Data Browser Breadcrumbs"
         >
           {linkables.map(linkable => {
