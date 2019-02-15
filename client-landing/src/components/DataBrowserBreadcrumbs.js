@@ -19,11 +19,6 @@ const styles = theme => ({
   },
 });
 
-function handleClick(event) {
-  event.preventDefault();
-  alert('You clicked a breadcrumb.'); // eslint-disable-line no-alert
-}
-
 class DataBrowserBreadcrumbs extends React.Component {
   splitIntoLinkables() {
     const { currentDirectory } = this.props;
@@ -42,9 +37,9 @@ class DataBrowserBreadcrumbs extends React.Component {
           itemsBeforeCollapse={3}
           arial-label="Data Browser Breadcrumbs"
         >
-          {linkables.map(linkable => {
+          {linkables.map((linkable, index) => {
             return (
-              <Link color="inherit" href="#" onClick={handleClick}>
+              <Link color="inherit" href="#" onClick={() => this.props.crumbcallback(linkables, index)}>
                 {linkable}
               </Link>
             );
@@ -57,7 +52,8 @@ class DataBrowserBreadcrumbs extends React.Component {
 
 DataBrowserBreadcrumbs.propTypes = {
   classes:           PropTypes.object.isRequired,
-  currentDirectory : PropTypes.string.isRequired,
+  currentDirectory:  PropTypes.string.isRequired,
+  crumbcallback:     PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(DataBrowserBreadcrumbs);

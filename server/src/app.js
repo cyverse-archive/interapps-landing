@@ -181,7 +181,9 @@ apirouter.get("/data", async (req, res) => {
           ...data,
           resources: []
         };
-        retval.resources = data.files.concat(data.folders);
+        retval.resources = data.files
+          .map(f => ({...f, type: 'file'}))
+          .concat(data.folders.map(f => ({...f, type: 'folder'})));
         delete retval.files;
         delete retval.folders;
         res.send(JSON.stringify(retval));

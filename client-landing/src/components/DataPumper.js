@@ -24,6 +24,30 @@ class DataPumper extends Component {
     this.props.fetch(dir, offset, limit, sortField, sortDirection.toUpperCase(), zone);
   }
 
+  componentDidUpdate(prevProps) {
+    let doUpdate = false;
+
+    let propsToCheck = [
+      'currentDirectory',
+      'currentPage',
+      'limit',
+      'sortField',
+      'sortDirection',
+      'username',
+      'zone',
+    ];
+
+    propsToCheck.forEach(p => {
+      if (this.props[p] !== prevProps[p]) {
+        doUpdate = true;
+      }
+    });
+
+    if (doUpdate) {
+      this.getDataResources();
+    }
+  }
+
   render() {
     this.getDataResources();
     return (<div/>);

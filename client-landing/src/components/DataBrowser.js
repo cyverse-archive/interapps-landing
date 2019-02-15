@@ -7,7 +7,8 @@ import {
   setPageSize,
   setCurrentPage,
   setSortField,
-  setSortDirection
+  setSortDirection,
+  setCurrentDirectory
 } from '../actions';
 
 import filesize from 'filesize';
@@ -28,6 +29,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
 import DataBrowserBreadcrumbs from './DataBrowserBreadcrumbs';
+import Link from '@material-ui/core/Link';
 
 const columns = [
   {
@@ -157,7 +159,8 @@ class DataBrowser extends Component {
       resetSortField,
       resetSortDirection,
       sortField,
-      sortDirection
+      sortDirection,
+      setNavDir
     } = this.props;
 
     return (
@@ -165,7 +168,12 @@ class DataBrowser extends Component {
         <Paper className={classes.root}>
           <div className={classes.toolbar}>
             <div className={classes.breadcrumbs}>
-              <DataBrowserBreadcrumbs currentDirectory={currentDirectory} />
+              <DataBrowserBreadcrumbs
+                currentDirectory={currentDirectory}
+                crumbcallback={(pathElements, pathIndex) => {
+                  setNavDir(`/${pathElements.slice(0, pathIndex+1).join('/')}`);
+                }}
+              />
             </div>
 
             <div className={classes.actions}>
@@ -200,7 +208,18 @@ class DataBrowser extends Component {
                       scope="row"
                       padding={columns[0].disablePadding ? "none" : "default"}
                       align={columns[0].align}>
-                      {r.name}
+                      {r.type === 'file' ?
+                        r.name
+                        :
+                        <Link
+                          component="button"
+                          variant="body2"
+                          onClick={() => {
+                            this.props.setNavDir(r.path);
+                          }}
+                          >
+                          {r.name}
+                        </Link>}
                     </TableCell>
 
                     <TableCell
@@ -274,6 +293,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
+  setNavDir: (currentDirectory) => dispatch(setCurrentDirectory(currentDirectory)),
   setPageSize:  (pageSize) => dispatch(setPageSize(pageSize)),
   setPage:      (page) => dispatch(setCurrentPage(page)),
 
