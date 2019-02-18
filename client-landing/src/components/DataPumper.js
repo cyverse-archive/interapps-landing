@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { fetchDataResources } from '../actions';
+import {
+  fetchDataResources,
+  selectAllDataResources,
+  clearSelected
+} from '../actions';
 
 class DataPumper extends Component {
   getDataResources() {
@@ -22,6 +26,22 @@ class DataPumper extends Component {
     }
 
     this.props.fetch(dir, offset, limit, sortField, sortDirection.toUpperCase(), zone);
+  }
+
+  doSelectAll() {
+    const {
+      currentDirectory,
+      zone,
+      selectAllResources,
+      username
+    } = this.props;
+
+    let dir = currentDirectory;
+    if (dir === "") {
+      dir = `/iplant/home/${username}`;
+    }
+
+    selectAllResources(dir, zone);
   }
 
   componentDidUpdate(prevProps) {
@@ -46,6 +66,14 @@ class DataPumper extends Component {
     if (doUpdate) {
       this.getDataResources();
     }
+
+    if (this.props.selectAll !== prevProps.selectAll) {
+      if (this.props.selectAll) {
+        this.doSelectAll();
+      } else {
+        this.props.unselectAllResources();
+      }
+    }
   }
 
   render() {
@@ -62,6 +90,7 @@ DataPumper.propTypes = {
   sortDirection:    PropTypes.string.isRequired,
   username:         PropTypes.string.isRequired,
   zone:             PropTypes.string.isRequired,
+  selectAll:        PropTypes.bool.isRequired,
 };
 
 const mapStateToProps = state => ({
@@ -72,12 +101,14 @@ const mapStateToProps = state => ({
   sortDirection:    state.dataResources.sortDirection,
   username:         state.username,
   zone:             state.dataResources.zone,
+  selectAll:        state.dataResources.selectAll,
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetch: (dir, offset, limit, sortField, sortDir, zone) => {
-    dispatch(fetchDataResources(dir, offset, limit, sortField, sortDir, zone));
-  },
+  fetch:       (dir, offset, limit, sortField, sortDir, zone) =>
+    dispatch(fetchDataResources(dir, offset, limit, sortField, sortDir, zone)),
+  selectAllResources:   (dir, zone) => dispatch(selectAllDataResources(dir, zone)),
+  unselectAllResources: () => dispatch(clearSelected()),
 });
 
 export default connect(

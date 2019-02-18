@@ -170,6 +170,7 @@ const defaultState = {
       sortField: "name",
       sortDirection: "asc",
       selected: {}, // use it like a set. key is the id
+      selectAll: false, //
       pageSize: 10,
       currentPage: 0,
       zone: "iplant",
@@ -204,6 +205,7 @@ export const {
     setSelected,
     unsetSelected,
     clearSelected,
+    selectAll,
     toggleRequestingDataResources,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
@@ -233,6 +235,7 @@ export const {
     SET_SELECTED: (id) => id,
     UNSET_SELECTED: (id) => id,
     CLEAR_SELECTED: () => {},
+    SELECT_ALL: (val) => val,
     TOGGLE_REQUESTING_DATA_RESOURCES: () => {},
 });
 
@@ -288,6 +291,58 @@ export const fetchDataResources = (path, offset=0, limit=500, sortField="", sort
         dispatch(toggleRequestingDataResources());
         dispatch(toggleLoading());
       });
+  }
+}
+
+export const selectAllDataResources = (path, zone="iplant") => {
+  return async dispatch => {
+    dispatch(toggleRequestingDataResources());
+    dispatch(toggleLoading());
+
+    const limit = 500;
+    let offset = 0;
+    let total = 0;
+    let done = false;
+
+    while (!done) {
+      let p = new URLSearchParams();
+      p.set('offset', offset);
+      p.set('limit', limit);
+      p.set('sortField', "name");
+      p.set('sortDir', "ASC");
+
+      const pathPrefix = `/${zone}`;
+      if (path.startsWith(pathPrefix)) {
+        path = path.slice(pathPrefix.length);
+      }
+
+      if (path.startsWith('/')) {
+        path = path.slice(1);
+      }
+
+      p.set('path', path);
+
+      let total = 0;
+
+      await axios.get(`/api/data?${p.toString()}`, {withCredentials: true})
+        .then(resp => {
+            total = resp.data.total;
+            resp.data.resources.forEach(item => dispatch(setSelected(item.id)));
+            if (offset >= total) {
+              done = true
+            } else {
+              offset = offset + limit;
+            }
+        })
+        .catch(e => {
+          errorHandler(e, dispatch);
+          dispatch(toggleRequestingDataResources());
+          dispatch(toggleLoading());
+        });
+    }
+
+    dispatch(toggleRequestingDataResources());
+    dispatch(toggleLoading());
   }
 }
 
@@ -468,6 +523,13 @@ export const reducer = handleActions(
           dataResources: {
             ...state.dataResources,
             selected: {}
+          }
+        }),
+        SELECT_ALL: (state, {payload: value}) => ({
+          ...state,
+          dataResources: {
+            ...state.dataResources,
+            selectAll: value,
           }
         }),
         TOGGLE_REQUESTING_DATA_RESOURCES: (state) => ({

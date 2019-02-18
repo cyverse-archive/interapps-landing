@@ -11,7 +11,8 @@ import {
   setCurrentDirectory,
   setSelected,
   unsetSelected,
-  clearSelected
+  clearSelected,
+  selectAll
 } from '../actions';
 
 import filesize from 'filesize';
@@ -74,7 +75,9 @@ class DataBrowserHead extends Component {
       sortField,
       sortDirection,
       resetSortDirection,
-      resetSortField
+      resetSortField,
+      selectAll,
+      selectAllCallback
     } = this.props;
 
     return (
@@ -82,7 +85,8 @@ class DataBrowserHead extends Component {
         <TableRow>
           <TableCell padding="checkbox">
             <Checkbox
-              checked={false}
+              checked={selectAll}
+              onChange={(event, checked) => selectAllCallback(checked)}
             />
           </TableCell>
           {columns.map(
@@ -160,6 +164,8 @@ class DataBrowser extends Component {
       selected,
       setSelected,
       unsetSelected,
+      selectAllRows,
+      selectAll,
       setPageSize,
       setPage,
       resetSortField,
@@ -197,6 +203,8 @@ class DataBrowser extends Component {
               resetSortField={resetSortField}
               sortDirection={sortDirection}
               resetSortDirection={resetSortDirection}
+              selectAllCallback={selectAllRows}
+              selectAll={selectAll}
             />
             <TableBody>
               {resources.map(r => {
@@ -306,6 +314,7 @@ const mapStateToProps = state => ({
   sortField:        state.dataResources.sortField,
   sortDirection:    state.dataResources.sortDirection,
   selected:         state.dataResources.selected,
+  selectAll:        state.dataResources.selectAll
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -314,6 +323,7 @@ const mapDispatchToProps = dispatch => ({
   setPage:       (page) => dispatch(setCurrentPage(page)),
   setSelected:   (id) => dispatch(setSelected(id)),
   unsetSelected: (id) => dispatch(unsetSelected(id)),
+  selectAllRows: (val) => dispatch(selectAll(val)),
 
   resetSortField:
     (sortField) => dispatch(setSortField(sortField)),
