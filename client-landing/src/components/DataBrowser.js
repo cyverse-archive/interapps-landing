@@ -8,7 +8,10 @@ import {
   setCurrentPage,
   setSortField,
   setSortDirection,
-  setCurrentDirectory
+  setCurrentDirectory,
+  setSelected,
+  unsetSelected,
+  clearSelected
 } from '../actions';
 
 import filesize from 'filesize';
@@ -154,6 +157,9 @@ class DataBrowser extends Component {
       currentPage,
       total,
       currentDirectory,
+      selected,
+      setSelected,
+      unsetSelected,
       setPageSize,
       setPage,
       resetSortField,
@@ -200,7 +206,16 @@ class DataBrowser extends Component {
                     key={r.id}
                   >
                     <TableCell padding="checkbox">
-                      <Checkbox checked={false} />
+                      <Checkbox
+                        checked={selected[r.id] === 1}
+                        onChange={(event, checked) => {
+                          if (checked) {
+                            setSelected(r.id);
+                          } else {
+                            unsetSelected(r.id);
+                          }
+                        }}
+                        />
                     </TableCell>
 
                     <TableCell
@@ -290,12 +305,15 @@ const mapStateToProps = state => ({
   currentDirectory: state.dataResources.currentDirectory,
   sortField:        state.dataResources.sortField,
   sortDirection:    state.dataResources.sortDirection,
+  selected:         state.dataResources.selected,
 });
 
 const mapDispatchToProps = dispatch => ({
-  setNavDir: (currentDirectory) => dispatch(setCurrentDirectory(currentDirectory)),
-  setPageSize:  (pageSize) => dispatch(setPageSize(pageSize)),
-  setPage:      (page) => dispatch(setCurrentPage(page)),
+  setNavDir:     (currentDirectory) => dispatch(setCurrentDirectory(currentDirectory)),
+  setPageSize:   (pageSize) => dispatch(setPageSize(pageSize)),
+  setPage:       (page) => dispatch(setCurrentPage(page)),
+  setSelected:   (id) => dispatch(setSelected(id)),
+  unsetSelected: (id) => dispatch(unsetSelected(id)),
 
   resetSortField:
     (sortField) => dispatch(setSortField(sortField)),

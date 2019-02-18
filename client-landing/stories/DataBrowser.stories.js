@@ -46,7 +46,7 @@ storiesOf('DataBrowser', module)
           "size": 0,
           "badName": false,
           "dateModified": Date.now(),
-          "id": "27bf3012-2a61-11e5-803b-3c4a92e4a804",
+          "id": `test-${i}`,
           "dateCreated": Date.now(),
         }
       )

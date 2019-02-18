@@ -201,6 +201,9 @@ export const {
     setSortDirection,
     setTotal,
     setZone,
+    setSelected,
+    unsetSelected,
+    clearSelected,
     toggleRequestingDataResources,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
@@ -227,6 +230,9 @@ export const {
     SET_SORT_DIRECTION: (direction) => direction,
     SET_TOTAL: (total) => total,
     SET_ZONE: (zone) => zone,
+    SET_SELECTED: (id) => id,
+    UNSET_SELECTED: (id) => id,
+    CLEAR_SELECTED: () => {},
     TOGGLE_REQUESTING_DATA_RESOURCES: () => {},
 });
 
@@ -433,6 +439,35 @@ export const reducer = handleActions(
           dataResources: {
             ...state.dataResources,
             zone: zone
+          }
+        }),
+        SET_SELECTED: (state, {payload: id}) => ({
+          ...state,
+          dataResources: {
+            ...state.dataResources,
+            selected: {
+              ...state.dataResources.selected,
+              [id]: 1,
+            }
+          }
+        }),
+        UNSET_SELECTED: (state, {payload: id}) => {
+          let copy = {...state.dataResources.selected};
+          delete copy[id];
+
+          return {
+            ...state,
+            dataResources: {
+              ...state.dataResources,
+              selected: copy
+            }
+          };
+        },
+        CLEAR_SELECTED: (state) => ({
+          ...state,
+          dataResources: {
+            ...state.dataResources,
+            selected: {}
           }
         }),
         TOGGLE_REQUESTING_DATA_RESOURCES: (state) => ({
