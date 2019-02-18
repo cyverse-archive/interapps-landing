@@ -12,7 +12,7 @@ const styles = theme => ({
     justifyContent: 'center',
   },
   paper: {
-    padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+    padding: `${theme.spacing.unit + 6}px ${theme.spacing.unit * 2}px 0px ${theme.spacing.unit * 2}px`,
     borderRadius: '0',
     overflowWrap: 'anywhere',
     boxShadow: '0 0 0 0'

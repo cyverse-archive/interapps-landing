@@ -35,6 +35,8 @@ import { lighten } from '@material-ui/core/styles/colorManipulator';
 import DataBrowserBreadcrumbs from './DataBrowserBreadcrumbs';
 import Link from '@material-ui/core/Link';
 
+import Measure from 'react-measure';
+
 const columns = [
   {
     id: "name",
@@ -122,13 +124,30 @@ const styles = theme => ({
   },
   table: {
     minWidth: 1020,
+    marginTop: 55,
+    marginBottom: 100,
+    boxShadow: '0px 0px 0px 0px rgba(0,0,0,0)',
   },
   tableWrapper: {
     overflowX: 'auto',
   },
   toolbar: {
-    width: '100%',
-    display: 'inline-block',
+    position: 'fixed',
+    top: 0,
+    height: 40,
+    paddingTop: 75,
+    zIndex: 500,
+    backgroundColor: 'white',
+    borderCollapse: 'collapse',
+    boxShadow: '0px 1px 5px 0px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 3px 1px -2px rgba(0,0,0,0.12)',
+
+  },
+  footer: {
+    position: 'fixed',
+    zIndex: 500,
+    backgroundColor: 'white',
+    boxShadow: '0px -1px 5px 0px rgba(0,0,0,0.2)',
+    height: 100,
   },
   breadcrumbs: {
     width: '75%',
@@ -147,6 +166,12 @@ const styles = theme => ({
 });
 
 class DataBrowser extends Component {
+  state = {
+    dimensions: {
+      width: -1,
+      height: -1
+    }
+  };
 
   formatDate(millis) {
     let d = new Date(millis);
@@ -175,126 +200,136 @@ class DataBrowser extends Component {
       setNavDir
     } = this.props;
 
+    const {
+      height,
+      width
+    } = this.state.dimensions;
+
     return (
-      <div className={classes.datatable}>
-        <Paper className={classes.root}>
-          <div className={classes.toolbar}>
-            <div className={classes.breadcrumbs}>
-              <DataBrowserBreadcrumbs
-                currentDirectory={currentDirectory}
-                crumbcallback={(pathElements, pathIndex) => {
-                  setNavDir(`/${pathElements.slice(0, pathIndex+1).join('/')}`);
+      <Measure bounds onResize={rect => this.setState({dimensions: rect.bounds})}>
+        {({ measureRef }) => (
+        <div ref={measureRef} className={classes.datatable}>
+          <Paper className={classes.root}>
+            <div style={{'width': width}}className={classes.toolbar}>
+              <div className={classes.breadcrumbs}>
+                <DataBrowserBreadcrumbs
+                  currentDirectory={currentDirectory}
+                  crumbcallback={(pathElements, pathIndex) => {
+                    setNavDir(`/${pathElements.slice(0, pathIndex+1).join('/')}`);
+                  }}
+                />
+              </div>
+
+              <div className={classes.actions}>
+                <Tooltip title="Filter list">
+                  <IconButton className={classes.filterButton} aria-label="Filter list">
+                    <FilterListIcon />
+                  </IconButton>
+                </Tooltip>
+              </div>
+            </div>
+
+            <Table width={width} className={classes.table} aria-labelledby="tableTitle">
+              <DataBrowserHead
+                sortField={sortField}
+                resetSortField={resetSortField}
+                sortDirection={sortDirection}
+                resetSortDirection={resetSortDirection}
+                selectAllCallback={selectAllRows}
+                selectAll={selectAll}
+              />
+              <TableBody>
+                {resources.map(r => {
+                  return (
+                    <TableRow
+                      hover
+                      key={r.id}
+                    >
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selected[r.id] === 1}
+                          onChange={(event, checked) => {
+                            if (checked) {
+                              setSelected(r.id);
+                            } else {
+                              unsetSelected(r.id);
+                            }
+                          }}
+                          />
+                      </TableCell>
+
+                      <TableCell
+                        component="th"
+                        scope="row"
+                        padding={columns[0].disablePadding ? "none" : "default"}
+                        align={columns[0].align}>
+                        {r.type === 'file' ?
+                          r.name
+                          :
+                          <Link
+                            component="button"
+                            variant="body2"
+                            onClick={() => {
+                              this.props.setNavDir(r.path);
+                            }}
+                            >
+                            {r.name}
+                          </Link>}
+                      </TableCell>
+
+                      <TableCell
+                        align={columns[1].align}
+                        padding={columns[1].disablePadding ? "none" : "default"}
+                      >
+                        {r.path}
+                      </TableCell>
+
+                      <TableCell
+                        align={columns[2].align}
+                        padding={columns[2].disablePadding ? "none" : "default"}
+                      >
+                        {this.formatDate(r.dateModified)}
+                      </TableCell>
+
+                      <TableCell
+                        align={columns[3].align}
+                        padding={columns[3].disablePadding ? "none" : "default"}
+                      >
+                        {this.formatDate(r.dateCreated)}
+                      </TableCell>
+
+                      <TableCell
+                        align={columns[4].align}
+                        padding={columns[4].disablePadding ? "none" : "default"}
+                      >
+                        {filesize(r.size)}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+            <div className={classes.footer} style={{'top': window.innerHeight-96, 'width': width}}>
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 50, 100, 250, 500]}
+                component="div"
+                count={total}
+                rowsPerPage={pageSize}
+                page={currentPage}
+                backIconButtonProps={{
+                  'aria-label': 'Previous Page',
                 }}
+                nextIconButtonProps={{
+                  'aria-label': 'Next Page',
+                }}
+                onChangePage={ (obj, page) => setPage(page) }
+                onChangeRowsPerPage={ event => setPageSize(event.target.value) }
               />
             </div>
-
-            <div className={classes.actions}>
-              <Tooltip title="Filter list">
-                <IconButton className={classes.filterButton} aria-label="Filter list">
-                  <FilterListIcon />
-                </IconButton>
-              </Tooltip>
-            </div>
-          </div>
-
-          <Table className={classes.table} aria-labelledby="tableTitle">
-            <DataBrowserHead
-              sortField={sortField}
-              resetSortField={resetSortField}
-              sortDirection={sortDirection}
-              resetSortDirection={resetSortDirection}
-              selectAllCallback={selectAllRows}
-              selectAll={selectAll}
-            />
-            <TableBody>
-              {resources.map(r => {
-                return (
-                  <TableRow
-                    hover
-                    key={r.id}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selected[r.id] === 1}
-                        onChange={(event, checked) => {
-                          if (checked) {
-                            setSelected(r.id);
-                          } else {
-                            unsetSelected(r.id);
-                          }
-                        }}
-                        />
-                    </TableCell>
-
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      padding={columns[0].disablePadding ? "none" : "default"}
-                      align={columns[0].align}>
-                      {r.type === 'file' ?
-                        r.name
-                        :
-                        <Link
-                          component="button"
-                          variant="body2"
-                          onClick={() => {
-                            this.props.setNavDir(r.path);
-                          }}
-                          >
-                          {r.name}
-                        </Link>}
-                    </TableCell>
-
-                    <TableCell
-                      align={columns[1].align}
-                      padding={columns[1].disablePadding ? "none" : "default"}
-                    >
-                      {r.path}
-                    </TableCell>
-
-                    <TableCell
-                      align={columns[2].align}
-                      padding={columns[2].disablePadding ? "none" : "default"}
-                    >
-                      {this.formatDate(r.dateModified)}
-                    </TableCell>
-
-                    <TableCell
-                      align={columns[3].align}
-                      padding={columns[3].disablePadding ? "none" : "default"}
-                    >
-                      {this.formatDate(r.dateCreated)}
-                    </TableCell>
-
-                    <TableCell
-                      align={columns[4].align}
-                      padding={columns[4].disablePadding ? "none" : "default"}
-                    >
-                      {filesize(r.size)}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-
-          <TablePagination
-            rowsPerPageOptions={[10, 25, 50, 100, 250, 500]}
-            component="div"
-            count={total}
-            rowsPerPage={pageSize}
-            page={currentPage}
-            backIconButtonProps={{
-              'aria-label': 'Previous Page',
-            }}
-            nextIconButtonProps={{
-              'aria-label': 'Next Page',
-            }}
-            onChangePage={ (obj, page) => setPage(page) }
-            onChangeRowsPerPage={ event => setPageSize(event.target.value) }
-          />
-        </Paper>
-      </div>
+          </Paper>
+        </div>
+        )}
+      </Measure>
     );
   }
 }
