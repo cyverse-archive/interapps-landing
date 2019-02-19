@@ -70,6 +70,13 @@ const columns = [
   }
 ];
 
+// const headStyles = styles => ({
+//   root: {
+//     display: 'table-header-group',
+//     top: 115,
+//   }
+// });
+
 class DataBrowserHead extends Component {
   render() {
     const {
@@ -79,7 +86,8 @@ class DataBrowserHead extends Component {
       resetSortDirection,
       resetSortField,
       selectAll,
-      selectAllCallback
+      selectAllCallback,
+      width
     } = this.props;
 
     return (
@@ -117,16 +125,21 @@ class DataBrowserHead extends Component {
   }
 }
 
+//const DataBrowserHead = withStyles(headStyles, {withTheme: true})(DataBrowserHeadBase);
+
 const styles = theme => ({
   root: {
     width: '100%',
     marginTop: theme.spacing.unit * 3,
+    boxShadow: '0px 0px 0px 0px rgba(0,0,0,0)',
+    borderRight: '1px solid rgba(0, 0, 0, 0.1)',
+    borderLeft: '1px solid rgba(0, 0, 0, 0.1)',
   },
   table: {
     minWidth: 1020,
     marginTop: 55,
     marginBottom: 100,
-    boxShadow: '0px 0px 0px 0px rgba(0,0,0,0)',
+
   },
   tableWrapper: {
     overflowX: 'auto',
@@ -237,6 +250,7 @@ class DataBrowser extends Component {
                 resetSortDirection={resetSortDirection}
                 selectAllCallback={selectAllRows}
                 selectAll={selectAll}
+                width={width}
               />
               <TableBody>
                 {resources.map(r => {
