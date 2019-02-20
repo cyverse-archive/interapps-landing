@@ -1,7 +1,7 @@
 import express from 'express';
 import { viceAnalyses, getDB } from './db';
 import { endpointConfig, ingressExists } from './ingress';
-import { getAppsForUser } from './apps';
+import { getAppsForUser, getRelaunchInfo } from './apps';
 import compression from 'compression';
 import helmet from 'helmet';
 import noCache from 'nocache';
@@ -143,6 +143,22 @@ apirouter.get("/profile", async (req,res)=>{
     }
 });
 
+apirouter.get("/analyses/relaunch/:analysisID", async (req, res) => {
+  const username = req.session.username;
+  const analysisID = req.params.analysisID;
+  await getRelaunchInfo(username, analysisID)
+    .then(relaunchResponse => {
+      res.status(relaunchResponse.status);
+      return relaunchResponse;
+    })
+    .then(relaunchResponse => relaunchResponse.buffer())
+    .then(data => res.send(data))
+    .catch(e => {
+      debug(`error getting relaunch info for ${username} regarding ${analysisID}: ${e}`);
+      res.status(500).send(e);
+    });
+});
+
 apirouter.get("/analyses", async (req, res) => {
   debug("calling get analyses for " + req.session.username + " with query=" + req.query.status);
   const username = req.session.username + process.env.UUID_DOMAIN;
@@ -177,7 +193,7 @@ apirouter.get("/apps", async (req, res) => {
     .then(appsResp => appsResp.buffer())
     .then(data => res.send(data))
     .catch(e => {
-      debug("sending error");
+      debug(`error getting apps for ${username}: ${e}`);
       res.status(500).send(e);
     });
 });
