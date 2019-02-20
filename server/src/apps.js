@@ -13,3 +13,9 @@ export async function getRelaunchInfo(user, analysisID) {
   debug(`fetching relaunch info from ${appsURL}`);
   return fetch(appsURL);
 }
+
+export async function getParameters(user, analysisID) {
+  const appsURL =`${process.env.APPS}/analyses/${analysisID}/parameters?user=${user}`;
+  debug(`fetching analysis parameter info from ${appsURL}`);
+  return fetch(appsURL);
+}

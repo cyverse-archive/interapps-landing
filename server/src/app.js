@@ -159,6 +159,22 @@ apirouter.get("/analyses/relaunch/:analysisID", async (req, res) => {
     });
 });
 
+apirouter.get("/analyses/parameters/:analysisID", async (req, res) => {
+  const username = req.session.username;
+  const analysisID = req.params.analysisID;
+  await getParameters(username, analysisID)
+    .then(paramResponse => {
+      res.status(paramResponse.status);
+      return paramResponse;
+    })
+    .then(paramResponse => paramResponse.buffer())
+    .then(data => res.send(data))
+    .catch(e => {
+      debug(`error getting parameter info for ${username} regarding ${analysisID}: ${e}`);
+      res.status(500).send(e);
+    });
+});
+
 apirouter.get("/analyses", async (req, res) => {
   debug("calling get analyses for " + req.session.username + " with query=" + req.query.status);
   const username = req.session.username + process.env.UUID_DOMAIN;
