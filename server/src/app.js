@@ -159,6 +159,23 @@ apirouter.get("/analyses/relaunch/:analysisID", async (req, res) => {
     });
 });
 
+apirouter.post("/analyses/relaunch", async (req, res) => {
+  const username  = req.session.username;
+  const analysisID = req.params.analysisID;
+
+  await doRelaunch(username, analysisID)
+    .then(apiResp => {
+      res.status(apiResp.status);
+      return apiResp;
+    })
+    .then(apiResp => apiResp.buffer())
+    .then(data => res.send(data))
+    .catch(e => {
+      debug(`error relaunching analysis ${analysisID} for user ${username}: ${e}`);
+      res.status(500).send(e);
+    });
+});
+
 apirouter.get("/analyses/parameters/:analysisID", async (req, res) => {
   const username = req.session.username;
   const analysisID = req.params.analysisID;

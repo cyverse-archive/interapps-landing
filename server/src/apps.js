@@ -15,7 +15,39 @@ export async function getRelaunchInfo(user, analysisID) {
 }
 
 export async function getParameters(user, analysisID) {
-  const appsURL =`${process.env.APPS}/analyses/${analysisID}/parameters?user=${user}`;
+  const appsURL = `${process.env.APPS}/analyses/${analysisID}/parameters?user=${user}`;
   debug(`fetching analysis parameter info from ${appsURL}`);
   return fetch(appsURL);
+}
+
+export async function doRelaunch(user, analysisID) {
+  const appsURL = `${process.env.APPS}/analyses/${analysisID}/parameters?user=${user}`;
+  const subURL = `${process.env.APPS}/analyses?user=${user}`;
+
+  debug(`relaunching analysis ${analysisID} for user ${user}`);
+
+  return Promise.all([
+    getParameters(user, analysisID).then(resp => resp.json()),
+    getRelaunchInfo(user, analysisID).then(resp => resp.json())
+  ])
+  .then(([parameters, relaunchInfo]) => ({
+      name:                 relaunchInfo.name,
+      label:                relaunchInfo.label,
+      app_id:               relaunchInfo.id,
+      debug:                relaunchInfo.debug || false,
+      create_output_subdir: relaunchInfo.create_output_subdir || false,
+      archive_logs:         relaunchInfo.archive_logs || false,
+      output_dir:           relaunchInfo.output_dir,
+      notify:               relaunchInfo.notify || true,
+      description:          relaunchInfo.description,
+      system_id:            relaunchInfo.system_id,
+      config:               {},
+      ['skip-parent-meta']: relaunchInfo['skip-parent-meta'] || false,
+      callback:             relaunchInfo.callback || "",
+  }))
+  .then(submission => fetch(subURL, {
+    method:  'post',
+    body:    JSON.stringify(submission),
+    headers: { 'Content-Type': 'application/json' }
+  }));
 }
