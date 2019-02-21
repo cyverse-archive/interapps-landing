@@ -30,7 +30,14 @@ export async function doRelaunch(user, analysisID) {
     getParameters(user, analysisID).then(resp => resp.json()),
     getRelaunchInfo(user, analysisID).then(resp => resp.json())
   ])
-  .then(([parameters, relaunchInfo]) => ({
+  .then(([parameters, relaunchInfo]) => {
+    let configmap = {};
+
+    parameters.parameters.forEach(parameter => {
+      configmap[parameters.full_param_id] = parameter.param_value.value;
+    });
+
+    return {
       name:                 relaunchInfo.name,
       label:                relaunchInfo.label,
       app_id:               relaunchInfo.id,
@@ -41,10 +48,11 @@ export async function doRelaunch(user, analysisID) {
       notify:               relaunchInfo.notify || true,
       description:          relaunchInfo.description,
       system_id:            relaunchInfo.system_id,
-      config:               {},
+      config:               configmap,
       ['skip-parent-meta']: relaunchInfo['skip-parent-meta'] || false,
       callback:             relaunchInfo.callback || "",
-  }))
+    };
+  })
   .then(submission => fetch(subURL, {
     method:  'post',
     body:    JSON.stringify(submission),
