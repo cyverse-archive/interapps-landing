@@ -166,6 +166,19 @@ apirouter.get("/analyses", async (req, res) => {
     });
 });
 
+apirouter.post("/analysis/:analysisID/timelimit", async (req, res) => {
+  const username = req.session.username + process.env.UUID_DOMAIN;
+  const analysisID = req.params.analysisID;
+  debug("reset timelimit analysis ${analysisID}; user ${username}");
+
+  await updateTimeLimit(username, analysisID)
+    .then(plannedEndDate => ({time_limit: plannedEndDate}))
+    .then(obj => res.send(JSON.stringify(obj)))
+    .catch(e => {
+      res.status(500).send(e);
+    });
+});
+
 apirouter.get("/apps", async (req, res) => {
   debug("calling get apps for " + req.session.username);
   const username = req.session.username;
