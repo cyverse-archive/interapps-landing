@@ -161,6 +161,7 @@ const defaultState = {
     drawerOpen: false,
     errorDialogOpen: false,
     errors: [],
+    messages: [],
 }
 
 export const {
@@ -176,6 +177,8 @@ export const {
     addError,
     rmError,
     clearErrors,
+    pushMessage,
+    shiftMessage,
 } = createActions({
     TOGGLE_DRAWER_OPEN: () => {
     },
@@ -191,6 +194,8 @@ export const {
     ADD_ERROR: (error) => error,
     RM_ERROR: (dateCreated) => dateCreated,
     CLEAR_ERRORS: () => {},
+    PUSH_MESSAGE: (message) => message,
+    SHIFT_MESSAGE: () => {},
 });
 
 export const fetchAnalyses = (status) => {
@@ -208,6 +213,19 @@ export const fetchAnalyses = (status) => {
     });
   };
 };
+
+export const resetTimeLimit = (id) => {
+  return dispatch => {
+    return axios.post(`/api/analyses/${id}/timelimit`, {withCredentials: true})
+      .then(response => {
+        let message = `New time limit is ${response.data.time_limit}.`;
+        dispatch(pushMessage(message));
+      })
+      .catch(e => {
+        errorHandler(e, dispatch);
+      });
+  }
+}
 
 export const fetchApps = () => {
     return dispatch => {
@@ -280,6 +298,16 @@ export const reducer = handleActions(
           return {...state, errors: newstate};
         },
         CLEAR_ERRORS: (state) => ({...state, errors: []}),
+        PUSH_MESSAGE: (state, {payload: message}) => {
+          let copy = [...state.messages];
+          copy.push(message);
+          return {...state, messages: copy};
+        },
+        SHIFT_MESSAGE: (state) => {
+          let copy = [...state.messages];
+          copy.shift();
+          return {...state, messages: copy};
+        },
   },
   defaultState
 );

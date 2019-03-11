@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import classnames from 'classnames';
-import { StatusCompleted, StatusFailed, StatusRunning } from '../actions';
+import {
+  StatusCompleted,
+  StatusFailed,
+  StatusRunning,
+} from '../actions';
 
 import Avatar from '@material-ui/core/Avatar';
 import Card from '@material-ui/core/Card';
@@ -13,9 +17,11 @@ import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import LaunchIcon from "@material-ui/icons/Launch";
+import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
 import Assessment from '@material-ui/icons/Assessment';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Divider from '@material-ui/core/Divider';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import { palette } from './App';
 
@@ -111,6 +117,7 @@ class AnalysisCard extends Component {
             startDate,
             plannedEndDate,
             status,
+            timeLimitCB,
         } = this.props;
 
 
@@ -178,9 +185,19 @@ class AnalysisCard extends Component {
                     <Divider light />
 
                     <CardActions disableActionSpacing>
-                        <IconButton onClick={this.handleClickAnalysisLink}>
-                            <LaunchIcon />
-                        </IconButton>
+                        <Tooltip title="Open in New Tab">
+                          <IconButton onClick={this.handleClickAnalysisLink}>
+                              <LaunchIcon />
+                          </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title="Extend Time Limit">
+                          <IconButton
+                            disabled={status !== StatusRunning}
+                            onClick={timeLimitCB}>
+                            <HourglassEmptyIcon />
+                          </IconButton>
+                        </Tooltip>
 
                         <IconButton
                             className={classnames(classes.expand, {
@@ -220,6 +237,8 @@ AnalysisCard.propTypes = {
     plannedEndDate: PropTypes.number.isRequired,
     analysisLink:   PropTypes.string.isRequired,
     status:         PropTypes.string.isRequired,
+    timeLimitCB:    PropTypes.func.isRequired,
+
 };
 
 export default withStyles(

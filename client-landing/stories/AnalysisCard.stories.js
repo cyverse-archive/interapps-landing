@@ -19,6 +19,7 @@ class AnalysisCardTest extends Component {
                   owner="Owner Name"
                   status={StatusCompleted}
                   analysisLink="https://qa.cyverse.org/de/?type=data&folder=/iplant/home/sriram/analyses"
+                  timeLimitCB={()=>{}}
               />
         );
     }

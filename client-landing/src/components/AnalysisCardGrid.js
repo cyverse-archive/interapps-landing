@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
 import AnalysisCard from './AnalysisCard';
 import Typography from "@material-ui/core/es/Typography/Typography";
+import { resetTimeLimit } from '../actions';
 
 const styles = theme => ({
   grid: {
@@ -37,6 +38,7 @@ class AnalysisCardGrid extends Component {
                               plannedEndDate={analysis.plannedEndDate}
                               status={analysis.status}
                               resultFolderLink={deHost + "/de?type=data&folder=" + analysis.resultFolderPath}
+                              timeLimitCB={() => resetTimeLimit(analyses.uuid)}
                           />
                       </Grid>
                   ))}
