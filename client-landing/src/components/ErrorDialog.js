@@ -58,6 +58,7 @@ class ErrorDialog extends Component {
                 errors.map((error, index) => {
                   const displayDate = new Date(error.dateCreated);
                   const displayDateString = `${displayDate.toLocaleDateString()} ${displayDate.toLocaleTimeString()}`;
+                  const errorMessage = `${error.response.data.message || error.message || "Unknown message"}`;
 
                   return (
                     <ExpansionPanel id={`expansion-panel-${index}`}>
@@ -65,11 +66,11 @@ class ErrorDialog extends Component {
                         <Typography className={classes.heading}>{error.status} Error - {displayDateString}</Typography>
                       </ExpansionPanelSummary>
                       <ExpansionPanelDetails>
-                        <Typography>{error.message}</Typography>
+                        <Typography>{errorMessage}</Typography>
                       </ExpansionPanelDetails>
 
                       <ExpansionPanelActions>
-                        <CopyToClipboard text={error.message}>
+                        <CopyToClipboard text={errorMessage}>
                           <Button size="small"><FileCopy /></Button>
                         </CopyToClipboard>
                         <Button size="small" onClick={() => handleRemove(index)}><RemoveCircle /></Button>
