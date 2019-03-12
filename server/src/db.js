@@ -41,10 +41,9 @@ SELECT planned_end_date
 export const timeLimitUpdate = `
    UPDATE ONLY jobs
       SET planned_end_date = old_value.planned_end_date + interval '72 hours'
-     FROM (SELECT planned_end_date FROM jobs WHERE id = $1) AS old_value
+     FROM (SELECT planned_end_date FROM jobs WHERE id = $2) AS old_value
     WHERE jobs.id = $2
       AND jobs.user_id = $1
-RETURNING jobs.planned_end_date
 `;
 
 const userIDQuery = 'SELECT id FROM users WHERE username = $1';
@@ -75,5 +74,6 @@ export const updateTimeLimit = (username, analysisID) =>
   getDB().task(t => // Wrap queries in a task to reuse the same connection.
     userAnalysis(username, analysisID, t) // used for validation
     .then(() => userID(username, t)) // also used for validation
-    .then(userID => t.one(timeLimitUpdate, [userID, analysisID]))
-      .then(data => data.planned_end_date));
+    .then(userID => t.none(timeLimitUpdate, [userID, analysisID]))
+    .then(() => t.one(timeLimitQuery, [username, analysisID]))
+    .then(data => data.planned_end_date));

@@ -11,6 +11,7 @@ import AnalysisCardGrid from './AnalysisCardGrid';
 import AppCardGrid from './AppsCardGrid';
 import ErrorCard from './ErrorCard';
 import ErrorDialog from './ErrorDialog';
+import MessageSnackbars from './MessageSnackbars';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { palette } from "./App";
@@ -76,6 +77,7 @@ class LandingMain extends Component {
                     }
                     {mainContent}
                     <ErrorDialog />
+                    <MessageSnackbars />
                 </LandingResponsiveDrawer>
                 <div style={{
                     position: 'fixed',

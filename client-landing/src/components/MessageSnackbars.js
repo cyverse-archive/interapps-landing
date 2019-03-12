@@ -52,6 +52,13 @@ class MessageSnackbars extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    // Open if it's going from no messages to one or more messages.
+    if (prevProps.messages.length === 0 && this.props.messages.length > 0) {
+      this.setState({open: true});
+    }
+  }
+
   render() {
     const { classes, messages } = this.props;
     return (

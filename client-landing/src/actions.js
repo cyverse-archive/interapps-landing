@@ -214,11 +214,13 @@ export const fetchAnalyses = (status) => {
   };
 };
 
-export const resetTimeLimit = (id) => {
+export const resetTimeLimit = (id, name) => {
   return dispatch => {
     return axios.post(`/api/analyses/${id}/timelimit`, {withCredentials: true})
       .then(response => {
-        let message = `New time limit is ${response.data.time_limit}.`;
+        const d = new Date(response.data.time_limit);
+        const displayDate = `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+        let message = `Time limit for '${name}' is ${displayDate}.`;
         dispatch(pushMessage(message));
       })
       .catch(e => {

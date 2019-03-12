@@ -16,7 +16,7 @@ const styles = theme => ({
 
 class AnalysisCardGrid extends Component {
   render() {
-    const { classes, analyses, deHost } = this.props;
+    const { classes, analyses, deHost, resetTimeLimit } = this.props;
 
       if (!analyses || analyses.length === 0) {
           return (<Typography variant="body2" color="primary"
@@ -24,6 +24,7 @@ class AnalysisCardGrid extends Component {
               No analyses to display!
           </Typography>);
       } else {
+          console.log(analyses);
           return (
              <Grid container className={classes.grid} justify="center" spacing={16}>
                   {analyses.map(analysis => (
@@ -38,7 +39,7 @@ class AnalysisCardGrid extends Component {
                               plannedEndDate={analysis.plannedEndDate}
                               status={analysis.status}
                               resultFolderLink={deHost + "/de?type=data&folder=" + analysis.resultFolderPath}
-                              timeLimitCB={() => resetTimeLimit(analyses.uuid)}
+                              timeLimitCB={() => resetTimeLimit(analysis.uuid, analysis.name)}
                           />
                       </Grid>
                   ))}
@@ -57,8 +58,13 @@ const mapStateToProps = state => ({
   deHost: state.deHost,
 });
 
+const mapDispatchToProps = dispatch => ({
+  resetTimeLimit: (uuid, name) => dispatch(resetTimeLimit(uuid, name)),
+});
+
 const MappedAnalysisCardGrid = connect(
-  mapStateToProps
+  mapStateToProps,
+  mapDispatchToProps
 )(AnalysisCardGrid);
 
 export default withStyles(
