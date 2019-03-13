@@ -1,5 +1,5 @@
 import express from 'express';
-import { viceAnalyses, getDB } from './db';
+import { viceAnalyses, getDB, updateTimeLimit } from './db';
 import { endpointConfig, ingressExists } from './ingress';
 import { getAppsForUser } from './apps';
 import compression from 'compression';
@@ -161,6 +161,19 @@ apirouter.get("/analyses", async (req, res) => {
         res.send(JSON.stringify({"vice_analyses": []}));
       }
     })
+    .catch(e => {
+      res.status(500).send(e);
+    });
+});
+
+apirouter.post("/analyses/:analysisID/timelimit", async (req, res) => {
+  const username = req.session.username + process.env.UUID_DOMAIN;
+  const analysisID = req.params.analysisID;
+  debug(`reset timelimit analysis ${analysisID}; user ${username}`);
+
+  await updateTimeLimit(username, analysisID)
+    .then(plannedEndDate => ({time_limit: plannedEndDate}))
+    .then(obj => res.send(JSON.stringify(obj)))
     .catch(e => {
       res.status(500).send(e);
     });

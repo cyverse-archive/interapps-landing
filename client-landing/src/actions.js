@@ -46,6 +46,9 @@ export const StatusRunning = "Running";
 export const StatusFailed = "Failed";
 export const StatusCompleted = "Completed";
 
+export const toDate = (d) => new Date(d);
+export const formatDate = (d) => `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+
 export class Analysis {
     constructor({
                     id,
@@ -111,9 +114,9 @@ export class Analysis {
         this.step = step;
         this.owner = username;
         this.status = status;
-        this.startDate = start_date;
-        this.endDate = end_date;
-        this.plannedEndDate = planned_end_date;
+        this.startDate = formatDate(toDate(start_date));
+        this.endDate = formatDate(toDate(end_date));
+        this.plannedEndDate = formatDate(toDate(planned_end_date));
         this.url = url;
     }
 }
@@ -161,6 +164,7 @@ const defaultState = {
     drawerOpen: false,
     errorDialogOpen: false,
     errors: [],
+    messages: [],
 }
 
 export const {
@@ -168,6 +172,7 @@ export const {
     setPageToShow,
     addApps,
     addAnalyses,
+    updateAnalysisEndDate,
     loggedIn,
     setHttpCode,
     toggleLoading,
@@ -176,21 +181,24 @@ export const {
     addError,
     rmError,
     clearErrors,
+    pushMessage,
+    shiftMessage,
 } = createActions({
-    TOGGLE_DRAWER_OPEN: () => {
-    },
+    TOGGLE_DRAWER_OPEN: () => {},
     SET_PAGE_TO_SHOW: (pageToShow = ShowRunning) => pageToShow,
     ADD_APPS: (apps) => apps,
     ADD_ANALYSES: (analyses) => analyses,
+    UPDATE_ANALYSIS_END_DATE: (id, endDate) => ({id: id, endDate: endDate}),
     LOGGED_IN: (username) => username,
     SET_HTTP_CODE: (httpCode) => httpCode,
-    TOGGLE_LOADING: () => {
-    },
+    TOGGLE_LOADING: () => {},
     TOGGLE_MOBILE_OPEN: (mobileOpen) => mobileOpen,
     SET_ERROR_DIALOG_OPEN: (errorDialogOpen) => errorDialogOpen,
     ADD_ERROR: (error) => error,
     RM_ERROR: (dateCreated) => dateCreated,
     CLEAR_ERRORS: () => {},
+    PUSH_MESSAGE: (message) => message,
+    SHIFT_MESSAGE: () => {},
 });
 
 export const fetchAnalyses = (status) => {
@@ -208,6 +216,20 @@ export const fetchAnalyses = (status) => {
     });
   };
 };
+
+export const resetTimeLimit = (id, name) => {
+  return dispatch => {
+    return axios.post(`/api/analyses/${id}/timelimit`, {withCredentials: true})
+      .then(response => {
+        let message = `Date limit for '${name}' is ${formatDate(toDate(response.data.time_limit))}.`;
+        dispatch(pushMessage(message));
+        dispatch(updateAnalysisEndDate(id, response.data.time_limit));
+      })
+      .catch(e => {
+        errorHandler(e, dispatch);
+      });
+  }
+}
 
 export const fetchApps = () => {
     return dispatch => {
@@ -253,6 +275,20 @@ export const reducer = handleActions(
                 analyses: analyses,
             };
         },
+        UPDATE_ANALYSIS_END_DATE: (state, {payload: {id, endDate}}) => {
+          let copy = [...state.analyses];
+
+          copy.forEach((analysis, index) => {
+            if (analysis.uuid = id) {
+              copy[index].plannedEndDate = formatDate(toDate(endDate));
+            }
+          });
+
+          return {
+            ...state,
+            analyses: copy,
+          };
+        },
         LOGGED_IN: (state, {payload: data}) => {
             return {
                 ...state,
@@ -280,6 +316,16 @@ export const reducer = handleActions(
           return {...state, errors: newstate};
         },
         CLEAR_ERRORS: (state) => ({...state, errors: []}),
+        PUSH_MESSAGE: (state, {payload: message}) => {
+          let copy = [...state.messages];
+          copy.push(message);
+          return {...state, messages: copy};
+        },
+        SHIFT_MESSAGE: (state) => {
+          let copy = [...state.messages];
+          copy.shift();
+          return {...state, messages: copy};
+        },
   },
   defaultState
 );
