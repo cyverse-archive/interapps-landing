@@ -169,7 +169,7 @@ apirouter.get("/analyses", async (req, res) => {
 apirouter.post("/analyses/:analysisID/timelimit", async (req, res) => {
   const username = req.session.username + process.env.UUID_DOMAIN;
   const analysisID = req.params.analysisID;
-  debug("reset timelimit analysis ${analysisID}; user ${username}");
+  debug(`reset timelimit analysis ${analysisID}; user ${username}`);
 
   await updateTimeLimit(username, analysisID)
     .then(plannedEndDate => ({time_limit: plannedEndDate}))

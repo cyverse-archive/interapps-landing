@@ -70,9 +70,26 @@ export function getTimeLimit(username, analysisID) {
   return getDB().any(timeLimitQuery, [username, analysisID]);
 }
 
+class UpdateTimeLimitError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "UpdateTimeLimitError";
+  }
+}
+
 export const updateTimeLimit = (username, analysisID) =>
   getDB().task(t => // Wrap queries in a task to reuse the same connection.
     userAnalysis(username, analysisID, t) // used for validation
+    .then(() => t.one(timeLimitQuery, [username, analysisID]))
+    .then(data => {
+      const now = Date.now();
+      const planned = new Date(data.planned_end_date);
+
+      // Make sure a day or less is left on the time limit.
+      if ((planned.getTime() - now) > 86400000) {
+        throw new UpdateTimeLimitError("Cannot update time limit until one day or less is remaining for the analysis");
+      }
+    })
     .then(() => userID(username, t)) // also used for validation
     .then(userID => t.none(timeLimitUpdate, [userID, analysisID]))
     .then(() => t.one(timeLimitQuery, [username, analysisID]))

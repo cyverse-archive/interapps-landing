@@ -92,6 +92,12 @@ const styles = theme => ({
 
 });
 
+function enableTimeLimitButton(endDate) {
+  const now = Date.now();
+  const end = new Date(endDate);
+  return ((end.getTime() - now) <= 86400000);
+}
+
 class AnalysisCard extends Component {
     state = { expanded: false };
 
@@ -193,7 +199,7 @@ class AnalysisCard extends Component {
 
                         <Tooltip title="Extend Time Limit">
                           <IconButton
-                            disabled={status !== StatusRunning}
+                            disabled={status !== StatusRunning || !enableTimeLimitButton(plannedEndDate)}
                             onClick={timeLimitCB}>
                             <HourglassEmptyIcon />
                           </IconButton>
