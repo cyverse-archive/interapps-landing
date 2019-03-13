@@ -12,6 +12,9 @@ const styles = theme => ({
   close: {
     padding: theme.spacing.unit / 2,
   },
+  messageSnackbar: {
+    paddingBottom: 60, // Get it above the footer
+  },
 });
 
 class MessageSnackbars extends React.Component {
@@ -63,10 +66,11 @@ class MessageSnackbars extends React.Component {
     const { classes, messages } = this.props;
     return (
       <Snackbar
+        className={classes.messageSnackbar}
         key={Date.now()}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
         open={this.state.open && messages.length > 0}
         autoHideDuration={6000}
