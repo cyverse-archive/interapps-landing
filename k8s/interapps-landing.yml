@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vice-landing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      de-app: vice-landing
+  template:
+    metadata:
+      labels:
+        de-app: vice-landing
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: ssl-files
+          secret:
+            secretName: ui-nginx-tls
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+        - name: timezone
+          configMap:
+            name: timezone
+            items:
+              - key: timezone
+                path: timezone
+      containers:
+      - name: vice-landing
+        image: discoenv/interapps-landing
+        imagePullPolicy: Always
+        env:
+          - name: K8S_ENABLED
+            value: "1"
+
+          - name: VICE_DOMAIN
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_BASE_URL
+
+          - name: DE_HOST
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_DE_HOST
+
+          - name: DB
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_DE_DB
+
+          - name: UI
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_LANDING_PATH
+
+          - name: APP_EXPOSER_HEADER
+            value: app-exposer
+
+          - name: INGRESS
+            value: http://app-exposer
+
+          - name: REDIS_HOST
+            value: redis
+
+          - name: REDIS_PORT
+            value: "6379"
+
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_REDIS_PASSWORD
+
+          - name: APPS
+            value: http://apps/apps?app-type=Interactive&user=
+
+          - name: UUID_DOMAIN
+            value: "@iplantcollaborative.org"
+
+          - name: CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_CLIENT_ID
+
+          - name: CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_CLIENT_SECRET
+
+          - name: ACCESS_TOKEN_URI
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_ACCESS_TOKEN_URI
+
+          - name: AUTHORIZATION_URI
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_AUTHORIZATION_URI
+
+          - name: REDIRECT_URI
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_REDIRECT_URI
+
+          - name: SERVER_NAME
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_SERVER_NAME
+
+          - name: LOGOUT
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_LOGOUT
+
+          - name: PROFILE_URI
+            valueFrom:
+              secretKeyRef:
+                name: configs
+                key: VICE_PROFILE_URI
+        volumeMounts:
+          - name: localtime
+            mountPath: /etc/localtime
+            readOnly: true
+          - name: timezone
+            mountPath: /etc/timezone
+            subPath: timezone
+          - name: ssl-files
+            mountPath: /etc/ssl
+            readOnly: true
+        resources:
+          requests:
+            cpu: "1m"
+            memory: "128Mi"
+          limits:
+            cpu: "4000m"
+            memory: "4Gi"
+        ports:
+          - name: listen-port
+            containerPort: 60000
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 60000
+          initialDelaySeconds: 120
+          periodSeconds: 20
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 60000
+          initialDelaySeconds: 120
+          periodSeconds: 20
+          timeoutSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vice-landing
+spec:
+  selector:
+    de-app: vice-landing
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: listen-port
+      nodePort: 31388
+  type: NodePort

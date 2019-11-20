@@ -1,0 +1,14 @@
+apiVersion: skaffold/v1
+kind: Config
+metadata:
+  name: vice-landing
+deploy:
+  kubectl:
+    manifests:
+    - k8s/interapps-landing.yml
+build:
+  tagPolicy:
+    gitCommit: {}
+  artifacts:
+  - image: discoenv/interapps-landing
+  local: {}
