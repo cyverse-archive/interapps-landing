@@ -1,6 +1,8 @@
 interapps-landing
 =================
 
+The code in this repository is no longer in use.
+
 A web application hosting the loading and landing pages for the Visual Interactive Computing Environment (VICE) feature of the Discovery Environment.
 
 ## Development
